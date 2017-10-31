@@ -18,7 +18,8 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
-
+void* pDicomDibits;
+LPBITMAPINFOHEADER m_lpBMIH;
 
 // CdcmtkShowDCMImageView
 IMPLEMENT_DYNCREATE(CdcmtkShowDCMImageView, CView)
@@ -67,39 +68,7 @@ void CdcmtkShowDCMImageView::OnDraw(CDC* pDC)
 
     CRect rc;
     GetClientRect(&rc);
-
-    //DcmFileFormat* pDicomFile = new DcmFileFormat();
-    ////读DICOM文件
-    //pDicomFile->loadFile("MR.dcm");
-    ////得到数据集
-    //DcmDataset *pDataset = pDicomFile->getDataset();
-
-    //得到传输语法
-    E_TransferSyntax xfer = m_pDataSet->getOriginalXfer();
-    //根据传输语法构造DicomImage从fstart帧开始一共fcount帧
-    DicomImage* pDicomImg = new DicomImage (m_pDataSet, xfer/*, 0, 0, 1*/);
-    /*DcmTagKey dcmwidth( 0x0028,0x0050 );
-    DcmTagKey dcmCenter( 0x0028,0x0051 );
-    DcmElement* dcmWidthValue = NULL;
-    m_pDataSet->findAndGetElement(dcmwidth, dcmWidthValue);
-    auto length =   dcmWidthValue->getLength();*/
-    pDicomImg->setWindow( 509, 885 );
-    //DicomImage* pDicomImg = new DicomImage ("MR.dcm");
-    //通过以下的方法得到并用BitmapHeadInformation的结构体来保存DICOM文件的信息
-    LPBITMAPINFOHEADER m_lpBMIH;
-    m_lpBMIH = (LPBITMAPINFOHEADER) new char[sizeof(BITMAPINFOHEADER) + sizeof(RGBQUAD) * 256];
-        m_lpBMIH->biSize = sizeof(BITMAPINFOHEADER);
-        m_lpBMIH->biWidth = pDicomImg->getWidth();
-        m_lpBMIH->biHeight = pDicomImg->getHeight();
-        m_lpBMIH->biPlanes = 1;
-        m_lpBMIH->biBitCount = 24;
-        m_lpBMIH->biCompression = BI_RGB;
-        m_lpBMIH->biSizeImage = 0;
-        m_lpBMIH->biXPelsPerMeter = 0;
-        m_lpBMIH->biYPelsPerMeter = 0;
-    void* pDicomDibits;
-    //得到DICOM文件第frame的DIB数据(假设是24位的)
-    pDicomImg->createWindowsDIB(pDicomDibits, 0, 0, 24, 1, 1);
+    
     StretchDIBits(pDC->GetSafeHdc(),0,0,rc.right/*m_lpBMIH->biWidth*/,rc.bottom/*m_lpBMIH ->biHeight*/,0,0,m_lpBMIH->biWidth,m_lpBMIH->biHeight,pDicomDibits, (LPBITMAPINFO) m_lpBMIH,DIB_RGB_COLORS, SRCCOPY);
 }
 
@@ -179,5 +148,35 @@ int CdcmtkShowDCMImageView::OnCreate(LPCREATESTRUCT lpCreateStruct)
     pDicomFile->loadFile("MR.dcm");
     //得到数据集
     m_pDataSet = pDicomFile->getDataset();
+
+    E_TransferSyntax xfer = m_pDataSet->getOriginalXfer();
+    //根据传输语法构造DicomImage从fstart帧开始一共fcount帧
+    DicomImage* pDicomImg = new DicomImage (m_pDataSet, xfer/*, 0, 0, 1*/);
+    const char* pElementValue;
+    m_pDataSet->findAndGetString( DCM_WindowWidth, pElementValue );
+    std::string sTemp = std::string( pElementValue );
+    auto iPos = sTemp.find_first_of("\\");
+    int dcmWidth = atoi( sTemp.substr(0,iPos).c_str() );
+
+    m_pDataSet->findAndGetString( DCM_WindowCenter, pElementValue );
+    sTemp = std::string( pElementValue );
+    iPos = sTemp.find_first_of("\\");
+    int dcmCenter = atoi( sTemp.substr(0,iPos).c_str() );
+    pDicomImg->setWindow( dcmCenter, dcmWidth );
+    //通过以下的方法得到并用BitmapHeadInformation的结构体来保存DICOM文件的信息
+    m_lpBMIH = (LPBITMAPINFOHEADER) new char[sizeof(BITMAPINFOHEADER) + sizeof(RGBQUAD) * 256];
+        m_lpBMIH->biSize = sizeof(BITMAPINFOHEADER);
+        m_lpBMIH->biWidth = pDicomImg->getWidth();
+        m_lpBMIH->biHeight = pDicomImg->getHeight();
+        m_lpBMIH->biPlanes = 1;
+        m_lpBMIH->biBitCount = 24;
+        m_lpBMIH->biCompression = BI_RGB;
+        m_lpBMIH->biSizeImage = 0;
+        m_lpBMIH->biXPelsPerMeter = 0;
+        m_lpBMIH->biYPelsPerMeter = 0;
+    
+    //得到DICOM文件第frame的DIB数据(假设是24位的)
+    pDicomImg->createWindowsDIB(pDicomDibits, 0, 0, 24, 1, 1);
+
     return 0;
 }
