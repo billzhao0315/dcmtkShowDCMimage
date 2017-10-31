@@ -21,7 +21,6 @@
 
 
 // CdcmtkShowDCMImageView
-
 IMPLEMENT_DYNCREATE(CdcmtkShowDCMImageView, CView)
 
 BEGIN_MESSAGE_MAP(CdcmtkShowDCMImageView, CView)
