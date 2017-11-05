@@ -193,6 +193,7 @@
     <ClInclude Include="dcmtkShowDCMImage.h" />
     <ClInclude Include="dcmtkShowDCMImageDoc.h" />
     <ClInclude Include="dcmtkShowDCMImageView.h" />
+    <ClInclude Include="DicomDictionary.h" />
     <ClInclude Include="FileView.h" />
     <ClInclude Include="MainFrm.h" />
     <ClInclude Include="OutputWnd.h" />

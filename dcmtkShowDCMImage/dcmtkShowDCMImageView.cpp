@@ -8,17 +8,19 @@
 #ifndef SHARED_HANDLERS
 #include "dcmtkShowDCMImage.h"
 #endif
-
+#include <io.h>
+#include <vector>
 #include "dcmtkShowDCMImageDoc.h"
 #include "dcmtkShowDCMImageView.h"
 #include "dcmtk/dcmdata/dctk.h"
 #include "dcmtk/dcmdata/dcdatset.h"
 #include "dcmtk/dcmimgle/dcmimage.h"
 #include "dcmtk/dcmdata/dcfilefo.h"
+#include "DicomDictionary.h"
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
-void* pDicomDibits;
+unsigned short* pDicomDibits;
 LPBITMAPINFOHEADER m_lpBMIH;
 
 // CdcmtkShowDCMImageView
@@ -32,6 +34,7 @@ BEGIN_MESSAGE_MAP(CdcmtkShowDCMImageView, CView)
 	ON_WM_CONTEXTMENU()
 	ON_WM_RBUTTONUP()
     ON_WM_CREATE()
+    ON_COMMAND(ID_FILE_OPENDICOM, &CdcmtkShowDCMImageView::OnFileOpendicom)
 END_MESSAGE_MAP()
 
 // CdcmtkShowDCMImageView construction/destruction
@@ -39,12 +42,16 @@ END_MESSAGE_MAP()
 CdcmtkShowDCMImageView::CdcmtkShowDCMImageView()
 {
 	// TODO: add construction code here
-
+    m_pDataSet = NULL;
 }
 
 CdcmtkShowDCMImageView::~CdcmtkShowDCMImageView()
 {
-    delete m_pDataSet;
+    if (m_pDataSet != NULL)
+    {
+        delete m_pDataSet;
+    }
+    
 }
 
 BOOL CdcmtkShowDCMImageView::PreCreateWindow(CREATESTRUCT& cs)
@@ -65,11 +72,19 @@ void CdcmtkShowDCMImageView::OnDraw(CDC* pDC)
 		return;
 
 	//// TODO: add draw code for native data here
-
-    CRect rc;
-    GetClientRect(&rc);
+    if( pDicomDibits != NULL )
+    {
+        CRect rc;
+        GetClientRect(&rc);
+        int dstWidth = m_lpBMIH->biWidth * rc.bottom /m_lpBMIH->biHeight;
+        int xDst = rc.right/2 - dstWidth/2;
+        StretchDIBits(pDC->GetSafeHdc(),
+                      xDst,0,dstWidth,rc.bottom,
+                      0,0,m_lpBMIH->biWidth,m_lpBMIH->biHeight,
+                      pDicomDibits, (LPBITMAPINFO) m_lpBMIH,DIB_RGB_COLORS, SRCCOPY);
+    }
     
-    StretchDIBits(pDC->GetSafeHdc(),0,0,rc.right/*m_lpBMIH->biWidth*/,rc.bottom/*m_lpBMIH ->biHeight*/,0,0,m_lpBMIH->biWidth,m_lpBMIH->biHeight,pDicomDibits, (LPBITMAPINFO) m_lpBMIH,DIB_RGB_COLORS, SRCCOPY);
+    
 }
 
 
@@ -143,28 +158,73 @@ int CdcmtkShowDCMImageView::OnCreate(LPCREATESTRUCT lpCreateStruct)
         return -1;
 
     // TODO:  Add your specialized creation code here
-    DcmFileFormat* pDicomFile = new DcmFileFormat();
-    //读DICOM文件
-    pDicomFile->loadFile("MR.dcm");
-    //得到数据集
-    m_pDataSet = pDicomFile->getDataset();
+    
 
-    E_TransferSyntax xfer = m_pDataSet->getOriginalXfer();
-    //根据传输语法构造DicomImage从fstart帧开始一共fcount帧
-    DicomImage* pDicomImg = new DicomImage (m_pDataSet, xfer/*, 0, 0, 1*/);
-    const char* pElementValue;
-    m_pDataSet->findAndGetString( DCM_WindowWidth, pElementValue );
-    std::string sTemp = std::string( pElementValue );
-    auto iPos = sTemp.find_first_of("\\");
-    int dcmWidth = atoi( sTemp.substr(0,iPos).c_str() );
+    return 0;
+}
 
-    m_pDataSet->findAndGetString( DCM_WindowCenter, pElementValue );
-    sTemp = std::string( pElementValue );
-    iPos = sTemp.find_first_of("\\");
-    int dcmCenter = atoi( sTemp.substr(0,iPos).c_str() );
-    pDicomImg->setWindow( dcmCenter, dcmWidth );
-    //通过以下的方法得到并用BitmapHeadInformation的结构体来保存DICOM文件的信息
-    m_lpBMIH = (LPBITMAPINFOHEADER) new char[sizeof(BITMAPINFOHEADER) + sizeof(RGBQUAD) * 256];
+void CdcmtkShowDCMImageView::openDicoms( std::string pDicomFileIndex)
+{
+    
+    std::string sDicomPath;
+    int iPos = pDicomFileIndex.find_last_of("\\");
+    sDicomPath = pDicomFileIndex.substr(0,iPos+1);
+    iPos = pDicomFileIndex.rfind(".DCM");
+    std::string strDicomIndex = sDicomPath +"*"+ pDicomFileIndex.substr(iPos, pDicomFileIndex.length());
+    intptr_t hFile = 0;
+    _finddata_t fileinfo;
+    hFile = _findfirst(strDicomIndex.c_str(), &fileinfo);
+    if (hFile == -1)
+    {
+        std::cout << "The file is not exist!" << std::endl;
+    }
+
+    do
+    {
+        m_vDicomFileSet.push_back(sDicomPath + std::string(fileinfo.name));
+    } while (_findnext(hFile, &fileinfo) == 0);
+
+    _findclose(hFile);
+}
+
+void CdcmtkShowDCMImageView::OnFileOpendicom()
+{
+    // TODO: Add your command handler code here
+    //open only the dicom file.
+    CString m_sFile;
+    CString szFilter = _T("Text Files (*.dcm)|*.dcm||"); //使打开文件对话框仅显示dcm文件
+    CFileDialog  dicomFile(TRUE,
+                          (LPCTSTR)".dcm",
+                          m_sFile,
+                          OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT,
+                          szFilter);
+    if( dicomFile.DoModal()==TRUE )
+    {
+        m_sFile = dicomFile.GetPathName();
+        openDicoms( m_sFile.GetString() );
+        DcmFileFormat* pDicomFile = new DcmFileFormat();
+        //读DICOM文件
+        auto str = m_sFile.GetString();
+        pDicomFile->loadFile(m_sFile.GetString());
+        //得到数据集
+        m_pDataSet = pDicomFile->getDataset();
+
+        E_TransferSyntax xfer = m_pDataSet->getOriginalXfer();
+        //根据传输语法构造DicomImage从fstart帧开始一共fcount帧
+        DicomImage* pDicomImg = new DicomImage (m_pDataSet, xfer/*, 0, 0, 1*/);
+        const char* pElementValue;
+        m_pDataSet->findAndGetString( DCM_WindowWidth, pElementValue );
+        std::string sTemp = std::string( pElementValue );
+        auto iPos = sTemp.find_first_of("\\");
+        int dcmWidth = atoi( sTemp.substr(0,iPos).c_str() );
+
+        m_pDataSet->findAndGetString( DCM_WindowCenter, pElementValue );
+        sTemp = std::string( pElementValue );
+        iPos = sTemp.find_first_of("\\");
+        int dcmCenter = atoi( sTemp.substr(0,iPos).c_str() );
+        pDicomImg->setWindow( dcmCenter, dcmWidth );
+        //通过以下的方法得到并用BitmapHeadInformation的结构体来保存DICOM文件的信息
+        m_lpBMIH = (LPBITMAPINFOHEADER) new char[sizeof(BITMAPINFOHEADER) + sizeof(RGBQUAD) * 256];
         m_lpBMIH->biSize = sizeof(BITMAPINFOHEADER);
         m_lpBMIH->biWidth = pDicomImg->getWidth();
         m_lpBMIH->biHeight = pDicomImg->getHeight();
@@ -174,9 +234,15 @@ int CdcmtkShowDCMImageView::OnCreate(LPCREATESTRUCT lpCreateStruct)
         m_lpBMIH->biSizeImage = 0;
         m_lpBMIH->biXPelsPerMeter = 0;
         m_lpBMIH->biYPelsPerMeter = 0;
-    
-    //得到DICOM文件第frame的DIB数据(假设是24位的)
-    pDicomImg->createWindowsDIB(pDicomDibits, 0, 0, 24, 1, 1);
+        const unsigned short* pU16Value;
+        unsigned long dataLen;
+        int icopysize = pDicomImg->getWidth() * pDicomImg->getHeight()*2;
+        pDicomDibits = new unsigned short[ pDicomImg->getWidth() * pDicomImg->getHeight() ];
+        m_pDataSet->findAndGetUint16Array( DCM_PixelData,  pU16Value ,&dataLen);
+        memcpy_s(pDicomDibits, icopysize, pU16Value, icopysize);
+        //得到DICOM文件第frame的DIB数据(假设是24位的)
+        //pDicomImg->createWindowsDIB(pDicomDibits, 0, 0, 24, 1, 1);
+        Invalidate(FALSE);
+    }
 
-    return 0;
 }

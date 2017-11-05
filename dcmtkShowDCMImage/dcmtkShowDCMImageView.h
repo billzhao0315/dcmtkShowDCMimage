@@ -3,7 +3,9 @@
 //
 
 #pragma once
-
+#include <memory>
+#include <string>
+#include <vector>
 class DcmDataset;
 
 
@@ -19,7 +21,7 @@ public:
 
 // Operations
 public:
-
+    void openDicoms( std::string pDicomFileIndex );
 // Overrides
 public:
 	virtual void OnDraw(CDC* pDC);  // overridden to draw this view
@@ -39,6 +41,8 @@ public:
 
 public:
     DcmDataset* m_pDataSet;
+    std::shared_ptr<short> m_pPixelDatas;
+    std::vector<std::string> m_vDicomFileSet;
 protected:
 
 // Generated message map functions
@@ -49,6 +53,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
     afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+    afx_msg void OnFileOpendicom();
 };
 
 #ifndef _DEBUG  // debug version in dcmtkShowDCMImageView.cpp
