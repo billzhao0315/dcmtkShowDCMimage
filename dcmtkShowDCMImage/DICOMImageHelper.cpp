@@ -1,4 +1,5 @@
-﻿#include "DICOMImageHelper.h"
+﻿#include "stdafx.h"
+#include "DICOMImageHelper.h"
 #include "dcmtk/dcmdata/dctk.h"
 #include "dcmtk/dcmdata/dcdatset.h"
 #include "dcmtk/dcmimgle/dcmimage.h"
@@ -6,9 +7,15 @@
 
 #include "DICOMVolume.h"
 
+
+void DICOMImageHelper::initMemory()
+{
+    m_pDICOMVolume = new DICOMVolume();
+}
+
 bool DICOMImageHelper::DicomParse( std::vector<std::string> pathNames )
 {
-       std::vector<std::shared_ptr<DICOMSerieImage>> arrDicomSeriesImage = m_pDICOMVolume->getDICOMSeriesImage();
+       std::vector<std::shared_ptr<DICOMSerieImage>> arrDicomSeriesImage;
        DcmFileFormat* pDicomFile = new DcmFileFormat();
 
        for( int i = 0; i < pathNames.size(); ++i )
@@ -48,12 +55,16 @@ bool DICOMImageHelper::DicomParse( std::vector<std::string> pathNames )
             //得到DICOM文件第frame的DIB数据(假设是24位的)
             void* pDicomDibits = NULL;
             unsigned long pixelLen = pDicomImg->createWindowsDIB(pDicomDibits, 0, 0, 24, 1, 1);
-            arrDicomSeriesImage[i]->m_pPixelData = new unsigned char[pixelLen];
-            arrDicomSeriesImage[i]->m_nLength = pixelLen;
-            for(int i = 0; i < pixelLen; ++i )
+            std::shared_ptr<DICOMSerieImage> pDicomSeries = std::make_shared<DICOMSerieImage>();
+            pDicomSeries->m_pPixelData = new unsigned char[pixelLen];
+            pDicomSeries->m_nLength = pixelLen;
+            for(unsigned long i = 0; i < pixelLen; ++i )
             {
-                arrDicomSeriesImage[i]->m_pPixelData[i] = ((unsigned char*)pDicomDibits)[i];
+                pDicomSeries->m_pPixelData[i] = ((unsigned char*)pDicomDibits)[i];
             }
+            arrDicomSeriesImage.push_back( pDicomSeries );
        }
-        
+       initMemory();
+       m_pDICOMVolume->setDICOMSeriesImage(arrDicomSeriesImage);
+       return true;
 }
