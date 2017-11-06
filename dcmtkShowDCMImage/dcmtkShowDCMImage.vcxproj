@@ -194,6 +194,8 @@
     <ClInclude Include="dcmtkShowDCMImageDoc.h" />
     <ClInclude Include="dcmtkShowDCMImageView.h" />
     <ClInclude Include="DicomDictionary.h" />
+    <ClInclude Include="DICOMVolume.h" />
+    <ClInclude Include="DICOMImageHelper.h" />
     <ClInclude Include="FileView.h" />
     <ClInclude Include="MainFrm.h" />
     <ClInclude Include="OutputWnd.h" />
@@ -208,6 +210,8 @@
     <ClCompile Include="dcmtkShowDCMImage.cpp" />
     <ClCompile Include="dcmtkShowDCMImageDoc.cpp" />
     <ClCompile Include="dcmtkShowDCMImageView.cpp" />
+    <ClCompile Include="DICOMVolume.cpp" />
+    <ClCompile Include="DICOMImageHelper.cpp" />
     <ClCompile Include="FileView.cpp" />
     <ClCompile Include="MainFrm.cpp" />
     <ClCompile Include="OutputWnd.cpp" />

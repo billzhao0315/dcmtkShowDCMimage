@@ -16,11 +16,14 @@
 #include "dcmtk/dcmdata/dcdatset.h"
 #include "dcmtk/dcmimgle/dcmimage.h"
 #include "dcmtk/dcmdata/dcfilefo.h"
-#include "DicomDictionary.h"
+//#include "DicomDictionary.h"
+#include "DICOMImageHelper.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
-unsigned short* pDicomDibits;
+void* pDicomDibits = NULL;
+unsigned char* pRGBDicomDibits;
 LPBITMAPINFOHEADER m_lpBMIH;
 
 // CdcmtkShowDCMImageView
@@ -81,7 +84,7 @@ void CdcmtkShowDCMImageView::OnDraw(CDC* pDC)
         StretchDIBits(pDC->GetSafeHdc(),
                       xDst,0,dstWidth,rc.bottom,
                       0,0,m_lpBMIH->biWidth,m_lpBMIH->biHeight,
-                      pDicomDibits, (LPBITMAPINFO) m_lpBMIH,DIB_RGB_COLORS, SRCCOPY);
+                      pRGBDicomDibits, (LPBITMAPINFO) m_lpBMIH,DIB_RGB_COLORS, SRCCOPY);
     }
     
     
@@ -204,7 +207,6 @@ void CdcmtkShowDCMImageView::OnFileOpendicom()
         openDicoms( m_sFile.GetString() );
         DcmFileFormat* pDicomFile = new DcmFileFormat();
         //读DICOM文件
-        auto str = m_sFile.GetString();
         pDicomFile->loadFile(m_sFile.GetString());
         //得到数据集
         m_pDataSet = pDicomFile->getDataset();
@@ -234,14 +236,14 @@ void CdcmtkShowDCMImageView::OnFileOpendicom()
         m_lpBMIH->biSizeImage = 0;
         m_lpBMIH->biXPelsPerMeter = 0;
         m_lpBMIH->biYPelsPerMeter = 0;
-        const unsigned short* pU16Value;
-        unsigned long dataLen;
-        int icopysize = pDicomImg->getWidth() * pDicomImg->getHeight()*2;
-        pDicomDibits = new unsigned short[ pDicomImg->getWidth() * pDicomImg->getHeight() ];
-        m_pDataSet->findAndGetUint16Array( DCM_PixelData,  pU16Value ,&dataLen);
-        memcpy_s(pDicomDibits, icopysize, pU16Value, icopysize);
+        
         //得到DICOM文件第frame的DIB数据(假设是24位的)
-        //pDicomImg->createWindowsDIB(pDicomDibits, 0, 0, 24, 1, 1);
+        unsigned long pixelLen = pDicomImg->createWindowsDIB(pDicomDibits, 0, 0, 24, 1, 1);
+        pRGBDicomDibits = new unsigned char[pixelLen];
+        for(int i = 0; i < pixelLen; ++i )
+        {
+            pRGBDicomDibits[i] = ((unsigned char*)pDicomDibits)[i];
+        }
         Invalidate(FALSE);
     }
 
