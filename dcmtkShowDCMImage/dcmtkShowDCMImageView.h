@@ -44,6 +44,7 @@ public:
     std::shared_ptr<short> m_pPixelDatas;
     std::vector<std::string> m_vDicomFileSet;
     std::shared_ptr<DICOMImageHelper> m_pDicomImageHelper;
+    unsigned int m_nSeriesImageIndex;
 protected:
 
 // Generated message map functions
@@ -55,6 +56,8 @@ protected:
 public:
     afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
     afx_msg void OnFileOpendicom();
+//    afx_msg void OnMouseHWheel(UINT nFlags, short zDelta, CPoint pt);
+    afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
 };
 
 #ifndef _DEBUG  // debug version in dcmtkShowDCMImageView.cpp

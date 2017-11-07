@@ -8,9 +8,14 @@
 #include "DICOMVolume.h"
 
 
+DICOMImageHelper::DICOMImageHelper()
+{
+    m_pDICOMVolume = std::make_shared<DICOMVolume>();
+}
+
 void DICOMImageHelper::initMemory()
 {
-    m_pDICOMVolume = new DICOMVolume();
+    
 }
 
 bool DICOMImageHelper::DicomParse( std::vector<std::string> pathNames )
@@ -58,13 +63,14 @@ bool DICOMImageHelper::DicomParse( std::vector<std::string> pathNames )
             std::shared_ptr<DICOMSerieImage> pDicomSeries = std::make_shared<DICOMSerieImage>();
             pDicomSeries->m_pPixelData = new unsigned char[pixelLen];
             pDicomSeries->m_nLength = pixelLen;
-            for(unsigned long i = 0; i < pixelLen; ++i )
+            pDicomSeries->m_pBitMapInfoHeader = m_lpBMIH;
+            for(unsigned long j = 0; j < pixelLen; ++j )
             {
-                pDicomSeries->m_pPixelData[i] = ((unsigned char*)pDicomDibits)[i];
+                pDicomSeries->m_pPixelData[j] = ((unsigned char*)pDicomDibits)[j];
             }
             arrDicomSeriesImage.push_back( pDicomSeries );
        }
-       initMemory();
+       //initMemory();
        m_pDICOMVolume->setDICOMSeriesImage(arrDicomSeriesImage);
        return true;
 }

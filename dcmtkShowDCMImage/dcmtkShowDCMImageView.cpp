@@ -39,6 +39,8 @@ BEGIN_MESSAGE_MAP(CdcmtkShowDCMImageView, CView)
 	ON_WM_RBUTTONUP()
     ON_WM_CREATE()
     ON_COMMAND(ID_FILE_OPENDICOM, &CdcmtkShowDCMImageView::OnFileOpendicom)
+//    ON_WM_MOUSEHWHEEL()
+    ON_WM_MOUSEWHEEL()
 END_MESSAGE_MAP()
 
 // CdcmtkShowDCMImageView construction/destruction
@@ -47,6 +49,8 @@ CdcmtkShowDCMImageView::CdcmtkShowDCMImageView()
 {
 	// TODO: add construction code here
     m_pDataSet = NULL;
+    m_pDicomImageHelper = nullptr;
+    m_nSeriesImageIndex = 0;
 }
 
 CdcmtkShowDCMImageView::~CdcmtkShowDCMImageView()
@@ -76,17 +80,24 @@ void CdcmtkShowDCMImageView::OnDraw(CDC* pDC)
 		return;
 
 	//// TODO: add draw code for native data here
-    if( pDicomDibits != NULL )
+    if( m_pDicomImageHelper != nullptr )
     {
-        CRect rc;
-        GetClientRect(&rc);
-        int dstWidth = m_lpBMIH->biWidth * rc.bottom /m_lpBMIH->biHeight;
-        int xDst = rc.right/2 - dstWidth/2;
-        StretchDIBits(pDC->GetSafeHdc(),
-                      xDst,0,dstWidth,rc.bottom,
-                      0,0,m_lpBMIH->biWidth,m_lpBMIH->biHeight,
-                      pRGBDicomDibits, (LPBITMAPINFO) m_lpBMIH,DIB_RGB_COLORS, SRCCOPY);
+        auto arrPDicomSeries = m_pDicomImageHelper->getDICOMVolume()->getDICOMSeriesImage();
+        m_lpBMIH = arrPDicomSeries[m_nSeriesImageIndex]->m_pBitMapInfoHeader;
+        pDicomDibits = arrPDicomSeries[m_nSeriesImageIndex]->m_pPixelData;
+        if( pDicomDibits != NULL )
+        {
+            CRect rc;
+            GetClientRect(&rc);
+            int dstWidth = m_lpBMIH->biWidth * rc.bottom /m_lpBMIH->biHeight;
+            int xDst = rc.right/2 - dstWidth/2;
+            StretchDIBits(pDC->GetSafeHdc(),
+                          xDst,0,dstWidth,rc.bottom,
+                          0,0,m_lpBMIH->biWidth,m_lpBMIH->biHeight,
+                          pDicomDibits, (LPBITMAPINFO) m_lpBMIH,DIB_RGB_COLORS, SRCCOPY);
+        }
     }
+    
     
     
 }
@@ -226,6 +237,7 @@ void CdcmtkShowDCMImageView::OnFileOpendicom()
         //iPos = sTemp.find_first_of("\\");
         //int dcmCenter = atoi( sTemp.substr(0,iPos).c_str() );
         //pDicomImg->setWindow( dcmCenter, dcmWidth );
+        
         ////通过以下的方法得到并用BitmapHeadInformation的结构体来保存DICOM文件的信息
         //m_lpBMIH = (LPBITMAPINFOHEADER) new char[sizeof(BITMAPINFOHEADER) + sizeof(RGBQUAD) * 256];
         //m_lpBMIH->biSize = sizeof(BITMAPINFOHEADER);
@@ -237,18 +249,46 @@ void CdcmtkShowDCMImageView::OnFileOpendicom()
         //m_lpBMIH->biSizeImage = 0;
         //m_lpBMIH->biXPelsPerMeter = 0;
         //m_lpBMIH->biYPelsPerMeter = 0;
+
         //
         ////得到DICOM文件第frame的DIB数据(假设是24位的)
         //unsigned long pixelLen = pDicomImg->createWindowsDIB(pDicomDibits, 0, 0, 24, 1, 1);
+        m_pDicomImageHelper =std::make_shared<DICOMImageHelper>();
         m_pDicomImageHelper->DicomParse(m_vDicomFileSet);
-        auto arrPDicomSeries = m_pDicomImageHelper->getDICOMVolume()->getDICOMSeriesImage();
-        unsigned long PixelLen = arrPDicomSeries[0]->m_nLength;
-        pDicomDibits = new unsigned char[PixelLen];
-        for(int i = 0; i < PixelLen; ++i )
-        {
-            ((unsigned char*)pDicomDibits)[i] = arrPDicomSeries[0]->m_pPixelData[i];
-        }
+        //auto arrPDicomSeries = m_pDicomImageHelper->getDICOMVolume()->getDICOMSeriesImage();
+        //unsigned long PixelLen = arrPDicomSeries[0]->m_nLength;
+        //pDicomDibits = new unsigned char[PixelLen];
+        //m_lpBMIH = arrPDicomSeries[0]->m_pBitMapInfoHeader;
+        ///*for(int i = 0; i < PixelLen; ++i )
+        //{
+        //    ((unsigned char*)pDicomDibits)[i] = arrPDicomSeries[0]->m_pPixelData[i];
+        //}*/
+        //pDicomDibits = arrPDicomSeries[0]->m_pPixelData;
         Invalidate(FALSE);
     }
 
+}
+
+
+//void CdcmtkShowDCMImageView::OnMouseHWheel(UINT nFlags, short zDelta, CPoint pt)
+//{
+//    // This feature requires Windows Vista or greater.
+//    // The symbol _WIN32_WINNT must be >= 0x0600.
+//    // TODO: Add your message handler code here and/or call default
+//    m_nSeriesImageIndex += 1;
+//    Invalidate(FALSE);
+//    CView::OnMouseHWheel(nFlags, zDelta, pt);
+//}
+
+
+BOOL CdcmtkShowDCMImageView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
+{
+    // TODO: Add your message handler code here and/or call default
+    if( m_pDicomImageHelper != nullptr && m_pDicomImageHelper->getDICOMVolume()->getDICOMSeriesImage().size() > 0 )
+    {
+        m_nSeriesImageIndex += 1;
+        m_nSeriesImageIndex = m_nSeriesImageIndex % m_pDicomImageHelper->getDICOMVolume()->getDICOMSeriesImage().size();
+        Invalidate(FALSE);
+    }
+    return CView::OnMouseWheel(nFlags, zDelta, pt);
 }

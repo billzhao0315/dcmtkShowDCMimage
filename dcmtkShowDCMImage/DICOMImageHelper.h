@@ -6,16 +6,13 @@ class DICOMVolume;
 class DICOMImageHelper
 {
 public:
-    DICOMImageHelper()
-    {
-
-    }
-    DICOMVolume* getDICOMVolume()
+    DICOMImageHelper();
+    std::shared_ptr<DICOMVolume> getDICOMVolume()
     {
         return m_pDICOMVolume;
     }
     bool DicomParse( std::vector<std::string> pathNames );
     void initMemory();
 private:
-    DICOMVolume* m_pDICOMVolume;
+   std::shared_ptr<DICOMVolume> m_pDICOMVolume;
 };
