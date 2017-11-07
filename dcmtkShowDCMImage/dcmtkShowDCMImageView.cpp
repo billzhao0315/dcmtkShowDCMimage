@@ -132,11 +132,30 @@ void CdcmtkShowDCMImageView::OnDraw(CDC* pDC)
                           pDicomDibits, (LPBITMAPINFO) m_lpBMIH,DIB_RGB_COLORS, SRCCOPY);*/
 
             CString str;
-            str.Format("%d",m_nSeriesImageIndex);
-            dcMem.TextOutA( 0,0,str );
+            str.Format("current Slice: %d",m_nSeriesImageIndex);
+            //dcMem.TextOutA( 0,0,str );
+            pDC->TextOutA( 0,rc.bottom - 10,str );
             pDC->BitBlt( xDst, 0, rc.Width(), rc.Height(), &dcMem, 0, 0, SRCCOPY );
         }
+
+        dcMem.DeleteDC();
         
+    }
+    else
+    {
+        CDC dcMem;
+        if ( dcMem.CreateCompatibleDC( pDC ) == FALSE )
+            return;
+
+        CRect rect;
+        GetClientRect( &rect );
+        CBitmap bmpBuffer;
+       
+        bmpBuffer.CreateBitmap( rect.Width(), rect.Height(), 1, dcMem.GetDeviceCaps( BITSPIXEL ), NULL );
+
+        pDC->BitBlt( 0, 0, rect.Width(), rect.Height(), &dcMem, 0, 0, BLACKNESS );
+
+        bmpBuffer.DeleteObject();
     }
     
     
@@ -294,8 +313,10 @@ void CdcmtkShowDCMImageView::OnFileOpendicom()
         //
         ////得到DICOM文件第frame的DIB数据(假设是24位的)
         //unsigned long pixelLen = pDicomImg->createWindowsDIB(pDicomDibits, 0, 0, 24, 1, 1);
+        BeginWaitCursor();
         m_pDicomImageHelper =std::make_shared<DICOMImageHelper>();
         m_pDicomImageHelper->DicomParse(m_vDicomFileSet);
+        EndWaitCursor();
         //auto arrPDicomSeries = m_pDicomImageHelper->getDICOMVolume()->getDICOMSeriesImage();
         //unsigned long PixelLen = arrPDicomSeries[0]->m_nLength;
         //pDicomDibits = new unsigned char[PixelLen];
