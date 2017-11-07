@@ -19,7 +19,7 @@
 //#include "DicomDictionary.h"
 #include "DICOMImageHelper.h"
 #include "DICOMVolume.h"
-
+#include "MainFrm.h"
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -93,10 +93,16 @@ void CdcmtkShowDCMImageView::OnDraw(CDC* pDC)
         pDicomDibits = arrPDicomSeries[m_nSeriesImageIndex]->m_pPixelData;
         if( pDicomDibits != NULL )
         {
+
+            CRect rcSatus;
+            CMainFrame* pWndFrame = (CMainFrame*)GetParent();
+            pWndFrame->m_wndStatusBar.GetWindowRect(rcSatus);
+            ScreenToClient(rcSatus);
+            pDC->ExcludeClipRect(rcSatus);
+
             CRect rc;
             GetClientRect(&rc);
-            int dstWidth = m_lpBMIH->biWidth * rc.bottom /m_lpBMIH->biHeight;
-            int xDst = rc.right/2 - dstWidth/2;
+            int xDst = rc.right/2 - m_lpBMIH->biWidth/2;
 
             HBITMAP hBitmap = NULL;
 
@@ -130,12 +136,30 @@ void CdcmtkShowDCMImageView::OnDraw(CDC* pDC)
                           xDst,0,dstWidth,rc.bottom,
                           0,0,m_lpBMIH->biWidth,m_lpBMIH->biHeight,
                           pDicomDibits, (LPBITMAPINFO) m_lpBMIH,DIB_RGB_COLORS, SRCCOPY);*/
-
+           
             CString str;
-            str.Format("current Slice: %d",m_nSeriesImageIndex);
-            //dcMem.TextOutA( 0,0,str );
-            pDC->TextOutA( 0,rc.bottom - 10,str );
+            str.Format("current Slice: %d/%d",m_nSeriesImageIndex,arrPDicomSeries.size());
+            pWndFrame->m_wndStatusBar.SetWindowTextA(str);
+            CDC dcBG;
+            bool bFlag = dcBG.CreateCompatibleDC(pDC);
+            if ( bFlag )
+            {
+                dcBG.BitBlt(0, 0, rc.Width(), rc.Height(), NULL, 0, 0, BLACKNESS);
+            }
+
+            pDC->BitBlt( 0, 0, rc.Width(), rc.Height(), &dcBG, 0, 0, SRCCOPY );
             pDC->BitBlt( xDst, 0, rc.Width(), rc.Height(), &dcMem, 0, 0, SRCCOPY );
+
+            //set text color
+            COLORREF oldColor = pDC->SetTextColor( RGB(255,0,0) );
+            COLORREF oldBkcolor = pDC->SetBkColor( RGB(0,0,0) );
+            pDC->TextOutA( 0,rc.bottom - 20,str );
+            pDC->SetTextColor( oldColor );
+            pDC->SetBkColor( oldBkcolor );
+            if (bFlag)
+            {
+                dcBG.DeleteDC();
+            }
         }
 
         dcMem.DeleteDC();
@@ -143,19 +167,10 @@ void CdcmtkShowDCMImageView::OnDraw(CDC* pDC)
     }
     else
     {
-        CDC dcMem;
-        if ( dcMem.CreateCompatibleDC( pDC ) == FALSE )
-            return;
-
         CRect rect;
         GetClientRect( &rect );
-        CBitmap bmpBuffer;
-       
-        bmpBuffer.CreateBitmap( rect.Width(), rect.Height(), 1, dcMem.GetDeviceCaps( BITSPIXEL ), NULL );
 
-        pDC->BitBlt( 0, 0, rect.Width(), rect.Height(), &dcMem, 0, 0, BLACKNESS );
-
-        bmpBuffer.DeleteObject();
+        pDC->BitBlt( 0, 0, rect.Width(), rect.Height(), NULL, 0, 0, BLACKNESS );
     }
     
     
@@ -326,7 +341,7 @@ void CdcmtkShowDCMImageView::OnFileOpendicom()
         //    ((unsigned char*)pDicomDibits)[i] = arrPDicomSeries[0]->m_pPixelData[i];
         //}*/
         //pDicomDibits = arrPDicomSeries[0]->m_pPixelData;
-        Invalidate(TRUE);
+        Invalidate(FALSE);
     }
 
 }
