@@ -64,6 +64,8 @@ bool DICOMImageHelper::DicomParse( std::vector<std::string> pathNames )
             pDicomSeries->m_pPixelData = new unsigned char[pixelLen];
             pDicomSeries->m_nLength = pixelLen;
             pDicomSeries->m_pBitMapInfoHeader = m_lpBMIH;
+            pDicomSeries->m_nWidth = pDicomImg->getWidth();
+            pDicomSeries->m_nHeight = pDicomImg->getHeight();
             for(unsigned long j = 0; j < pixelLen; ++j )
             {
                 pDicomSeries->m_pPixelData[j] = ((unsigned char*)pDicomDibits)[j];

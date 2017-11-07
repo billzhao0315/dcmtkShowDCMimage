@@ -82,6 +82,12 @@ void CdcmtkShowDCMImageView::OnDraw(CDC* pDC)
 	//// TODO: add draw code for native data here
     if( m_pDicomImageHelper != nullptr )
     {
+        CDC dcMem;
+        if( dcMem.CreateCompatibleDC( pDC ) == FALSE )
+        {
+            return;
+        }
+
         auto arrPDicomSeries = m_pDicomImageHelper->getDICOMVolume()->getDICOMSeriesImage();
         m_lpBMIH = arrPDicomSeries[m_nSeriesImageIndex]->m_pBitMapInfoHeader;
         pDicomDibits = arrPDicomSeries[m_nSeriesImageIndex]->m_pPixelData;
@@ -91,11 +97,46 @@ void CdcmtkShowDCMImageView::OnDraw(CDC* pDC)
             GetClientRect(&rc);
             int dstWidth = m_lpBMIH->biWidth * rc.bottom /m_lpBMIH->biHeight;
             int xDst = rc.right/2 - dstWidth/2;
-            StretchDIBits(pDC->GetSafeHdc(),
+
+            HBITMAP hBitmap = NULL;
+
+            void* pBits;
+            BITMAPINFOHEADER bmih;
+
+            // Setup the bitmap info structure
+            bmih.biSize = sizeof(BITMAPINFOHEADER);
+            bmih.biWidth = arrPDicomSeries[m_nSeriesImageIndex]->m_nWidth;
+            bmih.biHeight = arrPDicomSeries[m_nSeriesImageIndex]->m_nHeight;
+            bmih.biPlanes = 1;
+            bmih.biBitCount = 24;
+            bmih.biCompression = BI_RGB;
+            bmih.biSizeImage = 0;
+            bmih.biXPelsPerMeter = 0;
+            bmih.biYPelsPerMeter = 0;
+            bmih.biClrUsed = 0;
+            bmih.biClrImportant = 0;
+
+            // Create DIB 
+            hBitmap = CreateDIBSection(NULL, (BITMAPINFO*)&bmih, DIB_RGB_COLORS, &pBits, NULL, 0);
+
+            if ( hBitmap != NULL )
+            {
+                memcpy( pBits, pDicomDibits, sizeof(BYTE) * arrPDicomSeries[m_nSeriesImageIndex]->m_nLength );
+                ::SelectObject( dcMem.GetSafeHdc(), hBitmap );
+                ::DeleteObject( hBitmap );
+            }
+
+           /* StretchDIBits(pDC->GetSafeHdc(),
                           xDst,0,dstWidth,rc.bottom,
                           0,0,m_lpBMIH->biWidth,m_lpBMIH->biHeight,
-                          pDicomDibits, (LPBITMAPINFO) m_lpBMIH,DIB_RGB_COLORS, SRCCOPY);
+                          pDicomDibits, (LPBITMAPINFO) m_lpBMIH,DIB_RGB_COLORS, SRCCOPY);*/
+
+            CString str;
+            str.Format("%d",m_nSeriesImageIndex);
+            dcMem.TextOutA( 0,0,str );
+            pDC->BitBlt( xDst, 0, rc.Width(), rc.Height(), &dcMem, 0, 0, SRCCOPY );
         }
+        
     }
     
     
@@ -264,7 +305,7 @@ void CdcmtkShowDCMImageView::OnFileOpendicom()
         //    ((unsigned char*)pDicomDibits)[i] = arrPDicomSeries[0]->m_pPixelData[i];
         //}*/
         //pDicomDibits = arrPDicomSeries[0]->m_pPixelData;
-        Invalidate(FALSE);
+        Invalidate(TRUE);
     }
 
 }

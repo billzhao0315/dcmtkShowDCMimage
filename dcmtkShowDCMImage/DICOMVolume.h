@@ -17,6 +17,8 @@ struct DICOMSerieImage
     double m_ImagePositionPatient[3];
     unsigned char* m_pPixelData;
     unsigned long  m_nLength;
+    int m_nWidth;
+    int m_nHeight;
     LPBITMAPINFOHEADER m_pBitMapInfoHeader;
 };
 
