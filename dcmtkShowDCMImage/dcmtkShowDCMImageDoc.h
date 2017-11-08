@@ -12,6 +12,22 @@ protected: // create from serialization only
 	CdcmtkShowDCMImageDoc();
 	DECLARE_DYNCREATE(CdcmtkShowDCMImageDoc)
 
+    //not system function----begin
+
+
+
+
+
+
+    //not system function----end
+
+
+
+
+
+
+
+
 // Attributes
 public:
 

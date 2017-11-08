@@ -238,6 +238,13 @@ BEGIN
     BEGIN
         MENUITEM "&About dcmtkShowDCMImage...", ID_APP_ABOUT
     END
+    POPUP "Tools"
+    BEGIN
+        MENUITEM "Rotate",                      ID_TOOLS_ROTATE
+        MENUITEM "Pan",                         ID_TOOLS_PAN
+        MENUITEM "Zoom Out",                    ID_TOOLS_ZOOMOUT
+        MENUITEM "Zoom In",                     ID_TOOLS_ZOOMIN
+    END
 END
 
 IDR_POPUP_EDIT MENU

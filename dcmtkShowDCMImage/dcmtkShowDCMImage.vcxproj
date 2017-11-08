@@ -189,6 +189,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AttributeTag.h" />
     <ClInclude Include="ClassView.h" />
     <ClInclude Include="dcmtkShowDCMImage.h" />
     <ClInclude Include="dcmtkShowDCMImageDoc.h" />
@@ -198,6 +199,7 @@
     <ClInclude Include="DICOMImageHelper.h" />
     <ClInclude Include="FileView.h" />
     <ClInclude Include="MainFrm.h" />
+    <ClInclude Include="Observer.h" />
     <ClInclude Include="OutputWnd.h" />
     <ClInclude Include="PropertiesWnd.h" />
     <ClInclude Include="Resource.h" />
@@ -206,6 +208,7 @@
     <ClInclude Include="ViewTree.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AttributeTag.cpp" />
     <ClCompile Include="ClassView.cpp" />
     <ClCompile Include="dcmtkShowDCMImage.cpp" />
     <ClCompile Include="dcmtkShowDCMImageDoc.cpp" />
@@ -214,6 +217,7 @@
     <ClCompile Include="DICOMImageHelper.cpp" />
     <ClCompile Include="FileView.cpp" />
     <ClCompile Include="MainFrm.cpp" />
+    <ClCompile Include="Observer.cpp" />
     <ClCompile Include="OutputWnd.cpp" />
     <ClCompile Include="PropertiesWnd.cpp" />
     <ClCompile Include="stdafx.cpp">
