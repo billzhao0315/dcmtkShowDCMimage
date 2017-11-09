@@ -48,17 +48,12 @@ END_MESSAGE_MAP()
 CsplitDCMView::CsplitDCMView()
 {
 	// TODO: add construction code here
-    m_pDataSet = NULL;
     m_pDicomImageHelper = nullptr;
     m_nSeriesImageIndex = 0;
 }
 
 CsplitDCMView::~CsplitDCMView()
 {
-    if (m_pDataSet != NULL)
-    {
-        delete m_pDataSet;
-    }
     
 }
 

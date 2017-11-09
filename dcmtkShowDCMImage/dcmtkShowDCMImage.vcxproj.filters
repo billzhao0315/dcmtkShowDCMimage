@@ -72,6 +72,12 @@
     <ClInclude Include="CsplitDCMView.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="CoronalView.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SagittalView.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dcmtkShowDCMImage.cpp">
@@ -117,6 +123,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="CsplitDCMView.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CoronalView.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SagittalView.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

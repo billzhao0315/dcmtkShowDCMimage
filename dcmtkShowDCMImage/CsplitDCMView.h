@@ -33,8 +33,6 @@ public:
 #endif
 
 public:
-    DcmDataset* m_pDataSet;
-    std::shared_ptr<short> m_pPixelDatas;
     std::vector<std::string> m_vDicomFileSet;
     std::shared_ptr<DICOMImageHelper> m_pDicomImageHelper;
     unsigned int m_nSeriesImageIndex;
@@ -54,6 +52,6 @@ public:
 };
 
 #ifndef _DEBUG  // debug version in dcmtkShowDCMImageView.cpp
-inline CdcmtkShowDCMImageDoc* CdcmtkShowDCMImageView::GetDocument() const
+inline CdcmtkShowDCMImageDoc* CsplitDCMView::GetDocument() const
    { return reinterpret_cast<CdcmtkShowDCMImageDoc*>(m_pDocument); }
 #endif

@@ -48,18 +48,13 @@ END_MESSAGE_MAP()
 CdcmtkShowDCMImageView::CdcmtkShowDCMImageView()
 {
 	// TODO: add construction code here
-    m_pDataSet = NULL;
     m_pDicomImageHelper = nullptr;
     m_nSeriesImageIndex = 0;
 }
 
 CdcmtkShowDCMImageView::~CdcmtkShowDCMImageView()
 {
-    if (m_pDataSet != NULL)
-    {
-        delete m_pDataSet;
-    }
-    
+
 }
 
 BOOL CdcmtkShowDCMImageView::PreCreateWindow(CREATESTRUCT& cs)
@@ -148,7 +143,7 @@ void CdcmtkShowDCMImageView::OnDraw(CDC* pDC)
             }
 
             pDC->BitBlt( 0, 0, rc.Width(), rc.Height(), &dcBG, 0, 0, SRCCOPY );
-            pDC->BitBlt( xDst, 0, rc.Width(), rc.Height(), &dcMem, 0, 0, SRCCOPY );
+            pDC->BitBlt( 0, 0, rc.Width(), rc.Height(), &dcMem, 0, 0, SRCCOPY );
 
             //set text color
             COLORREF oldColor = pDC->SetTextColor( RGB(255,0,0) );

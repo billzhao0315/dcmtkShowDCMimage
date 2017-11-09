@@ -191,6 +191,7 @@
   <ItemGroup>
     <ClInclude Include="AttributeTag.h" />
     <ClInclude Include="ClassView.h" />
+    <ClInclude Include="CoronalView.h" />
     <ClInclude Include="CsplitDCMView.h" />
     <ClInclude Include="dcmtkShowDCMImage.h" />
     <ClInclude Include="dcmtkShowDCMImageDoc.h" />
@@ -204,6 +205,7 @@
     <ClInclude Include="OutputWnd.h" />
     <ClInclude Include="PropertiesWnd.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="SagittalView.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="ViewTree.h" />
@@ -211,6 +213,7 @@
   <ItemGroup>
     <ClCompile Include="AttributeTag.cpp" />
     <ClCompile Include="ClassView.cpp" />
+    <ClCompile Include="CoronalView.cpp" />
     <ClCompile Include="CsplitDCMView.cpp" />
     <ClCompile Include="dcmtkShowDCMImage.cpp" />
     <ClCompile Include="dcmtkShowDCMImageDoc.cpp" />
@@ -222,6 +225,7 @@
     <ClCompile Include="Observer.cpp" />
     <ClCompile Include="OutputWnd.cpp" />
     <ClCompile Include="PropertiesWnd.cpp" />
+    <ClCompile Include="SagittalView.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

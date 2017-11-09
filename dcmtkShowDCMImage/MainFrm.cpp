@@ -6,6 +6,8 @@
 #include "dcmtkShowDCMImage.h"
 #include "CsplitDCMView.h"
 #include "dcmtkShowDCMImageView.h"
+#include "CoronalView.h"
+#include "SagittalView.h"
 #include "MainFrm.h"
 
 #ifdef _DEBUG
@@ -411,7 +413,7 @@ void CMainFrame::OnSettingChange(UINT uFlags, LPCTSTR lpszSection)
 BOOL CMainFrame::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext)
 {
     // TODO: Add your specialized code here and/or call the base class
-    if (m_splitwnd.CreateStatic( this, 1,2 ) == false)
+    if (m_splitwnd.CreateStatic( this, 2,2 ) == false)
     {
         MessageBox(_T("fail to create multiview"),_T("error"), MB_OK|MB_ICONERROR);
         return false;
@@ -432,7 +434,17 @@ BOOL CMainFrame::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext)
         MessageBox(_T("fail to create (0,1)sub-window"),_T("CsplitDCMView"),MB_OK|MB_ICONERROR);
     }
 
+    bFlag = m_splitwnd.CreateView( 1,0,RUNTIME_CLASS( CoronalView ), CSize( nWidth/2, nHeight/2 ), pContext );
+    if( !bFlag )
+    {
+        MessageBox(_T("fail to create (1,0)sub-window"),_T("CoronalView"),MB_OK|MB_ICONERROR);
+    }
 
+    bFlag = m_splitwnd.CreateView( 1,1,RUNTIME_CLASS( SagittalView ), CSize( nWidth/2, nHeight/2 ), pContext );
+    if( !bFlag )
+    {
+        MessageBox(_T("fail to create (1,1)sub-window"),_T("SagittalView"),MB_OK|MB_ICONERROR);
+    }
 
     m_splitwnd.SetActivePane( 0,0 );
 

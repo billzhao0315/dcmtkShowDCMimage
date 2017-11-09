@@ -40,8 +40,6 @@ public:
 #endif
 
 public:
-    DcmDataset* m_pDataSet;
-    std::shared_ptr<short> m_pPixelDatas;
     std::vector<std::string> m_vDicomFileSet;
     std::shared_ptr<DICOMImageHelper> m_pDicomImageHelper;
     unsigned int m_nSeriesImageIndex;
