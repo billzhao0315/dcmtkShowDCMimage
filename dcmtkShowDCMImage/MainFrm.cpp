@@ -4,7 +4,8 @@
 
 #include "stdafx.h"
 #include "dcmtkShowDCMImage.h"
-
+#include "CsplitDCMView.h"
+#include "dcmtkShowDCMImageView.h"
 #include "MainFrm.h"
 
 #ifdef _DEBUG
@@ -404,4 +405,37 @@ void CMainFrame::OnSettingChange(UINT uFlags, LPCTSTR lpszSection)
 {
 	CFrameWndEx::OnSettingChange(uFlags, lpszSection);
 	m_wndOutput.UpdateFonts();
+}
+
+
+BOOL CMainFrame::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext)
+{
+    // TODO: Add your specialized code here and/or call the base class
+    if (m_splitwnd.CreateStatic( this, 1,2 ) == false)
+    {
+        MessageBox(_T("fail to create multiview"),_T("error"), MB_OK|MB_ICONERROR);
+        return false;
+    }
+    CRect rc;
+    GetClientRect(&rc);
+    int nWidth( rc.right );
+    int nHeight( rc.bottom );
+    bool bFlag = m_splitwnd.CreateView( 0,0,RUNTIME_CLASS(CdcmtkShowDCMImageView),CSize( nWidth/2, nHeight/2 ), pContext);
+    if( !bFlag )
+    {
+        MessageBox(_T("fail to create (0,0)sub-window"),_T("CdcmtkShowDCMImageView"),MB_OK|MB_ICONERROR);
+    }
+
+    bFlag =  m_splitwnd.CreateView( 0,1 ,RUNTIME_CLASS(CsplitDCMView),CSize( nWidth/2, nHeight/2 ), pContext);
+    if( !bFlag )
+    {
+        MessageBox(_T("fail to create (0,1)sub-window"),_T("CsplitDCMView"),MB_OK|MB_ICONERROR);
+    }
+
+
+
+    m_splitwnd.SetActivePane( 0,0 );
+
+    return true;
+    //return CFrameWndEx::OnCreateClient(lpcs, pContext);
 }

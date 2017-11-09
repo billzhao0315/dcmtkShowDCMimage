@@ -191,6 +191,7 @@
   <ItemGroup>
     <ClInclude Include="AttributeTag.h" />
     <ClInclude Include="ClassView.h" />
+    <ClInclude Include="CsplitDCMView.h" />
     <ClInclude Include="dcmtkShowDCMImage.h" />
     <ClInclude Include="dcmtkShowDCMImageDoc.h" />
     <ClInclude Include="dcmtkShowDCMImageView.h" />
@@ -210,6 +211,7 @@
   <ItemGroup>
     <ClCompile Include="AttributeTag.cpp" />
     <ClCompile Include="ClassView.cpp" />
+    <ClCompile Include="CsplitDCMView.cpp" />
     <ClCompile Include="dcmtkShowDCMImage.cpp" />
     <ClCompile Include="dcmtkShowDCMImageDoc.cpp" />
     <ClCompile Include="dcmtkShowDCMImageView.cpp" />

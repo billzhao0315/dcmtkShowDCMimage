@@ -245,6 +245,10 @@ BEGIN
         MENUITEM "Zoom Out",                    ID_TOOLS_ZOOMOUT
         MENUITEM "Zoom In",                     ID_TOOLS_ZOOMIN
     END
+    POPUP "VR"
+    BEGIN
+        MENUITEM "3DTextureType",               ID_VR_3DTEXTURETYPE
+    END
 END
 
 IDR_POPUP_EDIT MENU

@@ -8,6 +8,8 @@
 #include "OutputWnd.h"
 #include "PropertiesWnd.h"
 
+class CsplitDCMView;
+
 class CMainFrame : public CFrameWndEx
 {
 	
@@ -44,7 +46,9 @@ protected:  // control bar embedded members
 	CClassView        m_wndClassView;
 	COutputWnd        m_wndOutput;
 	CPropertiesWnd    m_wndProperties;
-
+    CsplitDCMView*    m_dcmSplitDCMView;
+    CSplitterWnd    m_splitwnd;
+    CSplitterWnd      m_subsplitwnd;
 // Generated message map functions
 protected:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
@@ -57,6 +61,7 @@ protected:
 
 	BOOL CreateDockingWindows();
 	void SetDockingWindowIcons(BOOL bHiColorIcons);
+    virtual BOOL OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext);
 };
 
 
