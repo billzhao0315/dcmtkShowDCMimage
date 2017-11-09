@@ -56,6 +56,7 @@ public:
     afx_msg void OnFileOpendicom();
 //    afx_msg void OnMouseHWheel(UINT nFlags, short zDelta, CPoint pt);
     afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
+    virtual void OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /*pHint*/);
 };
 
 #ifndef _DEBUG  // debug version in dcmtkShowDCMImageView.cpp

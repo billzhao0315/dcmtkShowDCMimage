@@ -1,4 +1,4 @@
-
+﻿
 // dcmtkShowDCMImageDoc.cpp : implementation of the CdcmtkShowDCMImageDoc class
 //
 
@@ -10,8 +10,11 @@
 #endif
 
 #include "dcmtkShowDCMImageDoc.h"
+#include "DICOMImageHelper.h"
 
 #include <propkey.h>
+#include <io.h>
+#include <winuser.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -19,9 +22,12 @@
 
 // CdcmtkShowDCMImageDoc
 
+const AttributeTag CdcmtkShowDCMImageDoc::tagDICOMImport;
+
 IMPLEMENT_DYNCREATE(CdcmtkShowDCMImageDoc, CDocument)
 
 BEGIN_MESSAGE_MAP(CdcmtkShowDCMImageDoc, CDocument)
+    ON_COMMAND(ID_FILE_OPENDICOM, &CdcmtkShowDCMImageDoc::OnFileOpendicom)
 END_MESSAGE_MAP()
 
 
@@ -135,3 +141,51 @@ void CdcmtkShowDCMImageDoc::Dump(CDumpContext& dc) const
 
 
 // CdcmtkShowDCMImageDoc commands
+
+void CdcmtkShowDCMImageDoc::openDicoms( std::string pDicomFileIndex)
+{
+    
+    std::string sDicomPath;
+    int iPos = pDicomFileIndex.find_last_of("\\");
+    sDicomPath = pDicomFileIndex.substr(0,iPos+1);
+    iPos = pDicomFileIndex.rfind(".DCM");
+    std::string strDicomIndex = sDicomPath +"*"+ pDicomFileIndex.substr(iPos, pDicomFileIndex.length());
+    intptr_t hFile = 0;
+    _finddata_t fileinfo;
+    hFile = _findfirst(strDicomIndex.c_str(), &fileinfo);
+    if (hFile == -1)
+    {
+        MessageBoxA(NULL,_T("fail to load the dicom file"),_T("error"), MB_OK|MB_ICONERROR);
+        return;
+    }
+
+    do
+    {
+        m_vDicomFileSet.push_back(sDicomPath + std::string(fileinfo.name));
+    } while (_findnext(hFile, &fileinfo) == 0);
+
+    _findclose(hFile);
+}
+
+void CdcmtkShowDCMImageDoc::OnFileOpendicom()
+{
+    // TODO: Add your command handler code here
+    CString m_sFile;
+    CString szFilter = _T("Text Files (*.dcm)|*.dcm||"); //使打开文件对话框仅显示dcm文件
+    CFileDialog  dicomFile(TRUE,
+                          (LPCTSTR)".dcm",
+                          m_sFile,
+                          OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT,
+                          szFilter);
+    if( dicomFile.DoModal()==TRUE )
+    {
+        m_sFile = dicomFile.GetPathName();
+        openDicoms( m_sFile.GetString() );
+        
+        BeginWaitCursor();
+        m_pDicomImageHelper =std::make_shared<DICOMImageHelper>();
+        m_pDicomImageHelper->DicomParse(m_vDicomFileSet);
+        EndWaitCursor();
+        UpdateAllViews( NULL, static_cast<LPARAM>( tagDICOMImport.getValue() ) );
+    }
+}

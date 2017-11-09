@@ -4,8 +4,11 @@
 
 
 #pragma once
-
-
+#include <memory>
+#include <vector>
+#include <string>
+#include "AttributeTag.h"
+class DICOMImageHelper;
 class CdcmtkShowDCMImageDoc : public CDocument
 {
 protected: // create from serialization only
@@ -15,10 +18,14 @@ protected: // create from serialization only
     //not system function----begin
 
 
-
-
-
-
+public:
+    static const AttributeTag tagDICOMImport;
+private:
+    void openDicoms( std::string pDicomFileIndex );
+private:
+    std::vector<std::string> m_vDicomFileSet;
+    std::shared_ptr<DICOMImageHelper> m_pDicomImageHelper;
+    unsigned int m_nSeriesImageIndex;
     //not system function----end
 
 
@@ -61,4 +68,6 @@ protected:
 	// Helper function that sets search content for a Search Handler
 	void SetSearchContent(const CString& value);
 #endif // SHARED_HANDLERS
+public:
+    afx_msg void OnFileOpendicom();
 };

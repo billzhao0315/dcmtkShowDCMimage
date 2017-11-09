@@ -367,3 +367,13 @@ BOOL CdcmtkShowDCMImageView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
     }
     return CView::OnMouseWheel(nFlags, zDelta, pt);
 }
+
+
+void CdcmtkShowDCMImageView::OnUpdate(CView* /*pSender*/, LPARAM lHint, CObject* /*pHint*/)
+{
+    // TODO: Add your specialized code here and/or call the base class
+    if( lHint == static_cast<LPARAM>(CdcmtkShowDCMImageDoc::tagDICOMImport.getValue()) )
+    {
+        Invalidate(TRUE);
+    }
+}
