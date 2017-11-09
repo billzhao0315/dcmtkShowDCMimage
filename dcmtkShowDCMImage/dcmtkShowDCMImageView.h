@@ -25,6 +25,11 @@ public:
 // Operations
 public:
     void openDicoms( std::string pDicomFileIndex );
+    virtual void onNotifyObservers(
+        AttributeTag tag,
+        void* pOldValue = NULL,
+        void* pNewValue = NULL
+        );
 // Overrides
 public:
 	virtual void OnDraw(CDC* pDC);  // overridden to draw this view

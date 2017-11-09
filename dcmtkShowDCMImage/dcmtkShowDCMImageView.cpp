@@ -379,6 +379,16 @@ BOOL CdcmtkShowDCMImageView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
     return CView::OnMouseWheel(nFlags, zDelta, pt);
 }
 
+void CdcmtkShowDCMImageView::onNotifyObservers(
+    AttributeTag tag,
+    void* pOldValue,
+    void* pNewValue
+    )
+{
+    CMainFrame* pWndFrame = (CMainFrame*)GetParentFrame();
+    pWndFrame->onNotifyObservers( tagMouseWheel );
+
+}
 
 void CdcmtkShowDCMImageView::OnUpdate(CView* /*pSender*/, LPARAM lHint, CObject* /*pHint*/)
 {

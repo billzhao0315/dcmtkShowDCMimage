@@ -464,7 +464,7 @@ void CMainFrame::onNotifyObservers(
 {
     if( tag == CdcmtkShowDCMImageView::tagMouseWheel )
     {
-        onNotifyObservers(tagMouseWheel);
+        dynamic_cast<CdcmtkShowDCMImageDoc*>(GetActiveDocument())->onNotifyObservers(tagMouseWheel);
     }
     
 }
