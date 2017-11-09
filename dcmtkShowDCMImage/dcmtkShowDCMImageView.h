@@ -6,15 +6,18 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include "AttributeTag.h"
+#include "Observer.h"
 class DcmDataset;
 class DICOMImageHelper;
 
-class CdcmtkShowDCMImageView : public CView
+class CdcmtkShowDCMImageView : public CView, public Subject
 {
 protected: // create from serialization only
 	CdcmtkShowDCMImageView();
 	DECLARE_DYNCREATE(CdcmtkShowDCMImageView)
-
+public:
+    static AttributeTag tagMouseWheel;
 // Attributes
 public:
 	CdcmtkShowDCMImageDoc* GetDocument() const;

@@ -8,8 +8,9 @@
 #include <vector>
 #include <string>
 #include "AttributeTag.h"
+#include "Observer.h"
 class DICOMImageHelper;
-class CdcmtkShowDCMImageDoc : public CDocument
+class CdcmtkShowDCMImageDoc : public CDocument,public Observer, public Subject
 {
 protected: // create from serialization only
 	CdcmtkShowDCMImageDoc();
@@ -20,8 +21,19 @@ protected: // create from serialization only
 
 public:
     static const AttributeTag tagDICOMImport;
+public:
+    std::shared_ptr<DICOMImageHelper> getDicomImageHelper()const;
+    unsigned int getCurrentImageIndex()const;
+    virtual void onNotifyObservers(
+        AttributeTag tag,
+        void* pOldValue = NULL,
+        void* pNewValue = NULL
+        );
 private:
     void openDicoms( std::string pDicomFileIndex );
+    void processSpvView(AttributeTag tag,
+        void* pOldValue = NULL,
+        void* pNewValue = NULL);
 private:
     std::vector<std::string> m_vDicomFileSet;
     std::shared_ptr<DICOMImageHelper> m_pDicomImageHelper;

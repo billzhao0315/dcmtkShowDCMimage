@@ -27,6 +27,8 @@ void* pDicomDibits = NULL;
 unsigned char* pRGBDicomDibits;
 LPBITMAPINFOHEADER m_lpBMIH;
 
+AttributeTag CdcmtkShowDCMImageView::tagMouseWheel;
+
 // CdcmtkShowDCMImageView
 IMPLEMENT_DYNCREATE(CdcmtkShowDCMImageView, CView)
 
@@ -38,7 +40,7 @@ BEGIN_MESSAGE_MAP(CdcmtkShowDCMImageView, CView)
 	ON_WM_CONTEXTMENU()
 	ON_WM_RBUTTONUP()
     ON_WM_CREATE()
-    ON_COMMAND(ID_FILE_OPENDICOM, &CdcmtkShowDCMImageView::OnFileOpendicom)
+    //ON_COMMAND(ID_FILE_OPENDICOM, &CdcmtkShowDCMImageView::OnFileOpendicom)
 //    ON_WM_MOUSEHWHEEL()
     ON_WM_MOUSEWHEEL()
 END_MESSAGE_MAP()
@@ -50,6 +52,9 @@ CdcmtkShowDCMImageView::CdcmtkShowDCMImageView()
 	// TODO: add construction code here
     m_pDicomImageHelper = nullptr;
     m_nSeriesImageIndex = 0;
+    CMainFrame* pWndFrame = (CMainFrame*)GetParentFrame();
+
+    attachObserver( pWndFrame );
 }
 
 CdcmtkShowDCMImageView::~CdcmtkShowDCMImageView()
@@ -75,6 +80,7 @@ void CdcmtkShowDCMImageView::OnDraw(CDC* pDC)
 		return;
 
 	//// TODO: add draw code for native data here
+    m_pDicomImageHelper = pDoc->getDicomImageHelper();
     if( m_pDicomImageHelper != nullptr )
     {
         CDC dcMem;
@@ -82,7 +88,8 @@ void CdcmtkShowDCMImageView::OnDraw(CDC* pDC)
         {
             return;
         }
-
+        
+        m_nSeriesImageIndex = pDoc->getCurrentImageIndex();
         auto arrPDicomSeries = m_pDicomImageHelper->getDICOMVolume()->getDICOMSeriesImage();
         m_lpBMIH = arrPDicomSeries[m_nSeriesImageIndex]->m_pBitMapInfoHeader;
         pDicomDibits = arrPDicomSeries[m_nSeriesImageIndex]->m_pPixelData;
@@ -356,15 +363,19 @@ void CdcmtkShowDCMImageView::OnFileOpendicom()
 BOOL CdcmtkShowDCMImageView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 {
     // TODO: Add your message handler code here and/or call default
-    if( m_pDicomImageHelper != nullptr && m_pDicomImageHelper->getDICOMVolume()->getDICOMSeriesImage().size() > 0 )
-    {
-        m_nSeriesImageIndex += 1;
-        m_nSeriesImageIndex = m_nSeriesImageIndex % m_pDicomImageHelper->getDICOMVolume()->getDICOMSeriesImage().size();
-        Invalidate(FALSE);
+    //if( m_pDicomImageHelper != nullptr && m_pDicomImageHelper->getDICOMVolume()->getDICOMSeriesImage().size() > 0 )
+    //{
+    //    m_nSeriesImageIndex += 1;
+    //    m_nSeriesImageIndex = m_nSeriesImageIndex % m_pDicomImageHelper->getDICOMVolume()->getDICOMSeriesImage().size();
+    //    Invalidate(FALSE);
 
-        GetDocument()->UpdateAllViews( this );
-        //UpdateWindow();
-    }
+    //    GetDocument()->UpdateAllViews( this );
+    //    //UpdateWindow();
+    //}
+    CMainFrame* pWndFrame = (CMainFrame*)GetParentFrame();
+
+    attachObserver( pWndFrame );
+    onNotifyObservers( tagMouseWheel );
     return CView::OnMouseWheel(nFlags, zDelta, pt);
 }
 

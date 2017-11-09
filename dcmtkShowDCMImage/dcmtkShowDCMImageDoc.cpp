@@ -11,7 +11,9 @@
 
 #include "dcmtkShowDCMImageDoc.h"
 #include "DICOMImageHelper.h"
-
+#include "DICOMVolume.h"
+#include "dcmtkShowDCMImageView.h"
+#include "MainFrm.h"
 #include <propkey.h>
 #include <io.h>
 #include <winuser.h>
@@ -36,7 +38,8 @@ END_MESSAGE_MAP()
 CdcmtkShowDCMImageDoc::CdcmtkShowDCMImageDoc()
 {
 	// TODO: add one-time construction code here
-
+    m_nSeriesImageIndex = 0;
+    m_pDicomImageHelper = nullptr;
 }
 
 CdcmtkShowDCMImageDoc::~CdcmtkShowDCMImageDoc()
@@ -187,5 +190,40 @@ void CdcmtkShowDCMImageDoc::OnFileOpendicom()
         m_pDicomImageHelper->DicomParse(m_vDicomFileSet);
         EndWaitCursor();
         UpdateAllViews( NULL, static_cast<LPARAM>( tagDICOMImport.getValue() ) );
+    }
+}
+
+std::shared_ptr<DICOMImageHelper> CdcmtkShowDCMImageDoc::getDicomImageHelper()const
+{
+    return m_pDicomImageHelper;
+}
+
+unsigned int CdcmtkShowDCMImageDoc::getCurrentImageIndex()const
+{
+    return m_nSeriesImageIndex;
+}
+
+void CdcmtkShowDCMImageDoc::onNotifyObservers(
+                                             AttributeTag tag,
+                                             void* pOldValue,
+                                             void* pNewValue
+                                             )
+{
+    if (tag == CMainFrame::tagMouseWheel)
+    {
+        processSpvView(CMainFrame::tagMouseWheel);
+    }
+    
+}
+
+void CdcmtkShowDCMImageDoc::processSpvView(AttributeTag tag,
+                    void* pOldValue,
+                    void* pNewValue)
+{
+    if( m_pDicomImageHelper != nullptr && m_pDicomImageHelper->getDICOMVolume()->getDICOMSeriesImage().size() > 0 )
+    {
+        m_nSeriesImageIndex += 1;
+        m_nSeriesImageIndex = m_nSeriesImageIndex % m_pDicomImageHelper->getDICOMVolume()->getDICOMSeriesImage().size();
+        UpdateAllViews(NULL, static_cast<LPARAM>( tagDICOMImport.getValue() ) );
     }
 }

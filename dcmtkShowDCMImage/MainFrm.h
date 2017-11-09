@@ -7,10 +7,11 @@
 #include "ClassView.h"
 #include "OutputWnd.h"
 #include "PropertiesWnd.h"
+#include "Observer.h"
 
 class CsplitDCMView;
 
-class CMainFrame : public CFrameWndEx
+class CMainFrame : public CFrameWndEx,public Observer,public Subject
 {
 	
 protected: // create from serialization only
@@ -19,10 +20,14 @@ protected: // create from serialization only
 
 // Attributes
 public:
-
+    static AttributeTag tagMouseWheel;
 // Operations
 public:
-
+    virtual void onNotifyObservers(
+        AttributeTag tag,
+        void* pOldValue = NULL,
+        void* pNewValue = NULL
+        );
 // Overrides
 public:
 	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
