@@ -52,9 +52,6 @@ CdcmtkShowDCMImageView::CdcmtkShowDCMImageView()
 	// TODO: add construction code here
     m_pDicomImageHelper = nullptr;
     m_nSeriesImageIndex = 0;
-    CMainFrame* pWndFrame = (CMainFrame*)GetParentFrame();
-
-    attachObserver( pWndFrame );
 }
 
 CdcmtkShowDCMImageView::~CdcmtkShowDCMImageView()
@@ -255,99 +252,6 @@ int CdcmtkShowDCMImageView::OnCreate(LPCREATESTRUCT lpCreateStruct)
     return 0;
 }
 
-void CdcmtkShowDCMImageView::openDicoms( std::string pDicomFileIndex)
-{
-    
-    std::string sDicomPath;
-    int iPos = pDicomFileIndex.find_last_of("\\");
-    sDicomPath = pDicomFileIndex.substr(0,iPos+1);
-    iPos = pDicomFileIndex.rfind(".DCM");
-    std::string strDicomIndex = sDicomPath +"*"+ pDicomFileIndex.substr(iPos, pDicomFileIndex.length());
-    intptr_t hFile = 0;
-    _finddata_t fileinfo;
-    hFile = _findfirst(strDicomIndex.c_str(), &fileinfo);
-    if (hFile == -1)
-    {
-        std::cout << "The file is not exist!" << std::endl;
-    }
-
-    do
-    {
-        m_vDicomFileSet.push_back(sDicomPath + std::string(fileinfo.name));
-    } while (_findnext(hFile, &fileinfo) == 0);
-
-    _findclose(hFile);
-}
-
-void CdcmtkShowDCMImageView::OnFileOpendicom()
-{
-    // TODO: Add your command handler code here
-    //open only the dicom file.
-    CString m_sFile;
-    CString szFilter = _T("Text Files (*.dcm)|*.dcm||"); //使打开文件对话框仅显示dcm文件
-    CFileDialog  dicomFile(TRUE,
-                          (LPCTSTR)".dcm",
-                          m_sFile,
-                          OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT,
-                          szFilter);
-    if( dicomFile.DoModal()==TRUE )
-    {
-        m_sFile = dicomFile.GetPathName();
-        openDicoms( m_sFile.GetString() );
-        //DcmFileFormat* pDicomFile = new DcmFileFormat();
-        ////读DICOM文件
-        //pDicomFile->loadFile(m_sFile.GetString());
-        ////得到数据集
-        //m_pDataSet = pDicomFile->getDataset();
-
-        //E_TransferSyntax xfer = m_pDataSet->getOriginalXfer();
-        ////根据传输语法构造DicomImage从fstart帧开始一共fcount帧
-        //DicomImage* pDicomImg = new DicomImage (m_pDataSet, xfer/*, 0, 0, 1*/);
-        //const char* pElementValue;
-        //m_pDataSet->findAndGetString( DCM_WindowWidth, pElementValue );
-        //std::string sTemp = std::string( pElementValue );
-        //auto iPos = sTemp.find_first_of("\\");
-        //int dcmWidth = atoi( sTemp.substr(0,iPos).c_str() );
-
-        //m_pDataSet->findAndGetString( DCM_WindowCenter, pElementValue );
-        //sTemp = std::string( pElementValue );
-        //iPos = sTemp.find_first_of("\\");
-        //int dcmCenter = atoi( sTemp.substr(0,iPos).c_str() );
-        //pDicomImg->setWindow( dcmCenter, dcmWidth );
-        
-        ////通过以下的方法得到并用BitmapHeadInformation的结构体来保存DICOM文件的信息
-        //m_lpBMIH = (LPBITMAPINFOHEADER) new char[sizeof(BITMAPINFOHEADER) + sizeof(RGBQUAD) * 256];
-        //m_lpBMIH->biSize = sizeof(BITMAPINFOHEADER);
-        //m_lpBMIH->biWidth = pDicomImg->getWidth();
-        //m_lpBMIH->biHeight = pDicomImg->getHeight();
-        //m_lpBMIH->biPlanes = 1;
-        //m_lpBMIH->biBitCount = 24;
-        //m_lpBMIH->biCompression = BI_RGB;
-        //m_lpBMIH->biSizeImage = 0;
-        //m_lpBMIH->biXPelsPerMeter = 0;
-        //m_lpBMIH->biYPelsPerMeter = 0;
-
-        //
-        ////得到DICOM文件第frame的DIB数据(假设是24位的)
-        //unsigned long pixelLen = pDicomImg->createWindowsDIB(pDicomDibits, 0, 0, 24, 1, 1);
-        BeginWaitCursor();
-        m_pDicomImageHelper =std::make_shared<DICOMImageHelper>();
-        m_pDicomImageHelper->DicomParse(m_vDicomFileSet);
-        EndWaitCursor();
-        //auto arrPDicomSeries = m_pDicomImageHelper->getDICOMVolume()->getDICOMSeriesImage();
-        //unsigned long PixelLen = arrPDicomSeries[0]->m_nLength;
-        //pDicomDibits = new unsigned char[PixelLen];
-        //m_lpBMIH = arrPDicomSeries[0]->m_pBitMapInfoHeader;
-        ///*for(int i = 0; i < PixelLen; ++i )
-        //{
-        //    ((unsigned char*)pDicomDibits)[i] = arrPDicomSeries[0]->m_pPixelData[i];
-        //}*/
-        //pDicomDibits = arrPDicomSeries[0]->m_pPixelData;
-        Invalidate(FALSE);
-    }
-
-}
-
 
 //void CdcmtkShowDCMImageView::OnMouseHWheel(UINT nFlags, short zDelta, CPoint pt)
 //{
@@ -372,10 +276,10 @@ BOOL CdcmtkShowDCMImageView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
     //    GetDocument()->UpdateAllViews( this );
     //    //UpdateWindow();
     //}
-    CMainFrame* pWndFrame = (CMainFrame*)GetParentFrame();
+    CdcmtkShowDCMImageDoc* pDoc = GetDocument();
 
-    attachObserver( pWndFrame );
-    onNotifyObservers( tagMouseWheel );
+    pDoc->increaseImageIndex();
+
     return CView::OnMouseWheel(nFlags, zDelta, pt);
 }
 
@@ -385,15 +289,14 @@ void CdcmtkShowDCMImageView::onNotifyObservers(
     void* pNewValue
     )
 {
-    CMainFrame* pWndFrame = (CMainFrame*)GetParentFrame();
-    pWndFrame->onNotifyObservers( tagMouseWheel );
 
 }
 
 void CdcmtkShowDCMImageView::OnUpdate(CView* /*pSender*/, LPARAM lHint, CObject* /*pHint*/)
 {
     // TODO: Add your specialized code here and/or call the base class
-    if( lHint == static_cast<LPARAM>(CdcmtkShowDCMImageDoc::tagDICOMImport.getValue()) )
+    if( lHint == static_cast<LPARAM>(CdcmtkShowDCMImageDoc::tagDICOMImport.getValue()) ||
+        lHint == static_cast<LPARAM>(CdcmtkShowDCMImageDoc::tagDICOMSliceChange.getValue()) )
     {
         Invalidate(TRUE);
     }

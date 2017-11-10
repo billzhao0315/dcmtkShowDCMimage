@@ -21,6 +21,7 @@ protected: // create from serialization only
 
 public:
     static const AttributeTag tagDICOMImport;
+    static const AttributeTag tagDICOMSliceChange;
 public:
     std::shared_ptr<DICOMImageHelper> getDicomImageHelper()const;
     unsigned int getCurrentImageIndex()const;
@@ -29,6 +30,7 @@ public:
         void* pOldValue = NULL,
         void* pNewValue = NULL
         );
+    void increaseImageIndex();
 private:
     void openDicoms( std::string pDicomFileIndex );
     void processSpvView(AttributeTag tag,

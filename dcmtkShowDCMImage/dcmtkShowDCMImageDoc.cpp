@@ -25,6 +25,7 @@
 // CdcmtkShowDCMImageDoc
 
 const AttributeTag CdcmtkShowDCMImageDoc::tagDICOMImport;
+const AttributeTag CdcmtkShowDCMImageDoc::tagDICOMSliceChange;
 
 IMPLEMENT_DYNCREATE(CdcmtkShowDCMImageDoc, CDocument)
 
@@ -220,10 +221,14 @@ void CdcmtkShowDCMImageDoc::processSpvView(AttributeTag tag,
                     void* pOldValue,
                     void* pNewValue)
 {
+}
+
+void CdcmtkShowDCMImageDoc::increaseImageIndex()
+{
     if( m_pDicomImageHelper != nullptr && m_pDicomImageHelper->getDICOMVolume()->getDICOMSeriesImage().size() > 0 )
     {
         m_nSeriesImageIndex += 1;
         m_nSeriesImageIndex = m_nSeriesImageIndex % m_pDicomImageHelper->getDICOMVolume()->getDICOMSeriesImage().size();
-        UpdateAllViews(NULL, static_cast<LPARAM>( tagDICOMImport.getValue() ) );
+        UpdateAllViews(NULL, static_cast<LPARAM>( tagDICOMSliceChange.getValue() ) );
     }
 }

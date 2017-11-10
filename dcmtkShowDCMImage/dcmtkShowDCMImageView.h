@@ -24,7 +24,6 @@ public:
 
 // Operations
 public:
-    void openDicoms( std::string pDicomFileIndex );
     virtual void onNotifyObservers(
         AttributeTag tag,
         void* pOldValue = NULL,
@@ -61,7 +60,6 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
     afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-    afx_msg void OnFileOpendicom();
 //    afx_msg void OnMouseHWheel(UINT nFlags, short zDelta, CPoint pt);
     afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
     virtual void OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /*pHint*/);
