@@ -201,6 +201,7 @@
     <ClInclude Include="DICOMImageHelper.h" />
     <ClInclude Include="DisplayMgr.h" />
     <ClInclude Include="FileView.h" />
+    <ClInclude Include="glext.h" />
     <ClInclude Include="MainFrm.h" />
     <ClInclude Include="Observer.h" />
     <ClInclude Include="OutputWnd.h" />
@@ -210,6 +211,7 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="ViewTree.h" />
+    <ClInclude Include="wglext.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AttributeTag.cpp" />

@@ -16,3 +16,8 @@ void DICOMVolume::setDICOMSeriesImage( std::vector<std::shared_ptr<DICOMSerieIma
     m_DicomSerieImage = arrDicomSerieImage;
     m_nDepth = m_DicomSerieImage.size();
 }
+
+unsigned int DICOMVolume::getDepth() const
+{
+    return m_nDepth;
+}

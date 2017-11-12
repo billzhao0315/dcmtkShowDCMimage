@@ -21,7 +21,9 @@
 #include "DICOMVolume.h"
 #include "MainFrm.h"
 
-#include <gl/GL.h>
+#include "gl/GLU.h"
+
+
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -32,6 +34,21 @@
 
 #pragma comment( lib, "OpenGL32.lib" )
 #pragma comment( lib, "glu32.lib" )
+
+GLfloat dOrthoSize = 1.0f;
+
+// Macro to draw the quad.
+ // Performance can be achieved by making a call list.
+ // To make it simple i am not using that now :-)
+  #define MAP_3DTEXT( TexIndex ) \
+            glTexCoord3f(0.0f, 0.0f, ((float)TexIndex+1.0f)/2.0f);  \
+        glVertex3f(-dOrthoSize,-dOrthoSize,TexIndex);\
+        glTexCoord3f(1.0f, 0.0f, ((float)TexIndex+1.0f)/2.0f);  \
+        glVertex3f(dOrthoSize,-dOrthoSize,TexIndex);\
+        glTexCoord3f(1.0f, 1.0f, ((float)TexIndex+1.0f)/2.0f);  \
+        glVertex3f(dOrthoSize,dOrthoSize,TexIndex);\
+        glTexCoord3f(0.0f, 1.0f, ((float)TexIndex+1.0f)/2.0f);  \
+        glVertex3f(-dOrthoSize,dOrthoSize,TexIndex);
 
 // CdcmtkShowDCMImageView
 IMPLEMENT_DYNCREATE(COpenGLView, CView)
@@ -55,6 +72,8 @@ END_MESSAGE_MAP()
 COpenGLView::COpenGLView()
 {
 	// TODO: add construction code here
+    m_pClientDC = NULL;
+    m_n3DTextureID = 0;
 }
 
 COpenGLView::~COpenGLView()
@@ -83,14 +102,31 @@ void COpenGLView::OnDraw(CDC* pDC)
 
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT );
 
-    glBegin( GL_TRIANGLES );
+    if( m_n3DTextureID == 0 )
+    {
+        glBegin( GL_TRIANGLES );
         glColor3f(1.0f,0.0f,0.0f);
         glVertex2f( -0.5f,-0.5f );
         glColor3f( 0.0f,1.0f,0.0f );
         glVertex2f( 0.5f,-0.5f );
         glColor3f(0.0f,0.0f,1.0f);
         glVertex2f( 0.0f,0.5f );
-    glEnd();
+        glEnd();
+    }
+    else
+    {
+        glEnable(GL_BLEND);
+        glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+
+        glEnable(GL_TEXTURE_3D);
+        glBindTexture( GL_TEXTURE_3D,  m_n3DTextureID );
+        for ( float fIndx = -1.0f; fIndx <= 1.0f; fIndx+=0.01f )
+        {
+            glBegin(GL_QUADS);
+                MAP_3DTEXT( fIndx );
+            glEnd();
+        }
+    }
     glFinish();
     SwapBuffers( m_pClientDC->GetSafeHdc() );
 }
@@ -272,7 +308,65 @@ void COpenGLView::OnUpdate(CView* /*pSender*/, LPARAM lHint, CObject* /*pHint*/)
 
     if( lHint == static_cast<LPARAM>( CdcmtkShowDCMImageDoc::tagDICOMImport.getValue() ) )
     {
+        initVolumeData();
         Invalidate();
     }
 
+}
+
+bool COpenGLView::initVolumeData()
+{
+    CdcmtkShowDCMImageDoc* pDoc = GetDocument();
+    ASSERT_VALID( pDoc );
+
+    if(!pDoc)
+    {
+        return false;
+    }
+
+    std::shared_ptr<DICOMImageHelper> pDicomHelper = pDoc->getDicomImageHelper();
+
+    if( m_n3DTextureID != 0 )
+    {
+        glDeleteTextures( 1, &m_n3DTextureID );
+    }
+    glGenTextures( 1, &m_n3DTextureID );
+
+    glBindTexture( GL_TEXTURE_3D, m_n3DTextureID );
+    glTexParameteri( GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER );
+    glTexParameteri( GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER );
+    glTexParameteri( GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_BORDER );
+    glTexParameteri( GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+    glTexParameteri( GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+
+    PFNGLTEXIMAGE3DPROC glTexImage3D = reinterpret_cast<PFNGLTEXIMAGE3DPROC>(wglGetProcAddress("glTexImage3D"));
+
+    int nWidth = pDicomHelper->getDICOMVolume()->getDICOMSeriesImage()[0]->m_nWidth;
+    int nHeight = pDicomHelper->getDICOMVolume()->getDICOMSeriesImage()[0]->m_nHeight;
+    int nDepth = pDicomHelper->getDICOMVolume()->getDepth();
+
+    int nImageLen = pDicomHelper->getDICOMVolume()->getDICOMSeriesImage()[0]->m_nLength;
+
+    char* pRGBBuffer = new char[ nWidth*nHeight*nDepth*3 ];
+    if( !pRGBBuffer)
+    {
+        return false;
+    }
+
+    for( int k = 0; k < nDepth; ++k )
+    {
+        for( int i = 0; i < nImageLen; ++i )
+        {
+            pRGBBuffer[ k*nImageLen + i ] = pDicomHelper->getDICOMVolume()->getDICOMSeriesImage()[k]->m_pPixelData[i];
+        }
+    }
+
+
+
+    glTexImage3D( GL_TEXTURE_3D,0,GL_RGB, nWidth , nHeight,nDepth ,
+        0,GL_RGB, GL_UNSIGNED_BYTE, pRGBBuffer );
+
+    delete[] pRGBBuffer;
+
+    return true;
 }

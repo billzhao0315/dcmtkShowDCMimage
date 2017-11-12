@@ -34,6 +34,7 @@ public:
     {
         return m_DicomSerieImage;
     }
+    unsigned int getDepth() const;
     void setDICOMSeriesImage( std::vector<std::shared_ptr<DICOMSerieImage>> arrDicomSerieImage );
 private:
     DICOMHeader m_DiconHeader;

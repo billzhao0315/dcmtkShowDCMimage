@@ -1,7 +1,11 @@
 #pragma once
 #include <afxsplitterwndex.h>
 #include "dcmtkShowDCMImageDoc.h"
-#include "dcmtkShowDCMImageView.h"
+
+#include <gl/GL.h>
+#include "glext.h"
+#include "wglext.h"
+
 class COpenGLView : public CView
 {
 protected: // create from serialization only
@@ -36,7 +40,10 @@ public:
 protected:
     bool GLSetting();
 private:
+    bool initVolumeData();
+private:
     CClientDC* m_pClientDC;
+    GLuint m_n3DTextureID;
 // Generated message map functions
 protected:
 	afx_msg void OnFilePrintPreview();
