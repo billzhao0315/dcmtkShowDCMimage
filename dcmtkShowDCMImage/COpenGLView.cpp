@@ -20,12 +20,18 @@
 #include "DICOMImageHelper.h"
 #include "DICOMVolume.h"
 #include "MainFrm.h"
+
+#include <gl/GL.h>
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 //void* pDicomDibits = NULL;
 //unsigned char* pRGBDicomDibits;
 //LPBITMAPINFOHEADER m_lpBMIH;
+
+#pragma comment( lib, "OpenGL32.lib" )
+#pragma comment( lib, "glu32.lib" )
 
 // CdcmtkShowDCMImageView
 IMPLEMENT_DYNCREATE(COpenGLView, CView)
@@ -41,6 +47,7 @@ BEGIN_MESSAGE_MAP(COpenGLView, CView)
     //ON_COMMAND(ID_FILE_OPENDICOM, &CsplitDCMView::OnFileOpendicom)
 //    ON_WM_MOUSEHWHEEL()
     ON_WM_MOUSEWHEEL()
+    ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
 // CdcmtkShowDCMImageView construction/destruction
@@ -74,6 +81,18 @@ void COpenGLView::OnDraw(CDC* pDC)
 
 	//// TODO: add draw code for native data here
 
+    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT );
+
+    glBegin( GL_TRIANGLES );
+        glColor3f(1.0f,0.0f,0.0f);
+        glVertex2f( -0.5f,-0.5f );
+        glColor3f( 0.0f,1.0f,0.0f );
+        glVertex2f( 0.5f,-0.5f );
+        glColor3f(0.0f,0.0f,1.0f);
+        glVertex2f( 0.0f,0.5f );
+    glEnd();
+    glFinish();
+    SwapBuffers( m_pClientDC->GetSafeHdc() );
 }
 
 
@@ -141,6 +160,57 @@ CdcmtkShowDCMImageDoc* COpenGLView::GetDocument() const // non-debug version is 
 // CdcmtkShowDCMImageView message handlers
 
 
+
+bool COpenGLView::GLSetting()
+{
+
+    m_pClientDC = new CClientDC(this);
+
+    HGLRC glRc;
+
+    PIXELFORMATDESCRIPTOR pfd = 
+    {
+        sizeof(PIXELFORMATDESCRIPTOR),  // size of this pfd                         //
+        1,                              // version number                           //
+        PFD_DRAW_TO_WINDOW|
+        PFD_SUPPORT_OPENGL|
+        PFD_DOUBLEBUFFER,                         // option flags                             //
+        PFD_TYPE_RGBA,                  // Pixel type (RGBA)                        //
+        24,                             // number of color bits                     //
+        0, 0, 0, 0, 0, 0,               // color field widths and shifts ignored    //
+        8,                              // 8-bit alpha buffer                       //
+        0,                              // shift bit ignored                        //
+        0,                              // no accumulation buffer                   //
+        0, 0, 0, 0,                     // accumulation buffer field widths ignored //
+        32,                             // 32-bit z-buffer                          //
+        8,                              // 8-bit stencil buffer                     //
+        0,                              // no auxiliary buffer                      //
+        PFD_MAIN_PLANE,                 // main layer                               //
+        0,                              // reserved                                 //
+        0, 0, 0                         // layer masks ignored                      //
+    };
+
+    int nPixelFormID = ChoosePixelFormat( m_pClientDC->GetSafeHdc(), &pfd );
+
+    if( nPixelFormID == 0 )
+    {
+        MessageBox(_T("fail to choosePixelFormat"));
+        return false;
+    }
+
+    if( SetPixelFormat( m_pClientDC->GetSafeHdc(), nPixelFormID,&pfd ) == false )
+    {
+        MessageBox(_T("fail to setPixelFormat"));
+        return false;
+    }
+
+    glRc = wglCreateContext( m_pClientDC->GetSafeHdc() );
+
+    wglMakeCurrent( m_pClientDC->GetSafeHdc(), glRc );
+
+    return true;
+}
+
 int COpenGLView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
     if (CView::OnCreate(lpCreateStruct) == -1)
@@ -148,6 +218,13 @@ int COpenGLView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
     // TODO:  Add your specialized creation code here
     
+    bool bFlag = GLSetting();
+
+    if( !bFlag )
+    {
+        MessageBox(_T("fail to initlize opengl"));
+        return -1;
+    }
 
     return 0;
 }
@@ -168,4 +245,34 @@ BOOL COpenGLView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 {
     // TODO: Add your message handler code here and/or call default
     return CView::OnMouseWheel(nFlags, zDelta, pt);
+}
+
+
+void COpenGLView::OnDestroy()
+{
+    CView::OnDestroy();
+
+    // TODO: Add your message handler code here
+    HGLRC glRc = wglGetCurrentContext();
+    wglMakeCurrent( NULL, NULL );
+    if( glRc )
+    {
+        wglDeleteContext( glRc );
+    }
+    if( m_pClientDC )
+    {
+        delete m_pClientDC;
+    }
+}
+
+
+void COpenGLView::OnUpdate(CView* /*pSender*/, LPARAM lHint, CObject* /*pHint*/)
+{
+    // TODO: Add your specialized code here and/or call the base class
+
+    if( lHint == static_cast<LPARAM>( CdcmtkShowDCMImageDoc::tagDICOMImport.getValue() ) )
+    {
+        Invalidate();
+    }
+
 }

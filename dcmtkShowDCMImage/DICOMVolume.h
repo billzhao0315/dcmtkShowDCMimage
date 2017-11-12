@@ -26,7 +26,7 @@ struct DICOMSerieImage
 class DICOMVolume
 {
 public:
-    DICOMVolume():m_DicomSerieImage(0)
+    DICOMVolume():m_DicomSerieImage(0), m_nDepth(0)
     {
 
     }
@@ -38,4 +38,5 @@ public:
 private:
     DICOMHeader m_DiconHeader;
     std::vector<std::shared_ptr<DICOMSerieImage>> m_DicomSerieImage;
+    unsigned int m_nDepth;
 };

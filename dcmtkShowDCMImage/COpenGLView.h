@@ -34,7 +34,9 @@ public:
 public:
 
 protected:
-
+    bool GLSetting();
+private:
+    CClientDC* m_pClientDC;
 // Generated message map functions
 protected:
 	afx_msg void OnFilePrintPreview();
@@ -45,6 +47,8 @@ public:
     afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 //    afx_msg void OnMouseHWheel(UINT nFlags, short zDelta, CPoint pt);
     afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
+    afx_msg void OnDestroy();
+    virtual void OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /*pHint*/);
 };
 
 #ifndef _DEBUG  // debug version in dcmtkShowDCMImageView.cpp
