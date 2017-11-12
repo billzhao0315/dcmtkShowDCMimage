@@ -11,7 +11,7 @@
 class DcmDataset;
 class DICOMImageHelper;
 
-class CdcmtkShowDCMImageView : public CView, public Subject
+class CdcmtkShowDCMImageView : public CView, public Observer
 {
 protected: // create from serialization only
 	CdcmtkShowDCMImageView();
@@ -24,11 +24,12 @@ public:
 
 // Operations
 public:
-    virtual void onNotifyObservers(
-        AttributeTag tag,
-        void* pOldValue = NULL,
-        void* pNewValue = NULL
-        );
+    virtual void onSubjectNotify(
+                         Subject* pSubject,
+                         AttributeTag tag,
+                         void* pOldValue = NULL,
+                         void* pNewValue = NULL
+                        );
 // Overrides
 public:
 	virtual void OnDraw(CDC* pDC);  // overridden to draw this view
@@ -47,9 +48,9 @@ public:
 #endif
 
 public:
-    std::vector<std::string> m_vDicomFileSet;
+    /*std::vector<std::string> m_vDicomFileSet;
     std::shared_ptr<DICOMImageHelper> m_pDicomImageHelper;
-    unsigned int m_nSeriesImageIndex;
+    unsigned int m_nSeriesImageIndex;*/
 protected:
 
 // Generated message map functions

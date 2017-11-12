@@ -21,11 +21,12 @@ void DICOMImageHelper::initMemory()
 bool DICOMImageHelper::DicomParse( std::vector<std::string> pathNames )
 {
        std::vector<std::shared_ptr<DICOMSerieImage>> arrDicomSeriesImage;
-       DcmFileFormat* pDicomFile = new DcmFileFormat();
+       
 
        for( int i = 0; i < pathNames.size(); ++i )
        {
            //读DICOM文件
+            DcmFileFormat* pDicomFile = new DcmFileFormat();
             pDicomFile->loadFile( pathNames[i].c_str() );
             //得到数据集
             DcmDataset* pDataSet = pDicomFile->getDataset();
@@ -70,6 +71,11 @@ bool DICOMImageHelper::DicomParse( std::vector<std::string> pathNames )
             {
                 pDicomSeries->m_pPixelData[j] = ((unsigned char*)pDicomDibits)[j];
             }
+
+            delete m_lpBMIH;
+            delete pDicomImg;
+            delete pDicomFile;
+            delete pDicomDibits;
             arrDicomSeriesImage.push_back( pDicomSeries );
        }
        //initMemory();

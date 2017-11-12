@@ -192,7 +192,7 @@
     <ClInclude Include="AttributeTag.h" />
     <ClInclude Include="ClassView.h" />
     <ClInclude Include="CoronalView.h" />
-    <ClInclude Include="CsplitDCMView.h" />
+    <ClInclude Include="COpenGLView.h" />
     <ClInclude Include="dcmtkShowDCMImage.h" />
     <ClInclude Include="dcmtkShowDCMImageDoc.h" />
     <ClInclude Include="dcmtkShowDCMImageView.h" />
@@ -215,7 +215,7 @@
     <ClCompile Include="AttributeTag.cpp" />
     <ClCompile Include="ClassView.cpp" />
     <ClCompile Include="CoronalView.cpp" />
-    <ClCompile Include="CsplitDCMView.cpp" />
+    <ClCompile Include="COpenGLView.cpp" />
     <ClCompile Include="dcmtkShowDCMImage.cpp" />
     <ClCompile Include="dcmtkShowDCMImageDoc.cpp" />
     <ClCompile Include="dcmtkShowDCMImageView.cpp" />

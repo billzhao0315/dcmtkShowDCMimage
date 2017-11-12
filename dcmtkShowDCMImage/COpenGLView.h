@@ -2,11 +2,11 @@
 #include <afxsplitterwndex.h>
 #include "dcmtkShowDCMImageDoc.h"
 #include "dcmtkShowDCMImageView.h"
-class CsplitDCMView : public CView
+class COpenGLView : public CView
 {
 protected: // create from serialization only
-	CsplitDCMView();
-	DECLARE_DYNCREATE(CsplitDCMView)
+	COpenGLView();
+	DECLARE_DYNCREATE(COpenGLView)
 
 // Attributes
 public:
@@ -14,7 +14,6 @@ public:
 
 // Operations
 public:
-    void openDicoms( std::string pDicomFileIndex );
 // Overrides
 public:
 	virtual void OnDraw(CDC* pDC);  // overridden to draw this view
@@ -26,16 +25,14 @@ protected:
 
 // Implementation
 public:
-	virtual ~CsplitDCMView();
+	virtual ~COpenGLView();
 #ifdef _DEBUG
 	virtual void AssertValid() const;
 	virtual void Dump(CDumpContext& dc) const;
 #endif
 
 public:
-    std::vector<std::string> m_vDicomFileSet;
-    std::shared_ptr<DICOMImageHelper> m_pDicomImageHelper;
-    unsigned int m_nSeriesImageIndex;
+
 protected:
 
 // Generated message map functions
@@ -46,12 +43,11 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
     afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-    afx_msg void OnFileOpendicom();
 //    afx_msg void OnMouseHWheel(UINT nFlags, short zDelta, CPoint pt);
     afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
 };
 
 #ifndef _DEBUG  // debug version in dcmtkShowDCMImageView.cpp
-inline CdcmtkShowDCMImageDoc* CsplitDCMView::GetDocument() const
+inline CdcmtkShowDCMImageDoc* COpenGLView::GetDocument() const
    { return reinterpret_cast<CdcmtkShowDCMImageDoc*>(m_pDocument); }
 #endif

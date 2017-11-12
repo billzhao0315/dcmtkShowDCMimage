@@ -31,6 +31,7 @@ public:
         void* pNewValue = NULL
         );
     void increaseImageIndex();
+    void decreaseImageIndex();
 private:
     void openDicoms( std::string pDicomFileIndex );
     void processSpvView(AttributeTag tag,

@@ -50,8 +50,6 @@ END_MESSAGE_MAP()
 CdcmtkShowDCMImageView::CdcmtkShowDCMImageView()
 {
 	// TODO: add construction code here
-    m_pDicomImageHelper = nullptr;
-    m_nSeriesImageIndex = 0;
 }
 
 CdcmtkShowDCMImageView::~CdcmtkShowDCMImageView()
@@ -77,8 +75,8 @@ void CdcmtkShowDCMImageView::OnDraw(CDC* pDC)
 		return;
 
 	//// TODO: add draw code for native data here
-    m_pDicomImageHelper = pDoc->getDicomImageHelper();
-    if( m_pDicomImageHelper != nullptr )
+    std::shared_ptr<DICOMImageHelper>  pDicomImageHelper = pDoc->getDicomImageHelper();
+    if( pDicomImageHelper != nullptr )
     {
         CDC dcMem;
         if( dcMem.CreateCompatibleDC( pDC ) == FALSE )
@@ -86,10 +84,10 @@ void CdcmtkShowDCMImageView::OnDraw(CDC* pDC)
             return;
         }
         
-        m_nSeriesImageIndex = pDoc->getCurrentImageIndex();
-        auto arrPDicomSeries = m_pDicomImageHelper->getDICOMVolume()->getDICOMSeriesImage();
-        m_lpBMIH = arrPDicomSeries[m_nSeriesImageIndex]->m_pBitMapInfoHeader;
-        pDicomDibits = arrPDicomSeries[m_nSeriesImageIndex]->m_pPixelData;
+        unsigned int nSeriesImageIndex = pDoc->getCurrentImageIndex();
+        auto arrPDicomSeries = pDicomImageHelper->getDICOMVolume()->getDICOMSeriesImage();
+        m_lpBMIH = arrPDicomSeries[nSeriesImageIndex]->m_pBitMapInfoHeader;
+        pDicomDibits = arrPDicomSeries[nSeriesImageIndex]->m_pPixelData;
         if( pDicomDibits != NULL )
         {
 
@@ -110,8 +108,8 @@ void CdcmtkShowDCMImageView::OnDraw(CDC* pDC)
 
             // Setup the bitmap info structure
             bmih.biSize = sizeof(BITMAPINFOHEADER);
-            bmih.biWidth = arrPDicomSeries[m_nSeriesImageIndex]->m_nWidth;
-            bmih.biHeight = arrPDicomSeries[m_nSeriesImageIndex]->m_nHeight;
+            bmih.biWidth = arrPDicomSeries[nSeriesImageIndex]->m_nWidth;
+            bmih.biHeight = arrPDicomSeries[nSeriesImageIndex]->m_nHeight;
             bmih.biPlanes = 1;
             bmih.biBitCount = 24;
             bmih.biCompression = BI_RGB;
@@ -126,7 +124,7 @@ void CdcmtkShowDCMImageView::OnDraw(CDC* pDC)
 
             if ( hBitmap != NULL )
             {
-                memcpy( pBits, pDicomDibits, sizeof(BYTE) * arrPDicomSeries[m_nSeriesImageIndex]->m_nLength );
+                memcpy( pBits, pDicomDibits, sizeof(BYTE) * arrPDicomSeries[nSeriesImageIndex]->m_nLength );
                 ::SelectObject( dcMem.GetSafeHdc(), hBitmap );
                 ::DeleteObject( hBitmap );
             }
@@ -137,7 +135,7 @@ void CdcmtkShowDCMImageView::OnDraw(CDC* pDC)
                           pDicomDibits, (LPBITMAPINFO) m_lpBMIH,DIB_RGB_COLORS, SRCCOPY);*/
            
             CString str;
-            str.Format("current Slice: %d/%d",m_nSeriesImageIndex,arrPDicomSeries.size());
+            str.Format("current Slice: %d/%d",nSeriesImageIndex + 1,arrPDicomSeries.size());
             pWndFrame->m_wndStatusBar.SetWindowTextA(str);
             CDC dcBG;
             bool bFlag = dcBG.CreateCompatibleDC(pDC);
@@ -267,29 +265,22 @@ int CdcmtkShowDCMImageView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 BOOL CdcmtkShowDCMImageView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 {
     // TODO: Add your message handler code here and/or call default
-    //if( m_pDicomImageHelper != nullptr && m_pDicomImageHelper->getDICOMVolume()->getDICOMSeriesImage().size() > 0 )
-    //{
-    //    m_nSeriesImageIndex += 1;
-    //    m_nSeriesImageIndex = m_nSeriesImageIndex % m_pDicomImageHelper->getDICOMVolume()->getDICOMSeriesImage().size();
-    //    Invalidate(FALSE);
-
-    //    GetDocument()->UpdateAllViews( this );
-    //    //UpdateWindow();
-    //}
     CdcmtkShowDCMImageDoc* pDoc = GetDocument();
 
-    pDoc->increaseImageIndex();
+    ASSERT_VALID(pDoc);
+	if (!pDoc)
+		return false;
+    if( zDelta >= 0 )
+    {
+        pDoc->increaseImageIndex();
+    }
+    else
+    {
+        pDoc->decreaseImageIndex();
+    }
+    
 
     return CView::OnMouseWheel(nFlags, zDelta, pt);
-}
-
-void CdcmtkShowDCMImageView::onNotifyObservers(
-    AttributeTag tag,
-    void* pOldValue,
-    void* pNewValue
-    )
-{
-
 }
 
 void CdcmtkShowDCMImageView::OnUpdate(CView* /*pSender*/, LPARAM lHint, CObject* /*pHint*/)
@@ -300,4 +291,10 @@ void CdcmtkShowDCMImageView::OnUpdate(CView* /*pSender*/, LPARAM lHint, CObject*
     {
         Invalidate(TRUE);
     }
+}
+
+
+void CdcmtkShowDCMImageView::onSubjectNotify(Subject* /*pSubject*/, AttributeTag /*tag*/, void* /*pOldValue*/, void* /*pNewValue*/)
+{
+    
 }

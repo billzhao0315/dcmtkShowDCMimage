@@ -232,3 +232,21 @@ void CdcmtkShowDCMImageDoc::increaseImageIndex()
         UpdateAllViews(NULL, static_cast<LPARAM>( tagDICOMSliceChange.getValue() ) );
     }
 }
+
+void CdcmtkShowDCMImageDoc::decreaseImageIndex()
+{
+    if( m_pDicomImageHelper != nullptr && m_pDicomImageHelper->getDICOMVolume()->getDICOMSeriesImage().size() > 0 )
+    {
+        if( m_nSeriesImageIndex == 0 )
+        {
+            m_nSeriesImageIndex = m_pDicomImageHelper->getDICOMVolume()->getDICOMSeriesImage().size() - 1;
+        }
+        else
+        {
+            m_nSeriesImageIndex -= 1;
+            m_nSeriesImageIndex = m_nSeriesImageIndex % m_pDicomImageHelper->getDICOMVolume()->getDICOMSeriesImage().size();
+        }
+        
+        UpdateAllViews(NULL, static_cast<LPARAM>( tagDICOMSliceChange.getValue() ) );
+    }
+}

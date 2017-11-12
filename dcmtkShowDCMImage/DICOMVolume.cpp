@@ -5,6 +5,10 @@
 //{
 //
 //}
+DICOMSerieImage::~DICOMSerieImage()
+{
+    delete[] m_pPixelData;
+}
 
 void DICOMVolume::setDICOMSeriesImage( std::vector<std::shared_ptr<DICOMSerieImage>> arrDicomSerieImage )
 {

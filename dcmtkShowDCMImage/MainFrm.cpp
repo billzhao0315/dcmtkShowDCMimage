@@ -5,7 +5,7 @@
 #include "stdafx.h"
 #include "dcmtkShowDCMImage.h"
 #include "dcmtkShowDCMImageDoc.h"
-#include "CsplitDCMView.h"
+#include "COpenGLView.h"
 
 #include "dcmtkShowDCMImageView.h"
 #include "CoronalView.h"
@@ -432,7 +432,7 @@ BOOL CMainFrame::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext)
         MessageBox(_T("fail to create (0,0)sub-window"),_T("CdcmtkShowDCMImageView"),MB_OK|MB_ICONERROR);
     }
 
-    bFlag =  m_splitwnd.CreateView( 0,1 ,RUNTIME_CLASS(CsplitDCMView),CSize( nWidth/2, nHeight/2 ), pContext);
+    bFlag =  m_splitwnd.CreateView( 0,1 ,RUNTIME_CLASS(COpenGLView),CSize( nWidth/2, nHeight/2 ), pContext);
     if( !bFlag )
     {
         MessageBox(_T("fail to create (0,1)sub-window"),_T("CsplitDCMView"),MB_OK|MB_ICONERROR);
