@@ -116,14 +116,30 @@ void COpenGLView::OnDraw(CDC* pDC)
     else
     {
         glEnable(GL_BLEND);
-        glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-
+        //glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+        glBlendFunc( GL_SRC_COLOR, GL_ONE_MINUS_SRC_COLOR );
         glEnable(GL_TEXTURE_3D);
         glBindTexture( GL_TEXTURE_3D,  m_n3DTextureID );
-        for ( float fIndx = -1.0f; fIndx <= 1.0f; fIndx+=0.01f )
+
+        glMatrixMode( GL_PROJECTION );
+
+        gluPerspective( 45,1,1.0f,3.0f );
+
+        glMatrixMode( GL_MODELVIEW );
+        gluLookAt( 0.0f,0.0f,2.0f, 0.0f,0.0f,0.0f, 0.0f,1.0f,0.0f );
+
+        for ( float fIndx = 0.0f; fIndx <= 1.0f; fIndx+=0.01f )
         {
             glBegin(GL_QUADS);
-                MAP_3DTEXT( fIndx );
+                //MAP_3DTEXT( fIndx );
+                glTexCoord3f(0.0f, 0.0f, fIndx);  
+                glVertex3f(-dOrthoSize,-dOrthoSize,fIndx);
+                glTexCoord3f(1.0f, 0.0f, fIndx);  
+                glVertex3f(dOrthoSize,-dOrthoSize,fIndx);
+                glTexCoord3f(1.0f, 1.0f, fIndx);  
+                glVertex3f(dOrthoSize,dOrthoSize,fIndx);
+                glTexCoord3f(0.0f, 1.0f, fIndx);
+                glVertex3f(-dOrthoSize,dOrthoSize,fIndx);
             glEnd();
         }
     }
@@ -352,13 +368,14 @@ bool COpenGLView::initVolumeData()
     {
         return false;
     }
-
+    char* pTemp = pRGBBuffer;
     for( int k = 0; k < nDepth; ++k )
     {
-        for( int i = 0; i < nImageLen; ++i )
+        /*for( int i = 0; i < nImageLen; ++i )
         {
             pRGBBuffer[ k*nImageLen + i ] = pDicomHelper->getDICOMVolume()->getDICOMSeriesImage()[k]->m_pPixelData[i];
-        }
+        }*/
+        memcpy( pTemp + k*nDepth, pDicomHelper->getDICOMVolume()->getDICOMSeriesImage()[k]->m_pPixelData, nImageLen );
     }
 
 
