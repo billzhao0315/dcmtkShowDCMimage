@@ -65,7 +65,51 @@ BEGIN_MESSAGE_MAP(COpenGLView, CView)
 //    ON_WM_MOUSEHWHEEL()
     ON_WM_MOUSEWHEEL()
     ON_WM_DESTROY()
+    ON_WM_LBUTTONDOWN()
+    ON_WM_MOUSEMOVE()
 END_MESSAGE_MAP()
+
+
+class COpenGLView::mathImpl
+{
+public:
+    mathImpl()
+    {
+        mdRotation[0]=mdRotation[5]=mdRotation[10]=mdRotation[15] = 1.0f;
+        mdRotation[1]=mdRotation[2]=mdRotation[3]=mdRotation[4] = 0.0f;
+        mdRotation[6]=mdRotation[7]=mdRotation[8]=mdRotation[9] = 0.0f;
+        mdRotation[11]=mdRotation[12]=mdRotation[13]=mdRotation[14] = 0.0f;
+
+        mfRot[0]=mfRot[1]=mfRot[2]=0.0f;
+    }
+    ~mathImpl()
+    {
+        
+    }
+    const double* getMatrix()
+    {
+        return mdRotation;
+    }
+
+    void Rotate( double dx, double dy, double dz )
+    {
+        mfRot[0] = dx;
+        mfRot[1] = dy;
+        mfRot[2] = dz;
+        glMatrixMode( GL_MODELVIEW );
+        glLoadMatrixd( mdRotation );
+        glRotated( mfRot[0], 1.0f, 0,0 );
+        glRotated( mfRot[1], 0, 1.0f,0 );
+        glRotated( mfRot[2], 0, 0,1.0f );
+        glGetDoublev( GL_MODELVIEW_MATRIX, mdRotation );
+        glLoadIdentity();
+    }
+
+private:
+    double mfRot[3];
+    double mdRotation[16];
+    
+};
 
 // CdcmtkShowDCMImageView construction/destruction
 
@@ -74,6 +118,7 @@ COpenGLView::COpenGLView()
 	// TODO: add construction code here
     m_pClientDC = NULL;
     m_n3DTextureID = 0;
+    m_pMathImpl = std::make_shared<mathImpl>();
 }
 
 COpenGLView::~COpenGLView()
@@ -118,15 +163,23 @@ void COpenGLView::OnDraw(CDC* pDC)
         glEnable(GL_BLEND);
         //glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
         glBlendFunc( GL_SRC_COLOR, GL_ONE_MINUS_SRC_COLOR );
-        glEnable(GL_TEXTURE_3D);
-        glBindTexture( GL_TEXTURE_3D,  m_n3DTextureID );
+        
 
         glMatrixMode( GL_PROJECTION );
 
-        gluPerspective( 45,1,1.0f,3.0f );
+        gluPerspective( 45,1,1.0f,5.0f );
 
         glMatrixMode( GL_MODELVIEW );
-        gluLookAt( 0.0f,0.0f,2.0f, 0.0f,0.0f,0.0f, 0.0f,1.0f,0.0f );
+        gluLookAt( 0.0f,0.0f,4.0f, 0.0f,0.0f,0.0f, 0.0f,1.0f,0.0f );
+
+        glMatrixMode( GL_TEXTURE );
+        glLoadIdentity();
+        glTranslatef( 0.5f, 0.5f, 0.5f );
+        glMultMatrixd( m_pMathImpl->getMatrix() );
+        glTranslatef( -0.5f,-0.5f,-0.5f );
+
+        glEnable(GL_TEXTURE_3D);
+        glBindTexture( GL_TEXTURE_3D,  m_n3DTextureID );
 
         for ( float fIndx = 0.0f; fIndx <= 1.0f; fIndx+=0.01f )
         {
@@ -142,6 +195,8 @@ void COpenGLView::OnDraw(CDC* pDC)
                 glVertex3f(-dOrthoSize,dOrthoSize,fIndx);
             glEnd();
         }
+
+
     }
     glFinish();
     SwapBuffers( m_pClientDC->GetSafeHdc() );
@@ -363,19 +418,19 @@ bool COpenGLView::initVolumeData()
 
     int nImageLen = pDicomHelper->getDICOMVolume()->getDICOMSeriesImage()[0]->m_nLength;
 
-    char* pRGBBuffer = new char[ nWidth*nHeight*nDepth*3 ];
+    unsigned char* pRGBBuffer = new unsigned char[ nWidth*nHeight*nDepth*3 ];
     if( !pRGBBuffer)
     {
         return false;
     }
-    char* pTemp = pRGBBuffer;
+    unsigned char* pTemp = pRGBBuffer;
     for( int k = 0; k < nDepth; ++k )
     {
         /*for( int i = 0; i < nImageLen; ++i )
         {
             pRGBBuffer[ k*nImageLen + i ] = pDicomHelper->getDICOMVolume()->getDICOMSeriesImage()[k]->m_pPixelData[i];
         }*/
-        memcpy( pTemp + k*nDepth, pDicomHelper->getDICOMVolume()->getDICOMSeriesImage()[k]->m_pPixelData, nImageLen );
+        memcpy( pTemp + k*nImageLen, pDicomHelper->getDICOMVolume()->getDICOMSeriesImage()[k]->m_pPixelData, nImageLen );
     }
 
 
@@ -386,4 +441,33 @@ bool COpenGLView::initVolumeData()
     delete[] pRGBBuffer;
 
     return true;
+}
+
+
+
+
+void COpenGLView::OnLButtonDown(UINT nFlags, CPoint point)
+{
+    // TODO: Add your message handler code here and/or call default
+    m_ReferencePoint = point;
+    CView::OnLButtonDown(nFlags, point);
+}
+
+
+void COpenGLView::OnMouseMove(UINT nFlags, CPoint point)
+{
+    // TODO: Add your message handler code here and/or call default
+    if( nFlags & MK_LBUTTON )
+    {
+        if( m_ReferencePoint != point )
+        {
+            m_pMathImpl->Rotate( m_ReferencePoint.x - point.x, m_ReferencePoint.y - point.y, 0 );
+            m_ReferencePoint = point;
+            Invalidate(  );
+        }
+        
+        
+    }
+    CView::OnMouseMove(nFlags, point);
+    
 }

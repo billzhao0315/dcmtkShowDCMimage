@@ -44,6 +44,9 @@ private:
 private:
     CClientDC* m_pClientDC;
     GLuint m_n3DTextureID;
+    class mathImpl;
+    std::shared_ptr< mathImpl > m_pMathImpl;
+    CPoint m_ReferencePoint;
 // Generated message map functions
 protected:
 	afx_msg void OnFilePrintPreview();
@@ -56,6 +59,8 @@ public:
     afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
     afx_msg void OnDestroy();
     virtual void OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /*pHint*/);
+    afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+    afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 };
 
 #ifndef _DEBUG  // debug version in dcmtkShowDCMImageView.cpp
