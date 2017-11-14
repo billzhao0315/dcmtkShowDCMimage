@@ -269,6 +269,7 @@
     <Image Include="UserImages.bmp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="res\curEyeRot.cur" />
     <None Include="res\dcmtkShowDCMImage.rc2" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

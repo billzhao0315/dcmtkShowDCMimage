@@ -230,5 +230,8 @@
     <None Include="res\dcmtkShowDCMImage.rc2">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="res\curEyeRot.cur">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -438,6 +438,7 @@ bool COpenGLView::initVolumeData()
     glGenTextures( 1, &m_n3DTextureID );
 
     glBindTexture( GL_TEXTURE_3D, m_n3DTextureID );
+    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
     glTexParameteri( GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER );
     glTexParameteri( GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER );
     glTexParameteri( GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_BORDER );
@@ -471,7 +472,7 @@ bool COpenGLView::initVolumeData()
 
     glTexImage3D( GL_TEXTURE_3D,0,GL_RGBA, nWidth , nHeight,nDepth ,
         0,GL_RGBA, GL_UNSIGNED_BYTE, pRGBBuffer );
-
+    glBindTexture( GL_TEXTURE_3D, 0 );
     delete[] pRGBBuffer;
 
     return true;
@@ -500,7 +501,8 @@ void COpenGLView::OnMouseMove(UINT nFlags, CPoint point)
             Invalidate( FALSE );
         }
         
-        
+        ::SetCursor( LoadCursor( AfxGetResourceHandle(),
+                                 MAKEINTRESOURCE( IDC_EYE_ROTATE_CURSOR ) ) );
     }
     CView::OnMouseMove(nFlags, point);
     
