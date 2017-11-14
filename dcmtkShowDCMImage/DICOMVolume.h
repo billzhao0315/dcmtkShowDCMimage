@@ -17,7 +17,7 @@ struct DICOMSerieImage
     ~DICOMSerieImage();
     //double m_ImagePositionPatient[3];
     unsigned char* m_pPixelData;
-    unsigned char* m_pRGBAPixelData;
+    //unsigned char* m_pRGBAPixelData;
     unsigned long  m_nLength;
     int m_nWidth;
     int m_nHeight;

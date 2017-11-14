@@ -74,10 +74,10 @@ bool DICOMImageHelper::DicomParse( std::vector<std::string> pathNames )
             //得到DICOM文件第frame的DIB数据(假设是24位的)
             void* pDicomDibits = NULL;
             unsigned long pixelLen = pDicomImg->createWindowsDIB(pDicomDibits, 0, 0, 24, 1, 1);
-            unsigned long imageLen = pDicomImg->getWidth() * pDicomImg->getHeight();
+            //unsigned long imageLen = pDicomImg->getWidth() * pDicomImg->getHeight();
             std::shared_ptr<DICOMSerieImage> pDicomSeries = std::make_shared<DICOMSerieImage>();
             pDicomSeries->m_pPixelData = new unsigned char[pixelLen];
-            pDicomSeries->m_pRGBAPixelData = new unsigned char[ imageLen *4 ];
+            //pDicomSeries->m_pRGBAPixelData = new unsigned char[ imageLen *4 ];
             pDicomSeries->m_nLength = pixelLen;
             pDicomSeries->m_pBitMapInfoHeader = m_lpBMIH;
             pDicomSeries->m_nWidth = pDicomImg->getWidth();
@@ -85,7 +85,7 @@ bool DICOMImageHelper::DicomParse( std::vector<std::string> pathNames )
             pDicomSeries->m_nImagePositionPatient[0] = IPP[0];
             pDicomSeries->m_nImagePositionPatient[1] = IPP[1];
             pDicomSeries->m_nImagePositionPatient[2] = IPP[2];
-            for(unsigned long j = 0; j < imageLen; ++j )
+            /*for(unsigned long j = 0; j < imageLen; ++j )
             {
                 pDicomSeries->m_pPixelData[3*j] = ((unsigned char*)pDicomDibits)[3*j];
                 pDicomSeries->m_pPixelData[3*j+1] = ((unsigned char*)pDicomDibits)[3*j];
@@ -94,8 +94,8 @@ bool DICOMImageHelper::DicomParse( std::vector<std::string> pathNames )
                 pDicomSeries->m_pRGBAPixelData[4*j+1] = ((unsigned char*)pDicomDibits)[3*j];
                 pDicomSeries->m_pRGBAPixelData[4*j+2] = ((unsigned char*)pDicomDibits)[3*j];
                 pDicomSeries->m_pRGBAPixelData[4*j+3] = ((unsigned char*)pDicomDibits)[3*j];
-            }
-            //memcpy( pDicomSeries->m_pPixelData, pDicomDibits, pixelLen );
+            }*/
+            memcpy( pDicomSeries->m_pPixelData, pDicomDibits, pixelLen );
 
             delete m_lpBMIH;
             delete pDicomImg;

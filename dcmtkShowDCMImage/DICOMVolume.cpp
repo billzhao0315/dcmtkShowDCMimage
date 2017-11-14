@@ -8,8 +8,11 @@
 //}
 DICOMSerieImage::~DICOMSerieImage()
 {
-    delete[] m_pPixelData;
-    delete[] m_pRGBAPixelData;
+    if( m_pPixelData != NULL )
+    {
+        delete[] m_pPixelData;
+    }
+    //delete[] m_pRGBAPixelData;
 }
 
 
