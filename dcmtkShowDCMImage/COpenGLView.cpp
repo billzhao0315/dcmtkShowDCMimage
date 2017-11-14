@@ -145,7 +145,7 @@ void COpenGLView::OnDraw(CDC* pDC)
 
 	//// TODO: add draw code for native data here
 
-    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT );
+    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
     if( m_n3DTextureID == 0 )
     {
@@ -160,41 +160,75 @@ void COpenGLView::OnDraw(CDC* pDC)
     }
     else
     {
+
+        std::shared_ptr<DICOMImageHelper> pDicomHelper = pDoc->getDicomImageHelper();
+        int nWidth = pDicomHelper->getDICOMVolume()->getDICOMSeriesImage()[0]->m_nWidth;
+        int nHeight = pDicomHelper->getDICOMVolume()->getDICOMSeriesImage()[0]->m_nHeight;
+        int nDepth = pDicomHelper->getDICOMVolume()->getDepth();
+        glEnable( GL_ALPHA_TEST );
+        glAlphaFunc( GL_GREATER, 0.05f );
         glEnable(GL_BLEND);
-        //glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-        glBlendFunc( GL_SRC_COLOR, GL_ONE_MINUS_SRC_COLOR );
-        
-
+        glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+        //glBlendFunc( GL_SRC_COLOR, GL_ONE_MINUS_SRC_COLOR );
+        CRect rc;
+        GetClientRect(rc);
+        glViewport( 0,0, rc.right, rc.bottom );
         glMatrixMode( GL_PROJECTION );
-
-        gluPerspective( 45,1,1.0f,5.0f );
+        glLoadIdentity();
+        gluPerspective( 45,1,1.0f,10.0f );
 
         glMatrixMode( GL_MODELVIEW );
+        glLoadIdentity();
         gluLookAt( 0.0f,0.0f,4.0f, 0.0f,0.0f,0.0f, 0.0f,1.0f,0.0f );
 
         glMatrixMode( GL_TEXTURE );
         glLoadIdentity();
         glTranslatef( 0.5f, 0.5f, 0.5f );
+
+        /*glScaled( (float)nWidth/(float)nWidth, 
+        -1.0f*(float)nWidth/(float)(float)nHeight, 
+        (float)nWidth/(float)nDepth);*/
+
         glMultMatrixd( m_pMathImpl->getMatrix() );
         glTranslatef( -0.5f,-0.5f,-0.5f );
 
         glEnable(GL_TEXTURE_3D);
         glBindTexture( GL_TEXTURE_3D,  m_n3DTextureID );
 
-        for ( float fIndx = 0.0f; fIndx <= 1.0f; fIndx+=0.01f )
+        for ( float fIndx = -1.0f; fIndx <= 1.0f; fIndx+=0.01f )
         {
             glBegin(GL_QUADS);
-                //MAP_3DTEXT( fIndx );
-                glTexCoord3f(0.0f, 0.0f, fIndx);  
-                glVertex3f(-dOrthoSize,-dOrthoSize,fIndx);
-                glTexCoord3f(1.0f, 0.0f, fIndx);  
-                glVertex3f(dOrthoSize,-dOrthoSize,fIndx);
-                glTexCoord3f(1.0f, 1.0f, fIndx);  
-                glVertex3f(dOrthoSize,dOrthoSize,fIndx);
-                glTexCoord3f(0.0f, 1.0f, fIndx);
-                glVertex3f(-dOrthoSize,dOrthoSize,fIndx);
+                MAP_3DTEXT( fIndx );
             glEnd();
         }
+
+        //for ( float fIndx = 0.0f; fIndx <= 1.0f; fIndx+=0.01f )
+        //{
+        //    MAP_3DTEXT( TexIndex )
+        //    //glBegin(GL_QUADS);
+        //    //    //MAP_3DTEXT( fIndx );
+        //    //    glTexCoord3f(0.0f, 0.0f, fIndx);  
+        //    //    glVertex3f(-dOrthoSize,-dOrthoSize,fIndx);
+        //    //    glTexCoord3f(1.0f, 0.0f, fIndx);  
+        //    //    glVertex3f(dOrthoSize,-dOrthoSize,fIndx);
+        //    //    glTexCoord3f(1.0f, 1.0f, fIndx);  
+        //    //    glVertex3f(dOrthoSize,dOrthoSize,fIndx);
+        //    //    glTexCoord3f(0.0f, 1.0f, fIndx);
+        //    //    glVertex3f(-dOrthoSize,dOrthoSize,fIndx);
+        //    //glEnd();
+        //}
+        //float fIndx = 0.5f;
+        //glBegin(GL_QUADS);
+        //        //MAP_3DTEXT( fIndx );
+        //        glTexCoord3f(0.0f, 0.0f, fIndx);  
+        //        glVertex3f(-dOrthoSize,-dOrthoSize,fIndx);
+        //        glTexCoord3f(1.0f, 0.0f, fIndx);  
+        //        glVertex3f(dOrthoSize,-dOrthoSize,fIndx);
+        //        glTexCoord3f(1.0f, 1.0f, fIndx);  
+        //        glVertex3f(dOrthoSize,dOrthoSize,fIndx);
+        //        glTexCoord3f(0.0f, 1.0f, fIndx);
+        //        glVertex3f(-dOrthoSize,dOrthoSize,fIndx);
+        //glEnd();
 
 
     }
@@ -314,7 +348,7 @@ bool COpenGLView::GLSetting()
     glRc = wglCreateContext( m_pClientDC->GetSafeHdc() );
 
     wglMakeCurrent( m_pClientDC->GetSafeHdc(), glRc );
-
+    //glClearColor( 1.0f,1.0f,1.0f ,1.0f);
     return true;
 }
 
@@ -416,9 +450,9 @@ bool COpenGLView::initVolumeData()
     int nHeight = pDicomHelper->getDICOMVolume()->getDICOMSeriesImage()[0]->m_nHeight;
     int nDepth = pDicomHelper->getDICOMVolume()->getDepth();
 
-    int nImageLen = pDicomHelper->getDICOMVolume()->getDICOMSeriesImage()[0]->m_nLength;
-
-    unsigned char* pRGBBuffer = new unsigned char[ nWidth*nHeight*nDepth*3 ];
+    //int nImageLen = pDicomHelper->getDICOMVolume()->getDICOMSeriesImage()[0]->m_nLength;
+    int nImageLen = pDicomHelper->getDICOMVolume()->getDICOMSeriesImage()[0]->m_nWidth * pDicomHelper->getDICOMVolume()->getDICOMSeriesImage()[0]->m_nHeight *4;
+    unsigned char* pRGBBuffer = new unsigned char[ nWidth*nHeight*nDepth*4 ];
     if( !pRGBBuffer)
     {
         return false;
@@ -430,13 +464,13 @@ bool COpenGLView::initVolumeData()
         {
             pRGBBuffer[ k*nImageLen + i ] = pDicomHelper->getDICOMVolume()->getDICOMSeriesImage()[k]->m_pPixelData[i];
         }*/
-        memcpy( pTemp + k*nImageLen, pDicomHelper->getDICOMVolume()->getDICOMSeriesImage()[k]->m_pPixelData, nImageLen );
+        memcpy( pTemp + k*nImageLen, pDicomHelper->getDICOMVolume()->getDICOMSeriesImage()[k]->m_pRGBAPixelData, nImageLen );
     }
 
 
 
-    glTexImage3D( GL_TEXTURE_3D,0,GL_RGB, nWidth , nHeight,nDepth ,
-        0,GL_RGB, GL_UNSIGNED_BYTE, pRGBBuffer );
+    glTexImage3D( GL_TEXTURE_3D,0,GL_RGBA, nWidth , nHeight,nDepth ,
+        0,GL_RGBA, GL_UNSIGNED_BYTE, pRGBBuffer );
 
     delete[] pRGBBuffer;
 
@@ -461,9 +495,9 @@ void COpenGLView::OnMouseMove(UINT nFlags, CPoint point)
     {
         if( m_ReferencePoint != point )
         {
-            m_pMathImpl->Rotate( m_ReferencePoint.x - point.x, m_ReferencePoint.y - point.y, 0 );
+            m_pMathImpl->Rotate( m_ReferencePoint.y - point.y, m_ReferencePoint.x - point.x, 0 );
             m_ReferencePoint = point;
-            Invalidate(  );
+            Invalidate( FALSE );
         }
         
         

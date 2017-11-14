@@ -45,6 +45,19 @@ bool DICOMImageHelper::DicomParse( std::vector<std::string> pathNames )
             iPos = sTemp.find_first_of("\\");
             int dcmCenter = atoi( sTemp.substr(0,iPos).c_str() );
             pDicomImg->setWindow( dcmCenter, dcmWidth );
+
+            double IPP[3];
+            pDataSet->findAndGetString( DCM_ImagePositionPatient, pElementValue );
+            sTemp = std::string( pElementValue );
+            iPos = sTemp.find_first_of("\\");
+            IPP[0] = atof( sTemp.substr(0,iPos).c_str() );
+            std::string str( sTemp.begin() + iPos + 1, sTemp.end() );
+            iPos = str.find_first_of( "\\" );
+            IPP[1] = atof( str.substr(0,iPos).c_str() );
+            str = std::string( str.begin() + iPos + 1, str.end() );
+            iPos = str.find_first_of( "\\" );
+            IPP[2] = atof( str.substr( 0, iPos ).c_str() );
+
             //通过以下的方法得到并用BitmapHeadInformation的结构体来保存DICOM文件的信息
             LPBITMAPINFOHEADER m_lpBMIH;
             m_lpBMIH = (LPBITMAPINFOHEADER) new char[sizeof(BITMAPINFOHEADER) + sizeof(RGBQUAD) * 256];
@@ -61,16 +74,28 @@ bool DICOMImageHelper::DicomParse( std::vector<std::string> pathNames )
             //得到DICOM文件第frame的DIB数据(假设是24位的)
             void* pDicomDibits = NULL;
             unsigned long pixelLen = pDicomImg->createWindowsDIB(pDicomDibits, 0, 0, 24, 1, 1);
+            unsigned long imageLen = pDicomImg->getWidth() * pDicomImg->getHeight();
             std::shared_ptr<DICOMSerieImage> pDicomSeries = std::make_shared<DICOMSerieImage>();
             pDicomSeries->m_pPixelData = new unsigned char[pixelLen];
+            pDicomSeries->m_pRGBAPixelData = new unsigned char[ imageLen *4 ];
             pDicomSeries->m_nLength = pixelLen;
             pDicomSeries->m_pBitMapInfoHeader = m_lpBMIH;
             pDicomSeries->m_nWidth = pDicomImg->getWidth();
             pDicomSeries->m_nHeight = pDicomImg->getHeight();
-            for(unsigned long j = 0; j < pixelLen; ++j )
+            pDicomSeries->m_nImagePositionPatient[0] = IPP[0];
+            pDicomSeries->m_nImagePositionPatient[1] = IPP[1];
+            pDicomSeries->m_nImagePositionPatient[2] = IPP[2];
+            for(unsigned long j = 0; j < imageLen; ++j )
             {
-                pDicomSeries->m_pPixelData[j] = ((unsigned char*)pDicomDibits)[j];
+                pDicomSeries->m_pPixelData[3*j] = ((unsigned char*)pDicomDibits)[3*j];
+                pDicomSeries->m_pPixelData[3*j+1] = ((unsigned char*)pDicomDibits)[3*j];
+                pDicomSeries->m_pPixelData[3*j+2] = ((unsigned char*)pDicomDibits)[3*j];
+                pDicomSeries->m_pRGBAPixelData[4*j] = ((unsigned char*)pDicomDibits)[3*j];
+                pDicomSeries->m_pRGBAPixelData[4*j+1] = ((unsigned char*)pDicomDibits)[3*j];
+                pDicomSeries->m_pRGBAPixelData[4*j+2] = ((unsigned char*)pDicomDibits)[3*j];
+                pDicomSeries->m_pRGBAPixelData[4*j+3] = ((unsigned char*)pDicomDibits)[3*j];
             }
+            //memcpy( pDicomSeries->m_pPixelData, pDicomDibits, pixelLen );
 
             delete m_lpBMIH;
             delete pDicomImg;
