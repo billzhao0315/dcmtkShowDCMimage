@@ -46,6 +46,7 @@ bool DICOMImageHelper::DicomParse( std::vector<std::string> pathNames )
             int dcmCenter = atoi( sTemp.substr(0,iPos).c_str() );
             pDicomImg->setWindow( dcmCenter, dcmWidth );
 
+            // get the Image Position Patient
             double IPP[3];
             pDataSet->findAndGetString( DCM_ImagePositionPatient, pElementValue );
             sTemp = std::string( pElementValue );
@@ -57,6 +58,54 @@ bool DICOMImageHelper::DicomParse( std::vector<std::string> pathNames )
             str = std::string( str.begin() + iPos + 1, str.end() );
             iPos = str.find_first_of( "\\" );
             IPP[2] = atof( str.substr( 0, iPos ).c_str() );
+
+            // get the Pixel Data Type
+            DICOMSerieImage::eDataType ePixelType = DICOMSerieImage::eDataType::UNKNOWN;
+            UINT16 u16PixelRepresentation;
+            UINT16 U16BitsAllocated;
+            const UINT16* pU16Pixel = 0;
+            const UINT8* pU8Pixel = 0;
+            unsigned long pixelDataLen = 0;
+            pDataSet->findAndGetUint16( DCM_PixelRepresentation, u16PixelRepresentation );
+            pDataSet->findAndGetUint16( DCM_BitsAllocated, U16BitsAllocated );
+            if( u16PixelRepresentation == 0 )
+            {
+                if( U16BitsAllocated ==16 )
+                {
+                    ePixelType = DICOMSerieImage::eDataType::DATATYPE_uSHORT;
+                }
+                else
+                {
+                    ePixelType = DICOMSerieImage::eDataType::DATATYPE_uCHAR;
+                }
+            }
+            else
+            {
+                if( U16BitsAllocated == 16 )
+                {
+                    ePixelType = DICOMSerieImage::eDataType::DATATYPE_SHORT;
+                }
+                else
+                {
+                    ePixelType = DICOMSerieImage::eDataType::DATATYPE_CHAR;
+                }
+            }
+           
+            if( ePixelType == DICOMSerieImage::eDataType::DATATYPE_uSHORT )
+            {
+                pDataSet->findAndGetUint16Array( DCM_PixelData, pU16Pixel, &pixelDataLen );
+            }
+            else if( ePixelType == DICOMSerieImage::eDataType::DATATYPE_uCHAR )
+            {
+                pDataSet->findAndGetUint8Array( DCM_PixelData, pU8Pixel, &pixelDataLen );
+            }
+            {
+               assert( false );
+           }
+            
+
+
+
 
             //通过以下的方法得到并用BitmapHeadInformation的结构体来保存DICOM文件的信息
             LPBITMAPINFOHEADER m_lpBMIH;
@@ -85,6 +134,19 @@ bool DICOMImageHelper::DicomParse( std::vector<std::string> pathNames )
             pDicomSeries->m_nImagePositionPatient[0] = IPP[0];
             pDicomSeries->m_nImagePositionPatient[1] = IPP[1];
             pDicomSeries->m_nImagePositionPatient[2] = IPP[2];
+            pDicomSeries->m_eDataType = ePixelType;
+
+            if( pDicomSeries->m_eDataType == DICOMSerieImage::eDataType::DATATYPE_uSHORT )
+            {
+                pDicomSeries->m_pOriginPixelData = new unsigned short[pixelDataLen];
+                memcpy( pDicomSeries->m_pOriginPixelData, pU16Pixel, pixelDataLen );
+            }
+            else if( pDicomSeries->m_eDataType == DICOMSerieImage::eDataType::DATATYPE_CHAR )
+            {
+                pDicomSeries->m_pOriginPixelData = new unsigned char[pixelDataLen];
+                memcpy( pDicomSeries->m_pOriginPixelData, pU8Pixel, pixelDataLen );
+            }
+            
             /*for(unsigned long j = 0; j < imageLen; ++j )
             {
                 pDicomSeries->m_pPixelData[3*j] = ((unsigned char*)pDicomDibits)[3*j];
