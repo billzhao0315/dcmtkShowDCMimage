@@ -20,10 +20,12 @@
 #include "DICOMImageHelper.h"
 #include "DICOMVolume.h"
 #include "MainFrm.h"
+#include "algorithm"
 
 #include "gl/GLU.h"
 
-
+#include <fstream> 
+#include <functional>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -36,6 +38,7 @@
 #pragma comment( lib, "glu32.lib" )
 
 GLfloat dOrthoSize = 1.0f;
+bool bRgb = false;
 
 // Macro to draw the quad.
  // Performance can be achieved by making a call list.
@@ -161,7 +164,7 @@ void COpenGLView::OnDraw(CDC* pDC)
     else
     {
         glEnable( GL_ALPHA_TEST );
-        glAlphaFunc( GL_GREATER, 0.05f );
+        //glAlphaFunc( GL_GREATER, 0.05f );
         glEnable(GL_BLEND);
         //glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
         glBlendFunc( GL_SRC_COLOR, GL_ONE_MINUS_SRC_COLOR );
@@ -189,13 +192,37 @@ void COpenGLView::OnDraw(CDC* pDC)
 
         glEnable(GL_TEXTURE_3D);
         glBindTexture( GL_TEXTURE_3D,  m_n3DTextureID );
-
-        for ( float fIndx = -1.0f; fIndx <= 1.0f; fIndx+=0.01f )
+        if( bRgb )
         {
-            glBegin(GL_QUADS);
-                MAP_3DTEXT( fIndx );
-            glEnd();
+            for ( float fIndx = -1.0f; fIndx <= 1.0f; fIndx+=0.01f )
+            {
+                glBegin(GL_QUADS);
+                    MAP_3DTEXT( fIndx );
+                glEnd();
+            }
         }
+        else
+        {
+            /*float TexIndex = -0.5;
+            glBegin( GL_QUADS );
+            glTexCoord3f(0.0f, 0.0f, (TexIndex+1.0f)/2.0f);  
+            glVertex3f(-dOrthoSize,-dOrthoSize,TexIndex);
+            glTexCoord3f(1.0f, 0.0f, (TexIndex+1.0f)/2.0f);  
+            glVertex3f(dOrthoSize,-dOrthoSize,TexIndex);
+            glTexCoord3f(1.0f, 1.0f, (TexIndex+1.0f)/2.0f);  
+            glVertex3f(dOrthoSize,dOrthoSize,TexIndex);
+            glTexCoord3f(0.0f, 1.0f, (TexIndex+1.0f)/2.0f);  
+            glVertex3f(-dOrthoSize,dOrthoSize,TexIndex);
+            glEnd();*/
+
+            for ( float fIndx = -1.0f; fIndx <= 1.0f; fIndx+=0.01f )
+            {
+                glBegin(GL_QUADS);
+                    MAP_3DTEXT( fIndx );
+                glEnd();
+            }
+        }
+        
 
 
     }
@@ -418,29 +445,104 @@ bool COpenGLView::initVolumeData()
     int nHeight = pDicomHelper->getDICOMVolume()->getDICOMSeriesImage()[0]->m_nHeight;
     int nDepth = pDicomHelper->getDICOMVolume()->getDepth();
 
-    int nImageLen = pDicomHelper->getDICOMVolume()->getDICOMSeriesImage()[0]->m_nLength;
-    //int nImageLen = pDicomHelper->getDICOMVolume()->getDICOMSeriesImage()[0]->m_nWidth * pDicomHelper->getDICOMVolume()->getDICOMSeriesImage()[0]->m_nHeight *4;
-    unsigned char* pRGBBuffer = new unsigned char[ nImageLen*nDepth ];
-    if( !pRGBBuffer)
+    //bool bRgb = true;
+
+    if( bRgb )
     {
-        return false;
-    }
-    unsigned char* pTemp = pRGBBuffer;
-    for( int k = 0; k < nDepth; ++k )
-    {
-        /*for( int i = 0; i < nImageLen; ++i )
+        int nImageLen = pDicomHelper->getDICOMVolume()->getDICOMSeriesImage()[0]->m_nLength;
+        //int nImageLen = pDicomHelper->getDICOMVolume()->getDICOMSeriesImage()[0]->m_nWidth * pDicomHelper->getDICOMVolume()->getDICOMSeriesImage()[0]->m_nHeight *4;
+        unsigned char* pRGBBuffer = new unsigned char[ nImageLen*nDepth ];
+        if( !pRGBBuffer)
         {
-            pRGBBuffer[ k*nImageLen + i ] = pDicomHelper->getDICOMVolume()->getDICOMSeriesImage()[k]->m_pPixelData[i];
-        }*/
-        memcpy( pTemp + k*nImageLen, pDicomHelper->getDICOMVolume()->getDICOMSeriesImage()[k]->m_pPixelData, nImageLen );
+            return false;
+        }
+        unsigned char* pTemp = pRGBBuffer;
+        for( int k = 0; k < nDepth; ++k )
+        {
+            memcpy( pTemp + k*nImageLen, pDicomHelper->getDICOMVolume()->getDICOMSeriesImage()[k]->m_pPixelData, nImageLen );
+        }
+
+
+
+        glTexImage3D( GL_TEXTURE_3D,0,GL_RGB, nWidth , nHeight,nDepth ,
+            0,GL_RGB, GL_UNSIGNED_BYTE, pRGBBuffer );
+        delete[] pRGBBuffer;
+    }
+    else
+    {
+        if( pDicomHelper->getDICOMVolume()->getDICOMSeriesImage()[0]->m_eDataType == DICOMSerieImage::eDataType::DATATYPE_uSHORT )
+        {
+            unsigned char* pIntensity = new unsigned char[ nWidth*nHeight*4*nDepth ];
+            if( !pIntensity )
+            {
+                return false;
+            }
+            int nImageLen = nWidth * nHeight *4;
+            std::vector<std::shared_ptr<DICOMSerieImage>> imageSeries = pDicomHelper->getDICOMVolume()->getDICOMSeriesImage();
+            auto itrBegin = imageSeries.begin();
+            auto itrEnd = imageSeries.end();
+            std::for_each( itrBegin, itrEnd, std::mem_fn( &DICOMSerieImage::mapToGray ) );
+            //void* pTemp ;
+            for( int k = 0; k < nDepth; ++k )
+            {
+                //pTemp = (unsigned short*)pIntensity + k*nImageLen;
+                //memcpy( pIntensity + k*nImageLen, (unsigned short*)pDicomHelper->getDICOMVolume()->getDICOMSeriesImage()[k]->m_pOriginPixelData, nImageLen );
+                memcpy( pIntensity + k*nImageLen, pDicomHelper->getDICOMVolume()->getDICOMSeriesImage()[k]->m_pRGBAPixelData, nImageLen );
+                /*for( int len = 0; len < nImageLen; ++len )
+                {
+                    unsigned short tempValue = ((unsigned short*)pDicomHelper->getDICOMVolume()->getDICOMSeriesImage()[k]->m_pOriginPixelData)[len];
+                    double maxValue = pDicomHelper->getDICOMVolume()->getDICOMSeriesImage()[k]->m_maxValue;
+                    double minValue = pDicomHelper->getDICOMVolume()->getDICOMSeriesImage()[k]->m_minValue;
+                    unsigned char resultValue = (tempValue - minValue) * 255/( maxValue - minValue );
+
+                    pIntensity[ k*nImageLen*4 + 4*len ] = resultValue;
+                    pIntensity[ k*nImageLen*4 + 4*len+1 ] = resultValue;
+                    pIntensity[ k*nImageLen*4 + 4*len+2 ] = resultValue;
+                    pIntensity[ k*nImageLen*4 + 4*len+3 ] = resultValue;
+                }*/
+                /*if( k == nDepth/2 )
+                {
+                    std::ofstream out("out.txt");
+                    if( out.is_open() )
+                    {
+                        unsigned char* pTemp = pIntensity + k*nImageLen;
+                        for( int i = 0; i < nWidth; ++i  )
+                        {
+                            for( int j = 0; j < nHeight; ++j )
+                            {
+                                out<< pTemp[i*nWidth+j]<< " ";
+                            }
+                            out<<"\n";
+                        }
+                        out.close();
+                    }
+                }*/
+                
+            }
+
+            glTexImage3D( GL_TEXTURE_3D,0,GL_RGBA, nWidth, nHeight,nDepth,0, GL_RGBA, GL_UNSIGNED_BYTE, pIntensity );
+            delete[] pIntensity;
+        }
+        else
+        {
+            unsigned char* pIntensity = new unsigned char[ nWidth*nHeight*nDepth ];
+            if( !pIntensity )
+            {
+                return false;
+            }
+            int nImageLen = nWidth * nHeight;
+            for( int k=0; k< nDepth; ++k )
+            {
+                memcpy( pIntensity + k*nImageLen, pDicomHelper->getDICOMVolume()->getDICOMSeriesImage()[k]->m_pOriginPixelData, nImageLen );
+            }
+            glTexImage3D( GL_TEXTURE_3D,0,GL_LUMINANCE8, nWidth,nHeight,nDepth,0,GL_LUMINANCE8, GL_UNSIGNED_BYTE, pIntensity );
+            delete[] pIntensity;
+        }
     }
 
-
-
-    glTexImage3D( GL_TEXTURE_3D,0,GL_RGB, nWidth , nHeight,nDepth ,
-        0,GL_RGB, GL_UNSIGNED_BYTE, pRGBBuffer );
+    
     glBindTexture( GL_TEXTURE_3D, 0 );
-    delete[] pRGBBuffer;
+    
 
     return true;
 }

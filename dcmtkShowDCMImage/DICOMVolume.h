@@ -26,15 +26,27 @@ struct DICOMSerieImage
         m_pPixelData = NULL;
         m_pBitMapInfoHeader = NULL;
         m_pOriginPixelData = NULL;
+        m_pRGBAPixelData = NULL;
+        m_minValue = 0;
+        m_maxValue = 0;
+        m_nWindow = 0;
+        m_nLevel = 0;
     }
+    void mapToWindowLevel();
+    void mapToGray();
+
     ~DICOMSerieImage();
     //double m_ImagePositionPatient[3];
     unsigned char* m_pPixelData;
     void* m_pOriginPixelData;
-    //unsigned char* m_pRGBAPixelData;
+    unsigned char* m_pRGBAPixelData;
     unsigned long  m_nLength;
     int m_nWidth;
     int m_nHeight;
+    int m_nWindow;
+    int m_nLevel;
+    double m_maxValue;
+    double m_minValue;
     double m_nImagePositionPatient[3];
     eDataType m_eDataType;
     LPBITMAPINFOHEADER m_pBitMapInfoHeader;

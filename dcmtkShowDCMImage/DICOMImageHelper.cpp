@@ -6,6 +6,7 @@
 #include "dcmtk/dcmdata/dcfilefo.h"
 
 #include "DICOMVolume.h"
+#include <algorithm>
 
 
 DICOMImageHelper::DICOMImageHelper()
@@ -99,12 +100,11 @@ bool DICOMImageHelper::DicomParse( std::vector<std::string> pathNames )
             {
                 pDataSet->findAndGetUint8Array( DCM_PixelData, pU8Pixel, &pixelDataLen );
             }
+            else
             {
                assert( false );
-           }
+            }
             
-
-
 
 
             //通过以下的方法得到并用BitmapHeadInformation的结构体来保存DICOM文件的信息
@@ -135,18 +135,40 @@ bool DICOMImageHelper::DicomParse( std::vector<std::string> pathNames )
             pDicomSeries->m_nImagePositionPatient[1] = IPP[1];
             pDicomSeries->m_nImagePositionPatient[2] = IPP[2];
             pDicomSeries->m_eDataType = ePixelType;
+            pDicomSeries->m_nWindow = dcmWidth;
+            pDicomSeries->m_nLevel = dcmCenter;
+
+
+            pDataSet->findAndGetString( DCM_SmallestImagePixelValue, pElementValue );
+            if( pElementValue != NULL )
+            {
+                pDicomSeries->m_minValue = atof( pElementValue );
+            }
+            
+            pDataSet->findAndGetString( DCM_LargestImagePixelValue, pElementValue );
+            if( pElementValue != NULL )
+            {
+                pDicomSeries->m_maxValue = atof( pElementValue );
+            }
 
             if( pDicomSeries->m_eDataType == DICOMSerieImage::eDataType::DATATYPE_uSHORT )
             {
                 pDicomSeries->m_pOriginPixelData = new unsigned short[pixelDataLen];
-                memcpy( pDicomSeries->m_pOriginPixelData, pU16Pixel, pixelDataLen );
+                memcpy( pDicomSeries->m_pOriginPixelData, pU16Pixel, pixelDataLen*2 );
             }
-            else if( pDicomSeries->m_eDataType == DICOMSerieImage::eDataType::DATATYPE_CHAR )
+            else if( pDicomSeries->m_eDataType == DICOMSerieImage::eDataType::DATATYPE_uCHAR )
             {
                 pDicomSeries->m_pOriginPixelData = new unsigned char[pixelDataLen];
                 memcpy( pDicomSeries->m_pOriginPixelData, pU8Pixel, pixelDataLen );
             }
             
+            if( pElementValue == NULL )
+            {
+                pDicomSeries->m_maxValue = *std::max_element( (unsigned short*)pDicomSeries->m_pOriginPixelData, (unsigned short*)pDicomSeries->m_pOriginPixelData + pixelDataLen );
+                pDicomSeries->m_minValue = *std::min_element( (unsigned short*)pDicomSeries->m_pOriginPixelData, (unsigned short*)pDicomSeries->m_pOriginPixelData + pixelDataLen ); 
+            }
+
+
             /*for(unsigned long j = 0; j < imageLen; ++j )
             {
                 pDicomSeries->m_pPixelData[3*j] = ((unsigned char*)pDicomDibits)[3*j];
