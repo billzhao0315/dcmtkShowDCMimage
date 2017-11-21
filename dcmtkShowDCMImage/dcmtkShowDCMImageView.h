@@ -8,6 +8,11 @@
 #include <vector>
 #include "AttributeTag.h"
 #include "Observer.h"
+#include <map>
+
+#include <gl/GL.h>
+#include "glext.h"
+#include "wglext.h"
 class DcmDataset;
 class DICOMImageHelper;
 
@@ -38,6 +43,25 @@ protected:
 	virtual BOOL OnPreparePrinting(CPrintInfo* pInfo);
 	virtual void OnBeginPrinting(CDC* pDC, CPrintInfo* pInfo);
 	virtual void OnEndPrinting(CDC* pDC, CPrintInfo* pInfo);
+
+protected:
+    bool GLSetting();
+private:
+    CClientDC* m_pClientDCSPV;
+    HGLRC      m_hGLrcSPV;
+
+    
+
+    typedef unsigned char ByteBlendTable[256][256];
+    struct ByteBlendLUT
+    {
+        ByteBlendTable table;
+    };
+    static std::map<int, std::shared_ptr<ByteBlendLUT> >   m_mapBlend;
+    static const int BYTE_RANGE;
+private:
+    std::shared_ptr<ByteBlendLUT> CdcmtkShowDCMImageView::getByteBlendLUT( int nPercentAlpha );
+    void drawCube();
 
 // Implementation
 public:

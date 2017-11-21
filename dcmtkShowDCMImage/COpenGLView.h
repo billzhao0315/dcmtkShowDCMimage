@@ -43,6 +43,7 @@ private:
     bool initVolumeData();
 private:
     CClientDC* m_pClientDC;
+    HGLRC      m_hGLrc;
     GLuint m_n3DTextureID;
     class mathImpl;
     std::shared_ptr< mathImpl > m_pMathImpl;

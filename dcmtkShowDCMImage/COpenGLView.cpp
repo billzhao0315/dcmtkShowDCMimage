@@ -38,7 +38,7 @@
 #pragma comment( lib, "glu32.lib" )
 
 GLfloat dOrthoSize = 1.0f;
-bool bRgb = false;
+bool bRgb = true;
 
 // Macro to draw the quad.
  // Performance can be achieved by making a call list.
@@ -100,6 +100,7 @@ public:
         mfRot[1] = dy;
         mfRot[2] = dz;
         glMatrixMode( GL_MODELVIEW );
+        glLoadIdentity();
         glLoadMatrixd( mdRotation );
         glRotated( mfRot[0], 1.0f, 0,0 );
         glRotated( mfRot[1], 0, 1.0f,0 );
@@ -148,6 +149,9 @@ void COpenGLView::OnDraw(CDC* pDC)
 
 	//// TODO: add draw code for native data here
 
+    wglMakeCurrent( m_pClientDC->GetSafeHdc(), m_hGLrc );
+
+    glClearColor( 0.0f,0.0f,0.0f ,1.0f);
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
     if( m_n3DTextureID == 0 )
@@ -168,6 +172,8 @@ void COpenGLView::OnDraw(CDC* pDC)
         glEnable(GL_BLEND);
         //glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
         glBlendFunc( GL_SRC_COLOR, GL_ONE_MINUS_SRC_COLOR );
+        glEnable(GL_TEXTURE_3D);
+        glBindTexture( GL_TEXTURE_3D,  m_n3DTextureID );
         CRect rc;
         GetClientRect(rc);
         glViewport( 0,0, rc.right, rc.bottom );
@@ -188,10 +194,11 @@ void COpenGLView::OnDraw(CDC* pDC)
         (float)nWidth/(float)nDepth);*/
 
         glMultMatrixd( m_pMathImpl->getMatrix() );
+        //glRotatef( 30, 0.0f,0.0f,1.0f );
         glTranslatef( -0.5f,-0.5f,-0.5f );
 
-        glEnable(GL_TEXTURE_3D);
-        glBindTexture( GL_TEXTURE_3D,  m_n3DTextureID );
+        /*glEnable(GL_TEXTURE_3D);
+        glBindTexture( GL_TEXTURE_3D,  m_n3DTextureID );*/
         if( bRgb )
         {
             for ( float fIndx = -1.0f; fIndx <= 1.0f; fIndx+=0.01f )
@@ -223,11 +230,14 @@ void COpenGLView::OnDraw(CDC* pDC)
             }
         }
         
-
+        glBindTexture( GL_TEXTURE_3D, 0 );
 
     }
     glFinish();
     SwapBuffers( m_pClientDC->GetSafeHdc() );
+
+    wglMakeCurrent( NULL, NULL );
+
 }
 
 
@@ -325,7 +335,9 @@ bool COpenGLView::GLSetting()
         0, 0, 0                         // layer masks ignored                      //
     };
 
-    int nPixelFormID = ChoosePixelFormat( m_pClientDC->GetSafeHdc(), &pfd );
+    HDC safeHDC = m_pClientDC->GetSafeHdc();
+
+    int nPixelFormID = ChoosePixelFormat( safeHDC, &pfd );
 
     if( nPixelFormID == 0 )
     {
@@ -342,7 +354,9 @@ bool COpenGLView::GLSetting()
     glRc = wglCreateContext( m_pClientDC->GetSafeHdc() );
 
     wglMakeCurrent( m_pClientDC->GetSafeHdc(), glRc );
-    //glClearColor( 1.0f,1.0f,1.0f ,1.0f);
+
+    m_hGLrc = wglGetCurrentContext();
+    
     return true;
 }
 
@@ -389,10 +403,15 @@ void COpenGLView::OnDestroy()
 
     // TODO: Add your message handler code here
     HGLRC glRc = wglGetCurrentContext();
-    wglMakeCurrent( NULL, NULL );
-    if( glRc )
+    HDC hDC =  wglGetCurrentDC();
+    if( m_hGLrc == glRc && m_pClientDC->GetSafeHdc() == hDC )
     {
-        wglDeleteContext( glRc );
+        wglMakeCurrent( NULL, NULL );
+    }
+
+    if( m_hGLrc )
+    {
+        wglDeleteContext( m_hGLrc );
     }
     if( m_pClientDC )
     {
@@ -422,7 +441,7 @@ bool COpenGLView::initVolumeData()
     {
         return false;
     }
-
+    wglMakeCurrent( m_pClientDC->GetSafeHdc(), m_hGLrc );
     std::shared_ptr<DICOMImageHelper> pDicomHelper = pDoc->getDicomImageHelper();
 
     if( m_n3DTextureID != 0 )
@@ -466,6 +485,7 @@ bool COpenGLView::initVolumeData()
 
         glTexImage3D( GL_TEXTURE_3D,0,GL_RGB, nWidth , nHeight,nDepth ,
             0,GL_RGB, GL_UNSIGNED_BYTE, pRGBBuffer );
+        
         delete[] pRGBBuffer;
     }
     else
@@ -543,7 +563,7 @@ bool COpenGLView::initVolumeData()
     
     glBindTexture( GL_TEXTURE_3D, 0 );
     
-
+    wglMakeCurrent( NULL, NULL );
     return true;
 }
 
@@ -565,7 +585,9 @@ void COpenGLView::OnMouseMove(UINT nFlags, CPoint point)
     {
         if( m_ReferencePoint != point )
         {
+            wglMakeCurrent( m_pClientDC->GetSafeHdc(), m_hGLrc );
             m_pMathImpl->Rotate( m_ReferencePoint.y - point.y, m_ReferencePoint.x - point.x, 0 );
+            wglMakeCurrent( NULL, NULL );
             m_ReferencePoint = point;
             Invalidate( FALSE );
         }
