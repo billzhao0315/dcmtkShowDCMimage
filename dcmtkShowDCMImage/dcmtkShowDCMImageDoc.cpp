@@ -152,7 +152,7 @@ void CdcmtkShowDCMImageDoc::openDicoms( std::string pDicomFileIndex)
     std::string sDicomPath;
     int iPos = pDicomFileIndex.find_last_of("\\");
     sDicomPath = pDicomFileIndex.substr(0,iPos+1);
-    iPos = pDicomFileIndex.rfind(".DCM");
+    iPos = pDicomFileIndex.rfind(".dcm");
     std::string strDicomIndex = sDicomPath +"*"+ pDicomFileIndex.substr(iPos, pDicomFileIndex.length());
     intptr_t hFile = 0;
     _finddata_t fileinfo;

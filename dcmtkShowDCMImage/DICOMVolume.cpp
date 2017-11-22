@@ -1,11 +1,14 @@
 #include "stdafx.h"
 #include "DICOMVolume.h"
 #include <algorithm>
+#include <fstream>
 
 //DICOMVolume::DICOMVolume():m_DicomSerieImage(0)
 //{
 //
 //}
+int* tempTffFile = NULL;
+
 DICOMSerieImage::~DICOMSerieImage()
 {
     if( m_pPixelData != NULL )
@@ -44,11 +47,21 @@ void DICOMSerieImage::mapToWindowLevel()
         {
             pTmep[i] = ( pTmep[i] - minWindow )*255 / m_nWindow; 
         }
-
-        m_pRGBAPixelData[ 4*i ] = pTmep[i];
-        m_pRGBAPixelData[ 4*i +1 ] = pTmep[i];
-        m_pRGBAPixelData[ 4*i +2 ] = pTmep[i];
-        m_pRGBAPixelData[ 4*i +3 ] = pTmep[i];
+        if( tempTffFile != NULL )
+        {
+            m_pRGBAPixelData[ 4*i ] = tempTffFile[4*pTmep[i]];
+            m_pRGBAPixelData[ 4*i +1 ] = tempTffFile[4*pTmep[i]+1];
+            m_pRGBAPixelData[ 4*i +2 ] = tempTffFile[4*pTmep[i]+2];
+            m_pRGBAPixelData[ 4*i +3 ] = tempTffFile[4*pTmep[i]+3];
+        }
+        else
+        {
+            m_pRGBAPixelData[ 4*i ] = pTmep[i];
+            m_pRGBAPixelData[ 4*i +1 ] = pTmep[i];
+            m_pRGBAPixelData[ 4*i +2 ] = pTmep[i];
+            m_pRGBAPixelData[ 4*i +3 ] = pTmep[i];
+        }
+        
     }
     m_minValue = 0;
     m_maxValue = 255;
@@ -61,11 +74,27 @@ void DICOMSerieImage::mapToGray()
     m_pRGBAPixelData = new unsigned char[ imageLen *4 ];
     for( int i = 0; i < imageLen; ++i )
     {
+        int tempGray = ( ((unsigned short*)m_pOriginPixelData)[i] - m_minValue ) * Temp;
+
+        if( tempTffFile != NULL )
+        {
+            m_pRGBAPixelData[ 4*i ]    = tempTffFile[4*tempGray];
+            m_pRGBAPixelData[ 4*i +1 ] = tempTffFile[4*tempGray+1];
+            m_pRGBAPixelData[ 4*i +2 ] = tempTffFile[4*tempGray+2];
+            m_pRGBAPixelData[ 4*i +3 ] = tempTffFile[4*tempGray+3];
+        }
+        else
+        {
+            /*m_pRGBAPixelData[ 4*i ] = ( ((unsigned short*)m_pOriginPixelData)[i] - m_minValue ) * Temp;
+            m_pRGBAPixelData[ 4*i +1 ] = ( ((unsigned short*)m_pOriginPixelData)[i] - m_minValue ) * Temp;
+            m_pRGBAPixelData[ 4*i +2 ] = ( ((unsigned short*)m_pOriginPixelData)[i] - m_minValue ) * Temp;
+            m_pRGBAPixelData[ 4*i +3 ] = ( ((unsigned short*)m_pOriginPixelData)[i] - m_minValue ) * Temp;*/
+            m_pRGBAPixelData[ 4*i ] = tempGray;
+            m_pRGBAPixelData[ 4*i +1 ] = tempGray;
+            m_pRGBAPixelData[ 4*i +2 ] = tempGray;
+            m_pRGBAPixelData[ 4*i +3 ] = tempGray;
+        }
         
-        m_pRGBAPixelData[ 4*i ] = ( ((unsigned short*)m_pOriginPixelData)[i] - m_minValue ) * Temp;
-        m_pRGBAPixelData[ 4*i +1 ] = ( ((unsigned short*)m_pOriginPixelData)[i] - m_minValue ) * Temp;
-        m_pRGBAPixelData[ 4*i +2 ] = ( ((unsigned short*)m_pOriginPixelData)[i] - m_minValue ) * Temp;
-        m_pRGBAPixelData[ 4*i +3 ] = ( ((unsigned short*)m_pOriginPixelData)[i] - m_minValue ) * Temp;
     }
 }
 
@@ -89,4 +118,36 @@ void DICOMVolume::sortDICOMSeriesByIPP()
 unsigned int DICOMVolume::getDepth() const
 {
     return m_nDepth;
+}
+
+void DICOMVolume::loadtffFile( std::string tffFileName )
+{
+    std::ifstream file(tffFileName.c_str(), std::ios::binary);
+    if( !file )
+    {
+        MessageBoxA(NULL, _T("fail to read tff"),_T("error"),MB_OK);
+    }
+    const int MAX_CNT = 10000;
+    unsigned char* tffData = reinterpret_cast< unsigned char* >(calloc( MAX_CNT, sizeof(unsigned char) ));
+    file.read( reinterpret_cast<char *>(tffData), MAX_CNT );
+    if( file.eof() )
+    {
+         size_t count =  file.gcount();
+         //*( tffData +count ) = '\0';
+         //std::cout<<"count: "<< count<<std::endl;
+         file.close();
+         m_ptffFile = new int[count];
+         //std::ofstream out("exportTff.txt");
+         for( int i =0 ;i<256;++i )
+         {
+             m_ptffFile[4*i] = (int)tffData[4*i];
+             m_ptffFile[4*i +1 ] = (int)tffData[4*i+1];
+             m_ptffFile[4*i +2 ] = (int)tffData[4*i+2];
+             m_ptffFile[4*i +3 ] = (int)tffData[4*i+3];
+         }
+
+         tempTffFile = m_ptffFile;
+         //out.close();
+         delete[] tffData;
+    }
 }

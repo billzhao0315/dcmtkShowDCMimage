@@ -55,9 +55,16 @@ struct DICOMSerieImage
 class DICOMVolume
 {
 public:
-    DICOMVolume():m_DicomSerieImage(0), m_nDepth(0)
+    DICOMVolume():m_DicomSerieImage(0), m_nDepth(0),m_ptffFile(NULL)
     {
 
+    }
+    ~DICOMVolume()
+    {
+        if( m_ptffFile != NULL )
+        {
+            delete[] m_ptffFile;
+        }
     }
     std::vector<std::shared_ptr<DICOMSerieImage>> getDICOMSeriesImage() const
     {
@@ -65,10 +72,12 @@ public:
     }
     unsigned int getDepth() const;
     void setDICOMSeriesImage( std::vector<std::shared_ptr<DICOMSerieImage>> arrDicomSerieImage );
+    void loadtffFile( std::string tffFileName );
 private:
     void sortDICOMSeriesByIPP();
 private:
     DICOMHeader m_DiconHeader;
     std::vector<std::shared_ptr<DICOMSerieImage>> m_DicomSerieImage;
+    int* m_ptffFile;
     unsigned int m_nDepth;
 };

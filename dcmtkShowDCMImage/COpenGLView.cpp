@@ -38,7 +38,7 @@
 #pragma comment( lib, "glu32.lib" )
 
 GLfloat dOrthoSize = 1.0f;
-bool bRgb = true;
+bool bRgb = false;
 
 // Macro to draw the quad.
  // Performance can be achieved by making a call list.
@@ -170,8 +170,16 @@ void COpenGLView::OnDraw(CDC* pDC)
         glEnable( GL_ALPHA_TEST );
         //glAlphaFunc( GL_GREATER, 0.05f );
         glEnable(GL_BLEND);
-        //glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-        glBlendFunc( GL_SRC_COLOR, GL_ONE_MINUS_SRC_COLOR );
+        if( bRgb )
+        {
+            glBlendFunc( GL_SRC_COLOR, GL_ONE_MINUS_SRC_COLOR );
+        }
+        else
+        {
+            glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+        }
+        
+        //
         glEnable(GL_TEXTURE_3D);
         glBindTexture( GL_TEXTURE_3D,  m_n3DTextureID );
         CRect rc;
@@ -497,6 +505,10 @@ bool COpenGLView::initVolumeData()
             {
                 return false;
             }
+
+            std::string fileName("F:/vs2012program/readTFFfileTest/readTFFfileTest/tfflung.dat");
+            pDicomHelper->getDICOMVolume()->loadtffFile(fileName);
+
             int nImageLen = nWidth * nHeight *4;
             std::vector<std::shared_ptr<DICOMSerieImage>> imageSeries = pDicomHelper->getDICOMVolume()->getDICOMSeriesImage();
             auto itrBegin = imageSeries.begin();
