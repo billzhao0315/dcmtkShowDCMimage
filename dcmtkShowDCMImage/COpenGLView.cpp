@@ -27,6 +27,9 @@
 #include <fstream> 
 #include <functional>
 
+#include "GLShaderMgr.h"
+#include "GLFunctionParse.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -382,6 +385,8 @@ bool COpenGLView::GLSetting()
     wglMakeCurrent( m_pClientDC->GetSafeHdc(), glRc );
 
     m_hGLrc = wglGetCurrentContext();
+
+    GLFunctionParse::initGLFunction();
     
     return true;
 }

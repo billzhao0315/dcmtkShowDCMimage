@@ -202,6 +202,9 @@
     <ClInclude Include="DisplayMgr.h" />
     <ClInclude Include="FileView.h" />
     <ClInclude Include="glext.h" />
+    <ClInclude Include="GLFunctionParse.h" />
+    <ClInclude Include="GLShader.h" />
+    <ClInclude Include="GLShaderMgr.h" />
     <ClInclude Include="MainFrm.h" />
     <ClInclude Include="Observer.h" />
     <ClInclude Include="OutputWnd.h" />
@@ -225,6 +228,9 @@
     <ClCompile Include="DICOMImageHelper.cpp" />
     <ClCompile Include="DisplayMgr.cpp" />
     <ClCompile Include="FileView.cpp" />
+    <ClCompile Include="GLFunctionParse.cpp" />
+    <ClCompile Include="GLShader.cpp" />
+    <ClCompile Include="GLShaderMgr.cpp" />
     <ClCompile Include="MainFrm.cpp" />
     <ClCompile Include="Observer.cpp" />
     <ClCompile Include="OutputWnd.cpp" />
