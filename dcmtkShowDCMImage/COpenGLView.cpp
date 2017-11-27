@@ -192,6 +192,7 @@ void COpenGLView::OnDraw(CDC* pDC)
         glMatrixMode( GL_MODELVIEW );
         glLoadIdentity();
         gluLookAt( 0.0f,0.0f,4.0f, 0.0f,0.0f,0.0f, 0.0f,1.0f,0.0f );
+        
 
         glMatrixMode( GL_TEXTURE );
         glLoadIdentity();
@@ -229,8 +230,7 @@ void COpenGLView::OnDraw(CDC* pDC)
             glTexCoord3f(0.0f, 1.0f, (TexIndex+1.0f)/2.0f);  
             glVertex3f(-dOrthoSize,dOrthoSize,TexIndex);
             glEnd();*/
-
-            for ( float fIndx = -1.0f; fIndx <= 1.0f; fIndx+=0.01f )
+            for ( float fIndx = -1.0f; fIndx <= 1.0f; fIndx+=0.002f )
             {
                 glBegin(GL_QUADS);
                     MAP_3DTEXT( fIndx );
@@ -239,6 +239,24 @@ void COpenGLView::OnDraw(CDC* pDC)
         }
         
         glBindTexture( GL_TEXTURE_3D, 0 );
+
+
+        /*glMatrixMode( GL_MODELVIEW );
+        glPushMatrix();
+        glLoadIdentity();
+        unsigned int nCurrentIndex = 2 * pDoc->getCurrentImageIndex();
+        unsigned int nImageSize = pDoc->getDicomImageHelper()->getDICOMVolume()->getDICOMSeriesImage().size();
+        double nCurrentPosition = (double)nCurrentIndex / (double)nImageSize -1;
+        glMultMatrixd( m_pMathImpl->getMatrix() );
+        glBegin( GL_QUADS );
+            glColor4f( 1.0f,0.0f,0.0f,0.5f );
+            glVertex3f( -1.0f, -1.0f, nCurrentPosition );
+            glVertex3f(  1.0f, -1.0f, nCurrentPosition );
+            glVertex3f(  1.0f, 1.0f, nCurrentPosition );
+            glVertex3f( -1.0f, 1.0f, nCurrentPosition );
+        glEnd();
+        glPopMatrix();*/
+
 
     }
     glFinish();
