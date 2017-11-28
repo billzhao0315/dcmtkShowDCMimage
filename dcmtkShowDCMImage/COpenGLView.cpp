@@ -173,11 +173,10 @@ void COpenGLView::OnDraw(CDC* pDC)
         glColor3f(0.0f,0.0f,1.0f);
         glVertex2f( 0.0f,0.5f );
         glEnd();*/
-        
+        m_pGLShaderMgr->getGLShader()->begin();
         GLFunctionParse::glBindVertexArray(m_nVertexArrayID);
         GLFunctionParse::glDrawArraysEXT(GL_TRIANGLES,0,6);
-
-
+        m_pGLShaderMgr->getGLShader()->end();
     }
     else
     {
@@ -679,5 +678,6 @@ bool COpenGLView::initBufferData()
     GLFunctionParse::glVertexAttribPointer(1,4,GL_FLOAT,GL_FALSE,6*sizeof(GLfloat),BUFFER_OFFSET(2*sizeof(GLfloat)));
     GLFunctionParse::glEnableVertexAttribArrayARB(1);
     GLFunctionParse::glBindVertexArray(0);
+    m_pGLShaderMgr->getGLShader()->end();
     return true;
 }
