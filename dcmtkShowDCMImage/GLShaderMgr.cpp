@@ -4,9 +4,9 @@
 
 #include "GLShader.h"
 
-GLShaderMgr::GLShaderMgr()
+GLShaderMgr::GLShaderMgr( const char* vertexShader, const char* fragShader )
 {
-    
+    m_pGLShader = std::make_shared<GLShader>( vertexShader, fragShader );
 }
 
 GLShaderMgr::~GLShaderMgr()
@@ -14,7 +14,7 @@ GLShaderMgr::~GLShaderMgr()
     
 }
 
-std::shared_ptr<GLShader> GLShaderMgr::getGLShader( const char* vertexShader, const char* fragShader )
+std::shared_ptr<GLShader> GLShaderMgr::getGLShader(  )
 {
-    return std::make_shared<GLShader>( vertexShader, fragShader );
+    return m_pGLShader;
 }

@@ -6,6 +6,8 @@ class GLShader
 public:
     GLShader( const char* vertexShader, const char* fragShader );
     ~GLShader();
+    void begin();
+    void end();
 private:
     bool initOpenGLFunction();
     void createShader( const char* vertexShader, const char* fragShader );

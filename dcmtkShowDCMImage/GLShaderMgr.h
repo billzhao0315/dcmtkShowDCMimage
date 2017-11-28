@@ -8,8 +8,11 @@ class GLShader;
 class GLShaderMgr
 {
 public:
-    GLShaderMgr();
+    GLShaderMgr( const char* vertexShader, const char* fragShader );
     ~GLShaderMgr();
-    std::shared_ptr<GLShader> getGLShader( const char* vertexShader, const char* fragShader );
+    std::shared_ptr<GLShader> getGLShader(  );
+private:
+    std::shared_ptr<GLShader> m_pGLShader;
+    GLShaderMgr();
 
 };

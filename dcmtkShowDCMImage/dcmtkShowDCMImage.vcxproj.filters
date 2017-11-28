@@ -96,6 +96,9 @@
     <ClInclude Include="GLFunctionParse.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="vertexfragmentShader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dcmtkShowDCMImage.cpp">

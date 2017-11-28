@@ -29,6 +29,10 @@
 
 #include "GLShaderMgr.h"
 #include "GLFunctionParse.h"
+#include "vertexfragmentShader.h"
+#include "GLShader.h"
+
+#define BUFFER_OFFSET(offset) ((void*)(offset))
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -156,17 +160,24 @@ void COpenGLView::OnDraw(CDC* pDC)
 
     glClearColor( 0.0f,0.0f,0.0f ,1.0f);
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-
+    CRect rc;
+    GetClientRect( &rc );
+    glViewport( rc.left, rc.top, rc.right, rc.bottom );
     if( m_n3DTextureID == 0 )
     {
-        glBegin( GL_TRIANGLES );
+        /*glBegin( GL_TRIANGLES );
         glColor3f(1.0f,0.0f,0.0f);
         glVertex2f( -0.5f,-0.5f );
         glColor3f( 0.0f,1.0f,0.0f );
         glVertex2f( 0.5f,-0.5f );
         glColor3f(0.0f,0.0f,1.0f);
         glVertex2f( 0.0f,0.5f );
-        glEnd();
+        glEnd();*/
+        
+        GLFunctionParse::glBindVertexArray(m_nVertexArrayID);
+        GLFunctionParse::glDrawArraysEXT(GL_TRIANGLES,0,6);
+
+
     }
     else
     {
@@ -386,8 +397,17 @@ bool COpenGLView::GLSetting()
 
     m_hGLrc = wglGetCurrentContext();
 
-    GLFunctionParse::initGLFunction();
-    
+    bool bfnInit = GLFunctionParse::initGLFunction();
+    if( bfnInit )
+    {
+        initBufferData();
+    }
+    else
+    {
+        MessageBox(_T("fail to initGLFunction"), _T("error"), MB_OK);
+        return false;
+    }
+
     return true;
 }
 
@@ -632,4 +652,32 @@ void COpenGLView::OnMouseMove(UINT nFlags, CPoint point)
     }
     CView::OnMouseMove(nFlags, point);
     
+}
+
+bool COpenGLView::initBufferData()
+{
+    GLfloat vertexData[6][6] = 
+    {
+        { -0.9f, -0.9f, 1.0f,0.0f,0.0f,1.0f },//first triangle
+        { 0.85f, -0.9f, 0.0f,1.0f,0.0f,1.0f },
+        { -0.9f, 0.85f, 0.0f,0.0f,1.0f,1.0f },
+        { 0.9f, -0.85f, 1.0f,0.0f,0.0f,1.0f },//second triangle
+        { 0.9f,   0.9f, 0.0f,1.0f,0.0f,1.0f },
+        { -0.85f, 0.9f, 0.0f,0.0f,1.0f,1.0f }
+    };
+
+    GLFunctionParse::glGenVertexArrays(1, &m_nVertexArrayID);
+    GLFunctionParse::glBindVertexArray(m_nVertexArrayID);
+    GLFunctionParse::glGenBuffers(1, &m_nBuffers);
+    GLFunctionParse::glBindBuffer(GL_ARRAY_BUFFER, m_nVertexArrayID);
+    GLFunctionParse::glBufferData(GL_ARRAY_BUFFER,sizeof( vertexData ), vertexData, GL_STATIC_DRAW);
+
+    m_pGLShaderMgr = std::make_shared<GLShaderMgr>( vertextShader, fragShader );
+    m_pGLShaderMgr->getGLShader()->begin();
+    GLFunctionParse::glVertexAttribPointer(0,2,GL_FLOAT, GL_FALSE, 6*sizeof(GLfloat), NULL);
+    GLFunctionParse::glEnableVertexAttribArrayARB(0);
+    GLFunctionParse::glVertexAttribPointer(1,4,GL_FLOAT,GL_FALSE,6*sizeof(GLfloat),BUFFER_OFFSET(2*sizeof(GLfloat)));
+    GLFunctionParse::glEnableVertexAttribArrayARB(1);
+    GLFunctionParse::glBindVertexArray(0);
+    return true;
 }

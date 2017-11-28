@@ -87,6 +87,9 @@ void CdcmtkShowDCMImageView::OnDraw(CDC* pDC)
 		return;
 
 	//// TODO: add draw code for native data here
+    CRect rc;
+    GetClientRect( &rc );
+    glViewport( rc.left, rc.top, rc.right, rc.bottom );
     std::shared_ptr<DICOMImageHelper>  pDicomImageHelper = pDoc->getDicomImageHelper();
     if( pDicomImageHelper != nullptr )
     {

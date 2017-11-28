@@ -6,6 +6,8 @@
 #include "glext.h"
 #include "wglext.h"
 
+class GLShaderMgr;
+
 class COpenGLView : public CView
 {
 protected: // create from serialization only
@@ -41,6 +43,13 @@ protected:
     bool GLSetting();
 private:
     bool initVolumeData();
+
+private:
+    bool initBufferData();
+private:
+    GLuint m_nVertexArrayID;
+    GLuint m_nBuffers;
+    std::shared_ptr<GLShaderMgr> m_pGLShaderMgr;
 private:
     CClientDC* m_pClientDC;
     HGLRC      m_hGLrc;
