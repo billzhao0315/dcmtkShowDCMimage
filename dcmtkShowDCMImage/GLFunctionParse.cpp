@@ -18,13 +18,33 @@ PFNGLGETSHADERINFOLOGPROC GLFunctionParse::glGetShaderInfoLog = NULL;
 PFNGLGETPROGRAMIVPROC GLFunctionParse::glGetProgramiv = NULL;
 PFNGLGETPROGRAMINFOLOGPROC GLFunctionParse::glGetProgramInfoLog = NULL;
 PFNGLVERTEXATTRIBPOINTERPROC GLFunctionParse::glVertexAttribPointer = NULL;
+PFNGLGETUNIFORMLOCATIONPROC GLFunctionParse::glGetUniformLocation = NULL;
+PFNGLUNIFORM1FPROC GLFunctionParse::glUniform1f = NULL;
+PFNGLUNIFORM2FPROC GLFunctionParse::glUniform2f = NULL;
+PFNGLUNIFORM3FPROC GLFunctionParse::glUniform3f = NULL;
+PFNGLUNIFORM4FPROC GLFunctionParse::glUniform4f = NULL;
+PFNGLUNIFORM1IPROC GLFunctionParse::glUniform1i = NULL;
+PFNGLUNIFORM2IPROC GLFunctionParse::glUniform2i = NULL;
+PFNGLUNIFORM3IPROC GLFunctionParse::glUniform3i = NULL;
+PFNGLUNIFORM4IPROC GLFunctionParse::glUniform4i = NULL;
+PFNGLUNIFORMMATRIX2FVPROC GLFunctionParse::glUniformMatrix2fv = NULL;
+PFNGLUNIFORMMATRIX3FVPROC GLFunctionParse::glUniformMatrix3fv = NULL;
+PFNGLUNIFORMMATRIX4FVPROC GLFunctionParse::glUniformMatrix4fv = NULL;
 
 PFNGLGENVERTEXARRAYSPROC    GLFunctionParse::glGenVertexArrays = NULL;
 PFNGLBINDVERTEXARRAYPROC GLFunctionParse::glBindVertexArray = NULL;
+PFNGLGENFRAMEBUFFERSPROC GLFunctionParse::glGenFramebuffers = NULL;
+PFNGLBINDFRAMEBUFFERPROC GLFunctionParse::glBindFramebuffer = NULL;
+PFNGLDELETEFRAMEBUFFERSPROC GLFunctionParse::glDeleteFramebuffers = NULL;
+PFNGLFRAMEBUFFERTEXTURE2DPROC GLFunctionParse::glFramebufferTexture2D = NULL;
 
 PFNGLENABLEVERTEXATTRIBARRAYARBPROC GLFunctionParse::glEnableVertexAttribArrayARB = NULL;
 PFNGLDRAWARRAYSEXTPROC GLFunctionParse::glDrawArraysEXT = NULL;
 
+
+//PFNGLGENTEXTURESEXTPROC GLFunctionParse::glGenTexturesEXT = NULL;
+//PFNGLBINDTEXTUREEXTPROC GLFunctionParse::glBindTextureEXT = NULL;
+//PFNGLDELETETEXTURESEXTPROC GLFunctionParse::glDeleteTexturesEXT = NULL;
 
 
 GLFunctionParse::GLFunctionParse()
@@ -56,11 +76,35 @@ bool GLFunctionParse::initGLFunction()
         glGetShaderInfoLog = reinterpret_cast<PFNGLGETSHADERINFOLOGPROC>( wglGetProcAddress("glGetShaderInfoLog") );
         glGetProgramiv = reinterpret_cast<PFNGLGETPROGRAMIVPROC>( wglGetProcAddress("glGetProgramiv") );
         glGetProgramInfoLog = reinterpret_cast<PFNGLGETPROGRAMINFOLOGPROC>( wglGetProcAddress("glGetProgramInfoLog") );
+        glGetUniformLocation = reinterpret_cast<PFNGLGETUNIFORMLOCATIONPROC>( wglGetProcAddress("glGetUniformLocation") );
+        glUniform1f = reinterpret_cast<PFNGLUNIFORM1FPROC>( wglGetProcAddress( "glUniform1f" ) );
+        glUniform2f = reinterpret_cast<PFNGLUNIFORM2FPROC>( wglGetProcAddress( "glUniform2f" ) );
+        glUniform3f = reinterpret_cast<PFNGLUNIFORM3FPROC>( wglGetProcAddress( "glUniform3f" ) );
+        glUniform4f = reinterpret_cast<PFNGLUNIFORM4FPROC>( wglGetProcAddress( "glUniform4f" ) );
+        glUniform1i = reinterpret_cast<PFNGLUNIFORM1IPROC>( wglGetProcAddress( "glUniform1i" ) );
+        glUniform2i = reinterpret_cast<PFNGLUNIFORM2IPROC>( wglGetProcAddress( "glUniform2i" ) );
+        glUniform3i = reinterpret_cast<PFNGLUNIFORM3IPROC>( wglGetProcAddress( "glUniform3i" ) );
+        glUniform4i = reinterpret_cast<PFNGLUNIFORM4IPROC>( wglGetProcAddress( "glUniform4i" ) );
+        glUniformMatrix2fv = reinterpret_cast<PFNGLUNIFORMMATRIX2FVPROC>( wglGetProcAddress( "glUniformMatrix2fv" ) );
+        glUniformMatrix3fv = reinterpret_cast<PFNGLUNIFORMMATRIX3FVPROC>( wglGetProcAddress( "glUniformMatrix3fv" ) );
+        glUniformMatrix4fv = reinterpret_cast<PFNGLUNIFORMMATRIX4FVPROC>( wglGetProcAddress( "glUniformMatrix4fv" ) );
+
+
+
         glVertexAttribPointer = reinterpret_cast<PFNGLVERTEXATTRIBPOINTERPROC>( wglGetProcAddress("glVertexAttribPointer") );
         glGenVertexArrays = reinterpret_cast<PFNGLGENVERTEXARRAYSPROC>( wglGetProcAddress("glGenVertexArrays") );
         glBindVertexArray = reinterpret_cast<PFNGLBINDVERTEXARRAYPROC>( wglGetProcAddress("glBindVertexArray") );
         glEnableVertexAttribArrayARB = reinterpret_cast<PFNGLENABLEVERTEXATTRIBARRAYARBPROC>( wglGetProcAddress("glEnableVertexAttribArrayARB") );
         glDrawArraysEXT = reinterpret_cast<PFNGLDRAWARRAYSEXTPROC>( wglGetProcAddress("glDrawArraysEXT") );
+        glGenFramebuffers = reinterpret_cast<PFNGLGENFRAMEBUFFERSPROC>( wglGetProcAddress("glGenFramebuffers") );
+        glBindFramebuffer = reinterpret_cast<PFNGLBINDFRAMEBUFFERPROC>( wglGetProcAddress("glBindFramebuffer") );
+        glDeleteFramebuffers = reinterpret_cast<PFNGLDELETEFRAMEBUFFERSPROC>( wglGetProcAddress("glDeleteFramebuffers") );
+        glFramebufferTexture2D = reinterpret_cast<PFNGLFRAMEBUFFERTEXTURE2DPROC>( wglGetProcAddress("glFramebufferTexture2D") );
+
+        /*glGenTexturesEXT = reinterpret_cast<PFNGLGENTEXTURESEXTPROC>( wglGetProcAddress("glGenTexturesEXT") );
+        glBindTextureEXT = reinterpret_cast<PFNGLBINDTEXTUREEXTPROC>( wglGetProcAddress("glBindTextureEXT") );
+        glDeleteTexturesEXT = reinterpret_cast<PFNGLDELETETEXTURESEXTPROC>( wglGetProcAddress("glDeleteTexturesEXT") );*/
+
         return variant();
     }
 
@@ -72,7 +116,11 @@ bool GLFunctionParse::variant()
 {
     if( glCreateShader == NULL || glShaderSource == NULL || glCompileShader == NULL || glAttachShader == NULL || glCreateProgram == NULL || glLinkProgram == NULL || glUseProgram == NULL || glGetObjectParameterivARB == NULL ||
         glGetShaderiv == NULL || glGetShaderInfoLog == NULL || glGetProgramiv == NULL || glGetProgramInfoLog == NULL || glGenVertexArrays == NULL || glBindVertexArray == NULL||
-        glGenBuffers == NULL || glBindBuffer == NULL || glBufferData == NULL || glVertexAttribPointer == NULL || glEnableVertexAttribArrayARB == NULL || glDrawArraysEXT == NULL)
+        glGenBuffers == NULL || glBindBuffer == NULL || glBufferData == NULL || glVertexAttribPointer == NULL || glEnableVertexAttribArrayARB == NULL || glDrawArraysEXT == NULL|| glGetUniformLocation == NULL || glUniform1f == NULL ||
+        glUniform2f == NULL || glUniform3f == NULL || glUniform4f == NULL || glUniform1i == NULL || glUniform2i == NULL || glUniform3i == NULL || glUniformMatrix2fv == NULL || glUniformMatrix3fv == NULL || glUniformMatrix4fv == NULL
+        /*|| glGenTexturesEXT == NULL || glBindTextureEXT == NULL || glDeleteTexturesEXT == NULL*/
+        || glGenFramebuffers == NULL || glBindFramebuffer == NULL || glDeleteFramebuffers == NULL || glFramebufferTexture2D == NULL
+        )
     {
         return false;
     }

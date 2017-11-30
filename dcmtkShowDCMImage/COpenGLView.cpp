@@ -134,7 +134,10 @@ COpenGLView::COpenGLView()
 
 COpenGLView::~COpenGLView()
 {
-	
+	if( m_n3DTextureID > 0 )
+	{
+	    glDeleteTextures( 1, &m_n3DTextureID );
+	}
 }
 
 BOOL COpenGLView::PreCreateWindow(CREATESTRUCT& cs)
