@@ -8,6 +8,7 @@ public:
     ~GLShader();
     void begin();
     void end();
+    GLuint getprogramID();
 private:
     bool initOpenGLFunction();
     void createShader( const char* vertexShader, const char* fragShader );

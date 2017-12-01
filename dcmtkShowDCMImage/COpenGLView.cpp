@@ -32,6 +32,12 @@
 #include "vertexfragmentShader.h"
 #include "GLShader.h"
 
+#include "..//dependence//glm//glm.hpp"
+#include "..//dependence//glm//vec3.hpp"
+#include "..//dependence//glm//vec4.hpp"
+#include "..//dependence//glm//mat4x4.hpp"
+#include "..//dependence//glm//gtc//matrix_transform.hpp"
+
 #define BUFFER_OFFSET(offset) ((void*)(offset))
 
 #ifdef _DEBUG
@@ -98,6 +104,7 @@ public:
 	}
 	const double* getMatrix()
 	{
+        transformTemp();
 		return mdRotation;
 	}
 
@@ -115,6 +122,97 @@ public:
 		glGetDoublev( GL_MODELVIEW_MATRIX, mdRotation );
 		glLoadIdentity();
 	}
+
+
+    std::vector<GLfloat> crossVector( const std::vector<GLfloat> firstVector, const std::vector<GLfloat> secondVector )
+    {
+        std::vector<GLfloat> crossResult(3);
+        crossResult[0] = firstVector[1]*secondVector[2] - firstVector[2]*secondVector[1];
+        crossResult[1] = firstVector[2]*secondVector[0] - firstVector[0]*secondVector[2];
+        crossResult[2] = firstVector[0]*secondVector[1] - firstVector[1]*secondVector[0];
+        return crossResult;
+    }
+
+    void calculateRotateMatrix( CPoint startPoint, CPoint currentPoint )
+    {
+
+        double angleX = (currentPoint.y - startPoint.y);
+        double angleY = (currentPoint.x - startPoint.x);
+
+        double rotateAngle = sqrtf( angleX*angleX + angleY*angleY );
+
+        rotateAngle = abs(rotateAngle) < 1 ? 1 : rotateAngle;
+
+        //double mouseDirection[3] = { point.x - m_pStartLocation.x, point.y - m_pStartLocation.y,0 };
+
+        std::vector<GLfloat> mouseDirection(3);
+        mouseDirection[0] = currentPoint.x - startPoint.x;
+        mouseDirection[1] = startPoint.y - currentPoint.y;
+        mouseDirection[2] = 0;
+
+        std::vector<GLfloat> viewDirection(3);
+        viewDirection[0] = 0.0;
+        viewDirection[1] = 0.0;
+        viewDirection[2] = 1.0;
+
+        /*rotateVector[0] = mouseDirection[1]*viewDirection[2] - mouseDirection[2]*viewDirection[1];
+        rotateVector[1] = mouseDirection[2]*viewDirection[0] - mouseDirection[0]*viewDirection[2];
+        rotateVector[2] = mouseDirection[0]*viewDirection[1] - mouseDirection[1]*viewDirection[0];
+
+        rotateVector[0] = -rotateVector[0];
+        rotateVector[1] = -rotateVector[1];
+        rotateVector[2] = -rotateVector[2];*/
+
+        std::vector<GLfloat> rotateVector = crossVector( viewDirection, mouseDirection );
+
+
+        glm::mat4x4 IdentityMatrix;
+        glm::vec3 directionVector( rotateVector[0],rotateVector[1],rotateVector[2] );
+        IdentityMatrix = glm::rotate( IdentityMatrix, (float)rotateAngle, directionVector );
+
+        glm::mat4x4 preRotateMatrix;
+
+        toglmMatrix( (float*)&mdRotation[0], preRotateMatrix );
+
+        IdentityMatrix = IdentityMatrix * preRotateMatrix;
+
+        toGLfloatMatrix( (float*)&mdRotation[0], IdentityMatrix );
+
+    }
+
+    void toGLfloatMatrix( GLfloat* glfoatMatrix, glm::mat4x4 glmMatrix )
+    {
+        for( int i = 0; i<4; ++i )
+        {
+            for( int j = 0; j<4; ++j )
+            {
+                glfoatMatrix[ i*4+j ] = glmMatrix[i][j];
+            }
+        }
+    }
+
+    void toglmMatrix( GLfloat* glfloatMatrix, glm::mat4x4& glmMatrix )
+    {
+        for( int i = 0; i<4; ++i )
+        {
+            for( int j = 0; j<4; ++j )
+            {
+                glmMatrix[i][j] = glfloatMatrix[ i*4+j ];
+            }
+        }
+    }
+
+    void transformTemp()
+	{
+        glm::mat4x4 modelviewMatrix;
+	    modelviewMatrix = glm::lookAt( glm::vec3(0.0,0.0,3.0),glm::vec3(0.0,0.0,0.0),glm::vec3(0.0,1.0,0.0) );
+        glm::mat4x4 projectionMatrix;
+        projectionMatrix = glm::perspective(45.0,1.0,1.0,5.0);
+        glm::mat4x4 MVP = projectionMatrix*modelviewMatrix;
+        toGLfloatMatrix( (GLfloat*)&mdRotation[0], MVP );
+
+	}
+
 
 private:
 	double mfRot[3];
@@ -178,7 +276,9 @@ void COpenGLView::OnDraw(CDC* pDC)
 		glEnd();*/
 		m_pGLShaderMgr->getGLShader()->begin();
 		GLFunctionParse::glBindVertexArray(m_nVertexArrayID);
-		GLFunctionParse::glDrawArraysEXT(GL_TRIANGLES,0,6);
+		GLFunctionParse::glDrawArraysEXT(GL_QUADS,0,24);
+        GLint mModelViewProjectionMatrix =  GLFunctionParse::glGetUniformLocation( m_pGLShaderMgr->getGLShader()->getprogramID(), std::string("mModelViewProjectionMatrix").c_str() );
+        GLFunctionParse::glUniformMatrix4fv( mModelViewProjectionMatrix,1, GL_FALSE, (const GLfloat* )m_pMathImpl->getMatrix() );
 		m_pGLShaderMgr->getGLShader()->end();
 	}
 	else
@@ -402,7 +502,8 @@ bool COpenGLView::GLSetting()
 	bool bfnInit = GLFunctionParse::initGLFunction();
 	if( bfnInit )
 	{
-		initBufferData();
+		//initBufferData();
+        initCubeData();
 	}
 	else
 	{
@@ -643,7 +744,8 @@ void COpenGLView::OnMouseMove(UINT nFlags, CPoint point)
 		if( m_ReferencePoint != point )
 		{
 			wglMakeCurrent( m_pClientDC->GetSafeHdc(), m_hGLrc );
-			m_pMathImpl->Rotate( m_ReferencePoint.y - point.y, m_ReferencePoint.x - point.x, 0 );
+			//m_pMathImpl->Rotate( m_ReferencePoint.y - point.y, m_ReferencePoint.x - point.x, 0 );
+            m_pMathImpl->calculateRotateMatrix( m_ReferencePoint, point );
 			wglMakeCurrent( NULL, NULL );
 			m_ReferencePoint = point;
 			Invalidate( FALSE );
@@ -682,5 +784,72 @@ bool COpenGLView::initBufferData()
 	GLFunctionParse::glEnableVertexAttribArrayARB(1);
 	GLFunctionParse::glBindVertexArray(0);
 	m_pGLShaderMgr->getGLShader()->end();
+
 	return true;
 }
+
+void COpenGLView::initCubeData()
+{
+    GLfloat cubeData[24][3] = 
+    {
+        //front face
+        { 0.0f,0.0f,1.0f },
+        { 1.0f,0.0f,1.0f },
+        { 1.0f,1.0f,1.0f },
+        { 0.0f,1.0f,1.0f },
+
+        //left face
+        { 0.0f,0.0f,1.0f },
+        { 0.0f,1.0f,1.0f },
+        { 0.0f,1.0f,0.0f },
+        { 0.0f,0.0f,0.0f },
+
+        // top face
+        { 0.0f,1.0f,1.0f },
+        { 1.0f,1.0f,1.0f },
+        { 1.0f,1.0f,0.0f },
+        { 0.0f,1.0f,0.0f },
+
+        //right face
+        { 1.0f,1.0f,1.0f },
+        { 1.0f,0.0f,1.0f },
+        { 1.0f,0.0f,0.0f },
+        { 1.0f,1.0f,0.0f },
+
+        // bottom face
+        { 0.0f,0.0f,1.0f },
+        { 0.0f,0.0f,0.0f },
+        { 1.0f,0.0f,0.0f },
+        { 1.0f,0.0f,1.0f },
+
+        // back face
+        { 0.0f,0.0f,0.0f },
+        { 0.0f,1.0f,0.0f },
+        { 1.0f,1.0f,0.0f },
+        { 1.0f,0.0f,0.0f }
+    };
+
+    for( int i = 0; i < 24; ++i )
+    {
+        for( int j = 0; j < 3; ++j )
+        {
+            cubeData[i][j] = cubeData[i][j] - 0.5;
+        }
+    }
+
+    GLFunctionParse::glGenVertexArrays(1,&m_nVertexArrayID);
+    GLFunctionParse::glBindVertexArray(m_nVertexArrayID);
+    GLFunctionParse::glGenBuffers(1,&m_nBuffers);
+    GLFunctionParse::glBindBuffer( GL_ARRAY_BUFFER, m_nBuffers );
+    GLFunctionParse::glBufferData(GL_ARRAY_BUFFER,sizeof(cubeData), cubeData, GL_STATIC_DRAW);
+
+    m_pGLShaderMgr = std::make_shared<GLShaderMgr>( vertextShader, fragShader );
+	m_pGLShaderMgr->getGLShader()->begin();
+    //GLint mModelViewProjectionMatrix =  GLFunctionParse::glGetUniformLocation( m_pGLShaderMgr->getGLShader()->getprogramID(), std::string("mModelViewProjectionMatrix").c_str() );
+    GLFunctionParse::glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,0,BUFFER_OFFSET(0));
+    GLFunctionParse::glEnableVertexAttribArrayARB(0);
+    GLFunctionParse::glBindVertexArray(0);
+    m_pGLShaderMgr->getGLShader()->end();
+    
+}
+

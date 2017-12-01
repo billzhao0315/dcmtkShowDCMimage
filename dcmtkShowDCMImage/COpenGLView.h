@@ -46,6 +46,7 @@ private:
 
 private:
     bool initBufferData();
+    void initCubeData();
 private:
     GLuint m_nVertexArrayID;
     GLuint m_nBuffers;

@@ -105,3 +105,9 @@ void GLShader::end()
 {
     GLFunctionParse::glUseProgram(0);
 }
+
+GLuint GLShader::getprogramID()
+{
+    return m_nProgram;
+}
+

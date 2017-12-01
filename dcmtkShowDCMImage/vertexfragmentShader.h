@@ -7,11 +7,12 @@ char* vertextShader = R(
          #version 430 core\n
          layout( location = 0 ) in vec4 vPosition;
          layout( location = 1 ) in vec4 vColor;
+         uniform mat4 mModelViewProjectionMatrix;
          out vec4 fragColor;
         void main()
         {
-            gl_Position = vPosition;
-            fragColor = vColor;
+            gl_Position = mModelViewProjectionMatrix*vPosition;
+            fragColor = vPosition;
         }
     );
 
