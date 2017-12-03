@@ -39,7 +39,7 @@ PFNGLDELETEFRAMEBUFFERSPROC GLFunctionParse::glDeleteFramebuffers = NULL;
 PFNGLFRAMEBUFFERTEXTURE2DPROC GLFunctionParse::glFramebufferTexture2D = NULL;
 
 PFNGLENABLEVERTEXATTRIBARRAYARBPROC GLFunctionParse::glEnableVertexAttribArrayARB = NULL;
-PFNGLDRAWARRAYSEXTPROC GLFunctionParse::glDrawArraysEXT = NULL;
+//PFNGLDRAWARRAYSEXTPROC GLFunctionParse::glDrawArraysEXT = NULL;
 
 
 //PFNGLGENTEXTURESEXTPROC GLFunctionParse::glGenTexturesEXT = NULL;
@@ -95,7 +95,7 @@ bool GLFunctionParse::initGLFunction()
         glGenVertexArrays = reinterpret_cast<PFNGLGENVERTEXARRAYSPROC>( wglGetProcAddress("glGenVertexArrays") );
         glBindVertexArray = reinterpret_cast<PFNGLBINDVERTEXARRAYPROC>( wglGetProcAddress("glBindVertexArray") );
         glEnableVertexAttribArrayARB = reinterpret_cast<PFNGLENABLEVERTEXATTRIBARRAYARBPROC>( wglGetProcAddress("glEnableVertexAttribArrayARB") );
-        glDrawArraysEXT = reinterpret_cast<PFNGLDRAWARRAYSEXTPROC>( wglGetProcAddress("glDrawArraysEXT") );
+        //glDrawArraysEXT = reinterpret_cast<PFNGLDRAWARRAYSEXTPROC>( wglGetProcAddress("glDrawArraysEXT") );
         glGenFramebuffers = reinterpret_cast<PFNGLGENFRAMEBUFFERSPROC>( wglGetProcAddress("glGenFramebuffers") );
         glBindFramebuffer = reinterpret_cast<PFNGLBINDFRAMEBUFFERPROC>( wglGetProcAddress("glBindFramebuffer") );
         glDeleteFramebuffers = reinterpret_cast<PFNGLDELETEFRAMEBUFFERSPROC>( wglGetProcAddress("glDeleteFramebuffers") );
@@ -116,7 +116,7 @@ bool GLFunctionParse::variant()
 {
     if( glCreateShader == NULL || glShaderSource == NULL || glCompileShader == NULL || glAttachShader == NULL || glCreateProgram == NULL || glLinkProgram == NULL || glUseProgram == NULL || glGetObjectParameterivARB == NULL ||
         glGetShaderiv == NULL || glGetShaderInfoLog == NULL || glGetProgramiv == NULL || glGetProgramInfoLog == NULL || glGenVertexArrays == NULL || glBindVertexArray == NULL||
-        glGenBuffers == NULL || glBindBuffer == NULL || glBufferData == NULL || glVertexAttribPointer == NULL || glEnableVertexAttribArrayARB == NULL || glDrawArraysEXT == NULL|| glGetUniformLocation == NULL || glUniform1f == NULL ||
+        glGenBuffers == NULL || glBindBuffer == NULL || glBufferData == NULL || glVertexAttribPointer == NULL || glEnableVertexAttribArrayARB == NULL /*|| glDrawArraysEXT == NULL*/|| glGetUniformLocation == NULL || glUniform1f == NULL ||
         glUniform2f == NULL || glUniform3f == NULL || glUniform4f == NULL || glUniform1i == NULL || glUniform2i == NULL || glUniform3i == NULL || glUniformMatrix2fv == NULL || glUniformMatrix3fv == NULL || glUniformMatrix4fv == NULL
         /*|| glGenTexturesEXT == NULL || glBindTextureEXT == NULL || glDeleteTexturesEXT == NULL*/
         || glGenFramebuffers == NULL || glBindFramebuffer == NULL || glDeleteFramebuffers == NULL || glFramebufferTexture2D == NULL

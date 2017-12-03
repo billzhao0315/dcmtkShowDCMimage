@@ -276,7 +276,7 @@ void COpenGLView::OnDraw(CDC* pDC)
 		glEnd();*/
 		m_pGLShaderMgr->getGLShader()->begin();
 		GLFunctionParse::glBindVertexArray(m_nVertexArrayID);
-		GLFunctionParse::glDrawArraysEXT(GL_QUADS,0,24);
+		glDrawArrays(GL_QUADS,0,24);
         GLint mModelViewProjectionMatrix =  GLFunctionParse::glGetUniformLocation( m_pGLShaderMgr->getGLShader()->getprogramID(), std::string("mModelViewProjectionMatrix").c_str() );
         GLFunctionParse::glUniformMatrix4fv( mModelViewProjectionMatrix,1, GL_FALSE, (const GLfloat* )m_pMathImpl->getMatrix() );
 		m_pGLShaderMgr->getGLShader()->end();
