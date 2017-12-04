@@ -91,20 +91,22 @@ class COpenGLView::mathImpl
 public:
 	mathImpl()
 	{
-		mdRotation[0]=mdRotation[5]=mdRotation[10]=mdRotation[15] = 1.0f;
+		/*mdRotation[0]=mdRotation[5]=mdRotation[10]=mdRotation[15] = 1.0f;
 		mdRotation[1]=mdRotation[2]=mdRotation[3]=mdRotation[4] = 0.0f;
 		mdRotation[6]=mdRotation[7]=mdRotation[8]=mdRotation[9] = 0.0f;
-		mdRotation[11]=mdRotation[12]=mdRotation[13]=mdRotation[14] = 0.0f;
+		mdRotation[11]=mdRotation[12]=mdRotation[13]=mdRotation[14] = 0.0f;*/
+        resetRotation();
 
 		mfRot[0]=mfRot[1]=mfRot[2]=0.0f;
+        resetModelMatrix();
 	}
 	~mathImpl()
 	{
 		
 	}
-	const double* getMatrix()
+	const float* getMatrix()
 	{
-        transformTemp();
+        calcModelViewProjectionMatrix();
 		return mdRotation;
 	}
 
@@ -115,14 +117,13 @@ public:
 		mfRot[2] = dz;
 		glMatrixMode( GL_MODELVIEW );
 		glLoadIdentity();
-		glLoadMatrixd( mdRotation );
+		glLoadMatrixf( mdRotation );
 		glRotated( mfRot[0], 1.0f, 0,0 );
 		glRotated( mfRot[1], 0, 1.0f,0 );
 		glRotated( mfRot[2], 0, 0,1.0f );
-		glGetDoublev( GL_MODELVIEW_MATRIX, mdRotation );
+		glGetFloatv( GL_MODELVIEW_MATRIX, mdRotation );
 		glLoadIdentity();
 	}
-
 
     std::vector<GLfloat> crossVector( const std::vector<GLfloat> firstVector, const std::vector<GLfloat> secondVector )
     {
@@ -166,17 +167,17 @@ public:
         std::vector<GLfloat> rotateVector = crossVector( viewDirection, mouseDirection );
 
 
-        glm::mat4x4 IdentityMatrix;
+        glm::mat4x4 modelRotateMatrix;
         glm::vec3 directionVector( rotateVector[0],rotateVector[1],rotateVector[2] );
-        IdentityMatrix = glm::rotate( IdentityMatrix, (float)rotateAngle, directionVector );
+        modelRotateMatrix = glm::rotate( modelRotateMatrix, (float)rotateAngle, directionVector );
 
-        glm::mat4x4 preRotateMatrix;
+        glm::mat4x4 preModelRotateMatrix;
 
-        toglmMatrix( (float*)&mdRotation[0], preRotateMatrix );
+        toglmMatrix( &m_modelMatrix[0], preModelRotateMatrix );
 
-        IdentityMatrix = IdentityMatrix * preRotateMatrix;
+        modelRotateMatrix = modelRotateMatrix * preModelRotateMatrix;
 
-        toGLfloatMatrix( (float*)&mdRotation[0], IdentityMatrix );
+        toGLfloatMatrix( &m_modelMatrix[0], modelRotateMatrix );
 
     }
 
@@ -202,21 +203,49 @@ public:
         }
     }
 
-    void transformTemp()
+    void calcModelViewProjectionMatrix()
 	{
         glm::mat4x4 modelviewMatrix;
 	    modelviewMatrix = glm::lookAt( glm::vec3(0.0,0.0,3.0),glm::vec3(0.0,0.0,0.0),glm::vec3(0.0,1.0,0.0) );
         glm::mat4x4 projectionMatrix;
         projectionMatrix = glm::perspective(45.0,1.0,1.0,5.0);
-        glm::mat4x4 MVP = projectionMatrix*modelviewMatrix;
-        toGLfloatMatrix( (GLfloat*)&mdRotation[0], MVP );
 
+        glm::mat4x4 modelMatrix;
+
+        toglmMatrix( &m_modelMatrix[0], modelMatrix );
+
+        glm::mat4x4 modelTransformX;
+        modelTransformX = glm::translate( modelTransformX,glm::vec3( -0.5,-0.5,-0.5 ) );
+
+        glm::mat4x4 MVP = projectionMatrix*modelviewMatrix * modelMatrix * modelTransformX;
+
+        
+
+        toGLfloatMatrix( &mdRotation[0], MVP );
+
+	}
+
+    void resetRotation()
+	{
+	    mdRotation[0]=mdRotation[5]=mdRotation[10]=mdRotation[15] = 1.0f;
+		mdRotation[1]=mdRotation[2]=mdRotation[3]=mdRotation[4] = 0.0f;
+		mdRotation[6]=mdRotation[7]=mdRotation[8]=mdRotation[9] = 0.0f;
+		mdRotation[11]=mdRotation[12]=mdRotation[13]=mdRotation[14] = 0.0f;
+	}
+
+    void resetModelMatrix()
+	{
+	    m_modelMatrix[0]=m_modelMatrix[5]=m_modelMatrix[10]=m_modelMatrix[15] = 1.0f;
+		m_modelMatrix[1]=m_modelMatrix[2]=m_modelMatrix[3]=m_modelMatrix[4] = 0.0f;
+		m_modelMatrix[6]=m_modelMatrix[7]=m_modelMatrix[8]=m_modelMatrix[9] = 0.0f;
+		m_modelMatrix[11]=m_modelMatrix[12]=m_modelMatrix[13]=m_modelMatrix[14] = 0.0f;
 	}
 
 
 private:
 	double mfRot[3];
-	double mdRotation[16];
+	float  mdRotation[16];
+    float  m_modelMatrix[16];
 	
 };
 
@@ -274,11 +303,16 @@ void COpenGLView::OnDraw(CDC* pDC)
 		glColor3f(0.0f,0.0f,1.0f);
 		glVertex2f( 0.0f,0.5f );
 		glEnd();*/
+
+        glEnable( GL_CULL_FACE );
+        glFrontFace( GL_CCW );
+        glCullFace( GL_BACK );
+
 		m_pGLShaderMgr->getGLShader()->begin();
 		GLFunctionParse::glBindVertexArray(m_nVertexArrayID);
 		glDrawArrays(GL_QUADS,0,24);
         GLint mModelViewProjectionMatrix =  GLFunctionParse::glGetUniformLocation( m_pGLShaderMgr->getGLShader()->getprogramID(), std::string("mModelViewProjectionMatrix").c_str() );
-        GLFunctionParse::glUniformMatrix4fv( mModelViewProjectionMatrix,1, GL_FALSE, (const GLfloat* )m_pMathImpl->getMatrix() );
+        GLFunctionParse::glUniformMatrix4fv( mModelViewProjectionMatrix,1, GL_FALSE, m_pMathImpl->getMatrix() );
 		m_pGLShaderMgr->getGLShader()->end();
 	}
 	else
@@ -317,8 +351,8 @@ void COpenGLView::OnDraw(CDC* pDC)
 		/*glScaled( (float)nWidth/(float)nWidth, 
 		-1.0f*(float)nWidth/(float)(float)nHeight, 
 		(float)nWidth/(float)nDepth);*/
-
-		glMultMatrixd( m_pMathImpl->getMatrix() );
+        
+		glMultMatrixf( m_pMathImpl->getMatrix() ); // /////////////////////////*******************this is wrong now********************////////////////////////////////
 		//glRotatef( 30, 0.0f,0.0f,1.0f );
 		glTranslatef( -0.5f,-0.5f,-0.5f );
 
@@ -829,13 +863,13 @@ void COpenGLView::initCubeData()
         { 1.0f,0.0f,0.0f }
     };
 
-    for( int i = 0; i < 24; ++i )
+    /*for( int i = 0; i < 24; ++i )
     {
         for( int j = 0; j < 3; ++j )
         {
             cubeData[i][j] = cubeData[i][j] - 0.5;
         }
-    }
+    }*/
 
     GLFunctionParse::glGenVertexArrays(1,&m_nVertexArrayID);
     GLFunctionParse::glBindVertexArray(m_nVertexArrayID);

@@ -50,7 +50,6 @@ public:
 
     //
     static PFNGLENABLEVERTEXATTRIBARRAYARBPROC glEnableVertexAttribArrayARB;
-    //static PFNGLDRAWARRAYSEXTPROC glDrawArraysEXT;
 
     ////GL_EXT_texture_object
     //static PFNGLGENTEXTURESEXTPROC glGenTexturesEXT;
