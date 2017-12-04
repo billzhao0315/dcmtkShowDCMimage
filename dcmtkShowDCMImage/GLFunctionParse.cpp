@@ -40,6 +40,8 @@ PFNGLFRAMEBUFFERTEXTURE2DPROC GLFunctionParse::glFramebufferTexture2D = NULL;
 
 PFNGLENABLEVERTEXATTRIBARRAYARBPROC GLFunctionParse::glEnableVertexAttribArrayARB = NULL;
 
+PFNGLTEXIMAGE3DPROC GLFunctionParse::glTexImage3D = NULL;
+
 
 //PFNGLGENTEXTURESEXTPROC GLFunctionParse::glGenTexturesEXT = NULL;
 //PFNGLBINDTEXTUREEXTPROC GLFunctionParse::glBindTextureEXT = NULL;
@@ -103,6 +105,8 @@ bool GLFunctionParse::initGLFunction()
         glBindTextureEXT = reinterpret_cast<PFNGLBINDTEXTUREEXTPROC>( wglGetProcAddress("glBindTextureEXT") );
         glDeleteTexturesEXT = reinterpret_cast<PFNGLDELETETEXTURESEXTPROC>( wglGetProcAddress("glDeleteTexturesEXT") );*/
 
+        glTexImage3D = reinterpret_cast<PFNGLTEXIMAGE3DPROC>(wglGetProcAddress("glTexImage3D"));
+
         return variant();
     }
 
@@ -117,7 +121,7 @@ bool GLFunctionParse::variant()
         glGenBuffers == NULL || glBindBuffer == NULL || glBufferData == NULL || glVertexAttribPointer == NULL || glEnableVertexAttribArrayARB == NULL || glGetUniformLocation == NULL || glUniform1f == NULL ||
         glUniform2f == NULL || glUniform3f == NULL || glUniform4f == NULL || glUniform1i == NULL || glUniform2i == NULL || glUniform3i == NULL || glUniformMatrix2fv == NULL || glUniformMatrix3fv == NULL || glUniformMatrix4fv == NULL
         /*|| glGenTexturesEXT == NULL || glBindTextureEXT == NULL || glDeleteTexturesEXT == NULL*/
-        || glGenFramebuffers == NULL || glBindFramebuffer == NULL || glDeleteFramebuffers == NULL || glFramebufferTexture2D == NULL
+        || glGenFramebuffers == NULL || glBindFramebuffer == NULL || glDeleteFramebuffers == NULL || glFramebufferTexture2D == NULL || glTexImage3D == NULL
         )
     {
         return false;

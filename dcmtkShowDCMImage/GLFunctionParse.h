@@ -8,6 +8,9 @@ public:
     ~GLFunctionParse();
     static bool initGLFunction();
 
+    //gl_version_1_2
+    static PFNGLTEXIMAGE3DPROC glTexImage3D;
+
     //GL_VERSION_1_5
     static PFNGLGENBUFFERSPROC glGenBuffers;
     static PFNGLBINDBUFFERPROC glBindBuffer;
@@ -50,6 +53,8 @@ public:
 
     //
     static PFNGLENABLEVERTEXATTRIBARRAYARBPROC glEnableVertexAttribArrayARB;
+
+    
 
     ////GL_EXT_texture_object
     //static PFNGLGENTEXTURESEXTPROC glGenTexturesEXT;

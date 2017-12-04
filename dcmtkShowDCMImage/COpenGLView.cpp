@@ -99,14 +99,25 @@ public:
 
 		mfRot[0]=mfRot[1]=mfRot[2]=0.0f;
         resetModelMatrix();
+        m_bDemoCube = true;
 	}
 	~mathImpl()
 	{
 		
 	}
+
+    void setDemoCubeFlag( bool bFlagDemoCube )
+	{
+	    m_bDemoCube = bFlagDemoCube;
+	}
+
 	const float* getMatrix()
 	{
-        calcModelViewProjectionMatrix();
+        if( m_bDemoCube )
+        {
+            calcModelViewProjectionMatrix();
+        }
+        
 		return mdRotation;
 	}
 
@@ -246,7 +257,7 @@ private:
 	double mfRot[3];
 	float  mdRotation[16];
     float  m_modelMatrix[16];
-	
+    bool   m_bDemoCube;
 };
 
 // CdcmtkShowDCMImageView construction/destruction
@@ -310,9 +321,12 @@ void COpenGLView::OnDraw(CDC* pDC)
 
 		m_pGLShaderMgr->getGLShader()->begin();
 		GLFunctionParse::glBindVertexArray(m_nVertexArrayID);
+        GLFunctionParse::glBindBuffer( GL_ARRAY_BUFFER, m_nBuffers );
 		glDrawArrays(GL_QUADS,0,24);
         GLint mModelViewProjectionMatrix =  GLFunctionParse::glGetUniformLocation( m_pGLShaderMgr->getGLShader()->getprogramID(), std::string("mModelViewProjectionMatrix").c_str() );
         GLFunctionParse::glUniformMatrix4fv( mModelViewProjectionMatrix,1, GL_FALSE, m_pMathImpl->getMatrix() );
+        GLFunctionParse::glBindVertexArray(0);
+        GLFunctionParse::glBindBuffer( GL_ARRAY_BUFFER, 0 );
 		m_pGLShaderMgr->getGLShader()->end();
 	}
 	else
@@ -328,7 +342,7 @@ void COpenGLView::OnDraw(CDC* pDC)
 		{
 			glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 		}
-		
+		glDisable( GL_CULL_FACE );
 		//
 		glEnable(GL_TEXTURE_3D);
 		glBindTexture( GL_TEXTURE_3D,  m_n3DTextureID );
@@ -352,7 +366,7 @@ void COpenGLView::OnDraw(CDC* pDC)
 		-1.0f*(float)nWidth/(float)(float)nHeight, 
 		(float)nWidth/(float)nDepth);*/
         
-		glMultMatrixf( m_pMathImpl->getMatrix() ); // /////////////////////////*******************this is wrong now********************////////////////////////////////
+		glMultMatrixf( m_pMathImpl->getMatrix() ); 
 		//glRotatef( 30, 0.0f,0.0f,1.0f );
 		glTranslatef( -0.5f,-0.5f,-0.5f );
 
@@ -614,7 +628,10 @@ void COpenGLView::OnUpdate(CView* /*pSender*/, LPARAM lHint, CObject* /*pHint*/)
 
 	if( lHint == static_cast<LPARAM>( CdcmtkShowDCMImageDoc::tagDICOMImport.getValue() ) )
 	{
+        m_pMathImpl->resetRotation();
+        m_pMathImpl->resetModelMatrix();
 		initVolumeData();
+        m_pMathImpl->setDemoCubeFlag( false );
 		Invalidate();
 	}
 
@@ -646,7 +663,7 @@ bool COpenGLView::initVolumeData()
 	glTexParameteri( GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
 	glTexParameteri( GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
 
-	PFNGLTEXIMAGE3DPROC glTexImage3D = reinterpret_cast<PFNGLTEXIMAGE3DPROC>(wglGetProcAddress("glTexImage3D"));
+	
 
 	int nWidth = pDicomHelper->getDICOMVolume()->getDICOMSeriesImage()[0]->m_nWidth;
 	int nHeight = pDicomHelper->getDICOMVolume()->getDICOMSeriesImage()[0]->m_nHeight;
@@ -671,7 +688,7 @@ bool COpenGLView::initVolumeData()
 
 
 
-		glTexImage3D( GL_TEXTURE_3D,0,GL_RGB, nWidth , nHeight,nDepth ,
+		GLFunctionParse::glTexImage3D( GL_TEXTURE_3D,0,GL_RGB, nWidth , nHeight,nDepth ,
 			0,GL_RGB, GL_UNSIGNED_BYTE, pRGBBuffer );
 		
 		delete[] pRGBBuffer;
@@ -686,7 +703,9 @@ bool COpenGLView::initVolumeData()
 				return false;
 			}
 
-			std::string fileName("F:/vs2012program/readTFFfileTest/readTFFfileTest/tfflung.dat");
+			/*std::string fileName("F:/vs2012program/readTFFfileTest/readTFFfileTest/tfflung.dat");*/
+            std::string fileName("../dependence/TFFFiles/tfflung.dat");
+            
 			pDicomHelper->getDICOMVolume()->loadtffFile(fileName);
 
 			int nImageLen = nWidth * nHeight *4;
@@ -732,7 +751,7 @@ bool COpenGLView::initVolumeData()
 				
 			}
 
-			glTexImage3D( GL_TEXTURE_3D,0,GL_RGBA, nWidth, nHeight,nDepth,0, GL_RGBA, GL_UNSIGNED_BYTE, pIntensity );
+			GLFunctionParse::glTexImage3D( GL_TEXTURE_3D,0,GL_RGBA, nWidth, nHeight,nDepth,0, GL_RGBA, GL_UNSIGNED_BYTE, pIntensity );
 			delete[] pIntensity;
 		}
 		else
@@ -747,7 +766,7 @@ bool COpenGLView::initVolumeData()
 			{
 				memcpy( pIntensity + k*nImageLen, pDicomHelper->getDICOMVolume()->getDICOMSeriesImage()[k]->m_pOriginPixelData, nImageLen );
 			}
-			glTexImage3D( GL_TEXTURE_3D,0,GL_LUMINANCE8, nWidth,nHeight,nDepth,0,GL_LUMINANCE8, GL_UNSIGNED_BYTE, pIntensity );
+			GLFunctionParse::glTexImage3D( GL_TEXTURE_3D,0,GL_LUMINANCE8, nWidth,nHeight,nDepth,0,GL_LUMINANCE8, GL_UNSIGNED_BYTE, pIntensity );
 			delete[] pIntensity;
 		}
 	}
@@ -778,8 +797,14 @@ void COpenGLView::OnMouseMove(UINT nFlags, CPoint point)
 		if( m_ReferencePoint != point )
 		{
 			wglMakeCurrent( m_pClientDC->GetSafeHdc(), m_hGLrc );
-			//m_pMathImpl->Rotate( m_ReferencePoint.y - point.y, m_ReferencePoint.x - point.x, 0 );
-            m_pMathImpl->calculateRotateMatrix( m_ReferencePoint, point );
+            if( m_n3DTextureID > 0 )
+            {
+                m_pMathImpl->Rotate( m_ReferencePoint.y - point.y, m_ReferencePoint.x - point.x, 0 );
+            }
+            else if( m_n3DTextureID == 0 )
+            {
+                m_pMathImpl->calculateRotateMatrix( m_ReferencePoint, point );
+            }
 			wglMakeCurrent( NULL, NULL );
 			m_ReferencePoint = point;
 			Invalidate( FALSE );
@@ -883,6 +908,7 @@ void COpenGLView::initCubeData()
     GLFunctionParse::glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,0,BUFFER_OFFSET(0));
     GLFunctionParse::glEnableVertexAttribArrayARB(0);
     GLFunctionParse::glBindVertexArray(0);
+    GLFunctionParse::glBindBuffer( GL_ARRAY_BUFFER, 0 );
     m_pGLShaderMgr->getGLShader()->end();
     
 }
