@@ -53,6 +53,8 @@
 GLfloat dOrthoSize = 1.0f;
 bool bRgb = false;
 
+GLfloat newIndex = 0.5f;
+
 // Macro to draw the quad.
  // Performance can be achieved by making a call list.
  // To make it simple i am not using that now :-)
@@ -219,7 +221,7 @@ public:
         glm::mat4x4 modelviewMatrix;
 	    modelviewMatrix = glm::lookAt( glm::vec3(0.0,0.0,3.0),glm::vec3(0.0,0.0,0.0),glm::vec3(0.0,1.0,0.0) );
         glm::mat4x4 projectionMatrix;
-        projectionMatrix = glm::perspective(45.0,1.0,1.0,5.0);
+        projectionMatrix = glm::perspective(45.0,1.0,1.0,7.0);
 
         glm::mat4x4 modelMatrix;
 
@@ -318,16 +320,39 @@ void COpenGLView::OnDraw(CDC* pDC)
         glEnable( GL_CULL_FACE );
         glFrontFace( GL_CCW );
         glCullFace( GL_BACK );
-
-		m_pGLShaderMgr->getGLShader()->begin();
+        glPolygonMode( GL_FRONT, GL_FILL );
+		m_pGLShaderMgr->getGLShader()[renderType::demoCube]->begin();
 		GLFunctionParse::glBindVertexArray(m_nVertexArrayID);
         GLFunctionParse::glBindBuffer( GL_ARRAY_BUFFER, m_nBuffers );
 		glDrawArrays(GL_QUADS,0,24);
-        GLint mModelViewProjectionMatrix =  GLFunctionParse::glGetUniformLocation( m_pGLShaderMgr->getGLShader()->getprogramID(), std::string("mModelViewProjectionMatrix").c_str() );
+        GLint mModelViewProjectionMatrix =  GLFunctionParse::glGetUniformLocation( m_pGLShaderMgr->getGLShader()[renderType::demoCube]->getprogramID(), std::string("mModelViewProjectionMatrix").c_str() );
         GLFunctionParse::glUniformMatrix4fv( mModelViewProjectionMatrix,1, GL_FALSE, m_pMathImpl->getMatrix() );
         GLFunctionParse::glBindVertexArray(0);
         GLFunctionParse::glBindBuffer( GL_ARRAY_BUFFER, 0 );
-		m_pGLShaderMgr->getGLShader()->end();
+		m_pGLShaderMgr->getGLShader()[renderType::demoCube]->end();
+
+        m_pGLShaderMgr->getGLShader()[renderType::IndexPlane]->begin();
+        GLint mModelViewProjectionMatrixIndexPlane =  GLFunctionParse::glGetUniformLocation( m_pGLShaderMgr->getGLShader()[renderType::IndexPlane]->getprogramID(), std::string("mModelViewProjectionMatrix").c_str() );
+        GLFunctionParse::glUniformMatrix4fv( mModelViewProjectionMatrixIndexPlane,1, GL_FALSE, m_pMathImpl->getMatrix() );
+        glDisable( GL_CULL_FACE );
+        glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+        GLFunctionParse::glBindVertexArray(m_nVertexArrayIDIndexPlane);
+        GLFunctionParse::glBindBuffer(GL_ARRAY_BUFFER, m_nBuffersIndexPlane);
+        
+        /*GLFunctionParse::glBufferSubData( GL_ARRAY_BUFFER, sizeof(GLfloat)*5, sizeof(GLfloat), &newIndex );
+        GLFunctionParse::glBufferSubData( GL_ARRAY_BUFFER, sizeof(GLfloat)*11, sizeof(GLfloat), &newIndex );
+        GLFunctionParse::glBufferSubData( GL_ARRAY_BUFFER, sizeof(GLfloat)*17, sizeof(GLfloat), &newIndex );
+        GLFunctionParse::glBufferSubData( GL_ARRAY_BUFFER, sizeof(GLfloat)*23, sizeof(GLfloat), &newIndex );*/
+
+        glDrawArrays(GL_QUADS,0,4);
+
+        GLFunctionParse::glBindVertexArray(0);
+        GLFunctionParse::glBindBuffer( GL_ARRAY_BUFFER, 0 );
+        m_pGLShaderMgr->getGLShader()[renderType::IndexPlane]->end();
+
+        
+
+
 	}
 	else
 	{
@@ -595,6 +620,25 @@ int COpenGLView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 BOOL COpenGLView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 {
 	// TODO: Add your message handler code here and/or call default
+
+    newIndex += 0.1f;
+    if( abs(newIndex - 1.0f) < 1e-6 )
+    {
+        newIndex = 0.0f;
+    }
+
+    GLFunctionParse::glBindBuffer(GL_ARRAY_BUFFER, m_nBuffersIndexPlane);
+        
+    void* ptr = GLFunctionParse::glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
+    ((GLfloat*)ptr)[1*3+2] = newIndex;
+    ((GLfloat*)ptr)[3*3+2] = newIndex;
+    ((GLfloat*)ptr)[5*3+2] = newIndex;
+    ((GLfloat*)ptr)[7*3+2] = newIndex;
+    GLFunctionParse::glUnmapBuffer( GL_ARRAY_BUFFER );
+    GLFunctionParse::glBindBuffer( GL_ARRAY_BUFFER, 0 );
+    glFinish();
+
+    Invalidate( FALSE );
 	return CView::OnMouseWheel(nFlags, zDelta, pt);
 }
 
@@ -817,35 +861,35 @@ void COpenGLView::OnMouseMove(UINT nFlags, CPoint point)
 	
 }
 
-bool COpenGLView::initBufferData()
-{
-	GLfloat vertexData[6][6] = 
-	{
-		{ -0.9f, -0.9f, 1.0f,0.0f,0.0f,1.0f },//first triangle
-		{ 0.85f, -0.9f, 0.0f,1.0f,0.0f,1.0f },
-		{ -0.9f, 0.85f, 0.0f,0.0f,1.0f,1.0f },
-		{ 0.9f, -0.85f, 1.0f,0.0f,0.0f,1.0f },//second triangle
-		{ 0.9f,   0.9f, 0.0f,1.0f,0.0f,1.0f },
-		{ -0.85f, 0.9f, 0.0f,0.0f,1.0f,1.0f }
-	};
-
-	GLFunctionParse::glGenVertexArrays(1, &m_nVertexArrayID);
-	GLFunctionParse::glBindVertexArray(m_nVertexArrayID);
-	GLFunctionParse::glGenBuffers(1, &m_nBuffers);
-	GLFunctionParse::glBindBuffer(GL_ARRAY_BUFFER, m_nVertexArrayID);
-	GLFunctionParse::glBufferData(GL_ARRAY_BUFFER,sizeof( vertexData ), vertexData, GL_STATIC_DRAW);
-
-	m_pGLShaderMgr = std::make_shared<GLShaderMgr>( vertextShader, fragShader );
-	m_pGLShaderMgr->getGLShader()->begin();
-	GLFunctionParse::glVertexAttribPointer(0,2,GL_FLOAT, GL_FALSE, 6*sizeof(GLfloat), NULL);
-	GLFunctionParse::glEnableVertexAttribArrayARB(0);
-	GLFunctionParse::glVertexAttribPointer(1,4,GL_FLOAT,GL_FALSE,6*sizeof(GLfloat),BUFFER_OFFSET(2*sizeof(GLfloat)));
-	GLFunctionParse::glEnableVertexAttribArrayARB(1);
-	GLFunctionParse::glBindVertexArray(0);
-	m_pGLShaderMgr->getGLShader()->end();
-
-	return true;
-}
+//bool COpenGLView::initBufferData()
+//{
+//	GLfloat vertexData[6][6] = 
+//	{
+//		{ -0.9f, -0.9f, 1.0f,0.0f,0.0f,1.0f },//first triangle
+//		{ 0.85f, -0.9f, 0.0f,1.0f,0.0f,1.0f },
+//		{ -0.9f, 0.85f, 0.0f,0.0f,1.0f,1.0f },
+//		{ 0.9f, -0.85f, 1.0f,0.0f,0.0f,1.0f },//second triangle
+//		{ 0.9f,   0.9f, 0.0f,1.0f,0.0f,1.0f },
+//		{ -0.85f, 0.9f, 0.0f,0.0f,1.0f,1.0f }
+//	};
+//
+//	GLFunctionParse::glGenVertexArrays(1, &m_nVertexArrayID);
+//	GLFunctionParse::glBindVertexArray(m_nVertexArrayID);
+//	GLFunctionParse::glGenBuffers(1, &m_nBuffers);
+//	GLFunctionParse::glBindBuffer(GL_ARRAY_BUFFER, m_nVertexArrayID);
+//	GLFunctionParse::glBufferData(GL_ARRAY_BUFFER,sizeof( vertexData ), vertexData, GL_STATIC_DRAW);
+//
+//	m_pGLShaderMgr = std::make_shared<GLShaderMgr>( vertextShader, fragShader );
+//	m_pGLShaderMgr->getGLShader()[renderType::demoCube]->begin();
+//	GLFunctionParse::glVertexAttribPointer(0,2,GL_FLOAT, GL_FALSE, 6*sizeof(GLfloat), NULL);
+//	GLFunctionParse::glEnableVertexAttribArrayARB(0);
+//	GLFunctionParse::glVertexAttribPointer(1,4,GL_FLOAT,GL_FALSE,6*sizeof(GLfloat),BUFFER_OFFSET(2*sizeof(GLfloat)));
+//	GLFunctionParse::glEnableVertexAttribArrayARB(1);
+//	GLFunctionParse::glBindVertexArray(0);
+//	m_pGLShaderMgr->getGLShader()[renderType::demoCube]->end();
+//
+//	return true;
+//}
 
 void COpenGLView::initCubeData()
 {
@@ -903,13 +947,38 @@ void COpenGLView::initCubeData()
     GLFunctionParse::glBufferData(GL_ARRAY_BUFFER,sizeof(cubeData), cubeData, GL_STATIC_DRAW);
 
     m_pGLShaderMgr = std::make_shared<GLShaderMgr>( vertextShader, fragShader );
-	m_pGLShaderMgr->getGLShader()->begin();
+	m_pGLShaderMgr->getGLShader()[renderType::demoCube]->begin();
     //GLint mModelViewProjectionMatrix =  GLFunctionParse::glGetUniformLocation( m_pGLShaderMgr->getGLShader()->getprogramID(), std::string("mModelViewProjectionMatrix").c_str() );
     GLFunctionParse::glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,0,BUFFER_OFFSET(0));
     GLFunctionParse::glEnableVertexAttribArrayARB(0);
     GLFunctionParse::glBindVertexArray(0);
     GLFunctionParse::glBindBuffer( GL_ARRAY_BUFFER, 0 );
-    m_pGLShaderMgr->getGLShader()->end();
-    
+    m_pGLShaderMgr->getGLShader()[renderType::demoCube]->end();
+
+    m_pGLShaderMgr->insertGLShader( vertextIndexPlaneShader, fragIndexPlaneShader );
+
+    GLfloat indexPlane[8][3] = 
+    {
+        {  1.0f, 0.0f, 0.0f },
+        { -0.5f,-0.5f, 0.5f },
+        {  0.0f, 1.0f, 0.0f },
+        {  1.5f,-0.5f, 0.5f },
+        {  0.0f, 0.0f, 1.0f },
+        {  1.5f, 1.5f, 0.5f },
+        {  1.0f, 1.0f, 0.0f },
+        { -0.5f, 1.5f, 0.5f }
+    };
+    GLFunctionParse::glGenVertexArrays(1, &m_nVertexArrayIDIndexPlane);
+    GLFunctionParse::glBindVertexArray(m_nVertexArrayIDIndexPlane);
+    GLFunctionParse::glGenBuffers(1,&m_nBuffersIndexPlane);
+    GLFunctionParse::glBindBuffer(GL_ARRAY_BUFFER, m_nBuffersIndexPlane);
+    GLFunctionParse::glBufferData( GL_ARRAY_BUFFER,sizeof(indexPlane), indexPlane, GL_STATIC_DRAW );
+    GLFunctionParse::glVertexAttribPointer(1,3,GL_FLOAT,GL_FALSE,sizeof(GLfloat)*6,BUFFER_OFFSET(0));
+    GLFunctionParse::glEnableVertexAttribArrayARB(1);
+    GLFunctionParse::glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE, sizeof(GLfloat)*6, BUFFER_OFFSET( 3* sizeof(GLfloat) ));
+    GLFunctionParse::glEnableVertexAttribArrayARB(0);
+    GLFunctionParse::glBindVertexArray(0);
+    GLFunctionParse::glBindBuffer( GL_ARRAY_BUFFER, 0 );
+
 }
 

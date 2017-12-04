@@ -45,11 +45,13 @@ private:
     bool initVolumeData();
 
 private:
-    bool initBufferData();
+    /*bool initBufferData();*/
     void initCubeData();
 private:
     GLuint m_nVertexArrayID;
     GLuint m_nBuffers;
+    GLuint m_nVertexArrayIDIndexPlane;
+    GLuint m_nBuffersIndexPlane;
     std::shared_ptr<GLShaderMgr> m_pGLShaderMgr;
 private:
     CClientDC* m_pClientDC;
@@ -58,6 +60,12 @@ private:
     class mathImpl;
     std::shared_ptr< mathImpl > m_pMathImpl;
     CPoint m_ReferencePoint;
+public:
+    enum renderType
+    {
+        demoCube,
+        IndexPlane
+    };
 // Generated message map functions
 protected:
 	afx_msg void OnFilePrintPreview();

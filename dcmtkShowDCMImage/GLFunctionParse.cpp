@@ -4,6 +4,9 @@
 PFNGLGENBUFFERSPROC GLFunctionParse::glGenBuffers = NULL;
 PFNGLBINDBUFFERPROC GLFunctionParse::glBindBuffer = NULL;
 PFNGLBUFFERDATAPROC GLFunctionParse::glBufferData = NULL;
+PFNGLBUFFERSUBDATAPROC GLFunctionParse::glBufferSubData = NULL;
+PFNGLMAPBUFFERPROC GLFunctionParse::glMapBuffer = NULL;
+PFNGLUNMAPBUFFERPROC GLFunctionParse::glUnmapBuffer = NULL;
 
 PFNGLCREATESHADERPROC  GLFunctionParse::glCreateShader  = NULL;
 PFNGLSHADERSOURCEPROC  GLFunctionParse::glShaderSource  = NULL;
@@ -65,6 +68,11 @@ bool GLFunctionParse::initGLFunction()
         glGenBuffers = reinterpret_cast<PFNGLGENBUFFERSPROC>( wglGetProcAddress("glGenBuffers") );
         glBindBuffer = reinterpret_cast<PFNGLBINDBUFFERPROC>( wglGetProcAddress("glBindBuffer") );
         glBufferData = reinterpret_cast<PFNGLBUFFERDATAPROC>( wglGetProcAddress("glBufferData") );
+        glBufferSubData = reinterpret_cast<PFNGLBUFFERSUBDATAPROC>( wglGetProcAddress("glBufferSubData") );
+        glMapBuffer = reinterpret_cast<PFNGLMAPBUFFERPROC>( wglGetProcAddress("glMapBuffer") );
+        glUnmapBuffer = reinterpret_cast<PFNGLUNMAPBUFFERPROC>( wglGetProcAddress("glUnmapBuffer") );
+
+
         glCreateShader = reinterpret_cast<PFNGLCREATESHADERPROC>( wglGetProcAddress("glCreateShader") );
         glShaderSource = reinterpret_cast<PFNGLSHADERSOURCEPROC>( wglGetProcAddress("glShaderSource") );
         glCompileShader = reinterpret_cast<PFNGLCOMPILESHADERPROC>( wglGetProcAddress("glCompileShader") );
@@ -121,7 +129,7 @@ bool GLFunctionParse::variant()
         glGenBuffers == NULL || glBindBuffer == NULL || glBufferData == NULL || glVertexAttribPointer == NULL || glEnableVertexAttribArrayARB == NULL || glGetUniformLocation == NULL || glUniform1f == NULL ||
         glUniform2f == NULL || glUniform3f == NULL || glUniform4f == NULL || glUniform1i == NULL || glUniform2i == NULL || glUniform3i == NULL || glUniformMatrix2fv == NULL || glUniformMatrix3fv == NULL || glUniformMatrix4fv == NULL
         /*|| glGenTexturesEXT == NULL || glBindTextureEXT == NULL || glDeleteTexturesEXT == NULL*/
-        || glGenFramebuffers == NULL || glBindFramebuffer == NULL || glDeleteFramebuffers == NULL || glFramebufferTexture2D == NULL || glTexImage3D == NULL
+        || glGenFramebuffers == NULL || glBindFramebuffer == NULL || glDeleteFramebuffers == NULL || glFramebufferTexture2D == NULL || glTexImage3D == NULL || glBufferSubData == NULL || glMapBuffer == NULL || glUnmapBuffer == NULL
         )
     {
         return false;

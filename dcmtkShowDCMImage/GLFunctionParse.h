@@ -15,6 +15,9 @@ public:
     static PFNGLGENBUFFERSPROC glGenBuffers;
     static PFNGLBINDBUFFERPROC glBindBuffer;
     static PFNGLBUFFERDATAPROC glBufferData;
+    static PFNGLBUFFERSUBDATAPROC glBufferSubData;
+    static PFNGLMAPBUFFERPROC glMapBuffer;
+    static PFNGLUNMAPBUFFERPROC glUnmapBuffer;
 
     //GL_VERSION_2_0
     static PFNGLCREATESHADERPROC glCreateShader;
