@@ -33,10 +33,13 @@ char* fragShader = R(
         layout( location = 0 ) in vec4 vPosition;
         layout( location = 1 ) in vec4 vColor;
          uniform mat4 mModelViewProjectionMatrix;
+         uniform float indexPlane;
          out vec4 fragColor;
         void main()
         {
-            gl_Position = mModelViewProjectionMatrix*vPosition;
+            vec4 position = vPosition;
+            position.z = indexPlane;
+            gl_Position = mModelViewProjectionMatrix*position;
             fragColor = vColor;
         }
     );

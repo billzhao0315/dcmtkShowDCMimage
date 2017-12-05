@@ -334,6 +334,10 @@ void COpenGLView::OnDraw(CDC* pDC)
         m_pGLShaderMgr->getGLShader()[renderType::IndexPlane]->begin();
         GLint mModelViewProjectionMatrixIndexPlane =  GLFunctionParse::glGetUniformLocation( m_pGLShaderMgr->getGLShader()[renderType::IndexPlane]->getprogramID(), std::string("mModelViewProjectionMatrix").c_str() );
         GLFunctionParse::glUniformMatrix4fv( mModelViewProjectionMatrixIndexPlane,1, GL_FALSE, m_pMathImpl->getMatrix() );
+
+        GLint indexPlane =  GLFunctionParse::glGetUniformLocation( m_pGLShaderMgr->getGLShader()[renderType::IndexPlane]->getprogramID(), std::string("indexPlane").c_str() );
+        GLFunctionParse::glUniform1f( indexPlane,newIndex );
+
         glDisable( GL_CULL_FACE );
         glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
         GLFunctionParse::glBindVertexArray(m_nVertexArrayIDIndexPlane);
@@ -627,7 +631,7 @@ BOOL COpenGLView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
         newIndex = 0.0f;
     }
 
-    GLFunctionParse::glBindBuffer(GL_ARRAY_BUFFER, m_nBuffersIndexPlane);
+    /*GLFunctionParse::glBindBuffer(GL_ARRAY_BUFFER, m_nBuffersIndexPlane);
         
     void* ptr = GLFunctionParse::glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
     ((GLfloat*)ptr)[1*3+2] = newIndex;
@@ -636,7 +640,7 @@ BOOL COpenGLView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
     ((GLfloat*)ptr)[7*3+2] = newIndex;
     GLFunctionParse::glUnmapBuffer( GL_ARRAY_BUFFER );
     GLFunctionParse::glBindBuffer( GL_ARRAY_BUFFER, 0 );
-    glFinish();
+    glFinish();*/
 
     Invalidate( FALSE );
 	return CView::OnMouseWheel(nFlags, zDelta, pt);
@@ -960,13 +964,13 @@ void COpenGLView::initCubeData()
     GLfloat indexPlane[8][3] = 
     {
         {  1.0f, 0.0f, 0.0f },
-        { -0.5f,-0.5f, 0.5f },
+        { -0.2f,-0.2f, 0.5f },
         {  0.0f, 1.0f, 0.0f },
-        {  1.5f,-0.5f, 0.5f },
+        {  1.2f,-0.2f, 0.5f },
         {  0.0f, 0.0f, 1.0f },
-        {  1.5f, 1.5f, 0.5f },
+        {  1.2f, 1.2f, 0.5f },
         {  1.0f, 1.0f, 0.0f },
-        { -0.5f, 1.5f, 0.5f }
+        { -0.2f, 1.2f, 0.5f }
     };
     GLFunctionParse::glGenVertexArrays(1, &m_nVertexArrayIDIndexPlane);
     GLFunctionParse::glBindVertexArray(m_nVertexArrayIDIndexPlane);
