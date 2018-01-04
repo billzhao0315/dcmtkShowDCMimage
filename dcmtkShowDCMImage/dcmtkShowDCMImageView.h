@@ -88,6 +88,7 @@ public:
 //    afx_msg void OnMouseHWheel(UINT nFlags, short zDelta, CPoint pt);
     afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
     virtual void OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /*pHint*/);
+    afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
 };
 
 #ifndef _DEBUG  // debug version in dcmtkShowDCMImageView.cpp

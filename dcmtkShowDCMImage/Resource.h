@@ -86,19 +86,24 @@
 #define IDS_EDIT_MENU                   306
 #define IDC_CURSOR1                     310
 #define IDC_EYE_ROTATE_CURSOR           310
+#define IDR_MENU1                       311
+#define IDR_TRANSVERSE_POPUP            311
 #define ID_FILE_OPENDICOM               32771
 #define ID_TOOLS_ROTATE                 32772
 #define ID_TOOLS_PAN                    32773
 #define ID_TOOLS_ZOOMOUT                32774
 #define ID_TOOLS_ZOOMIN                 32775
 #define ID_VR_3DTEXTURETYPE             32776
+#define ID_ZOOM_PAN                     32777
+#define ID_ZOOM_WINDOW                  32778
+#define ID_TRANSVERSE_ZOOM              32779
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        311
-#define _APS_NEXT_COMMAND_VALUE         32777
+#define _APS_NEXT_RESOURCE_VALUE        312
+#define _APS_NEXT_COMMAND_VALUE         32780
 #define _APS_NEXT_CONTROL_VALUE         1000
 #define _APS_NEXT_SYMED_VALUE           310
 #endif

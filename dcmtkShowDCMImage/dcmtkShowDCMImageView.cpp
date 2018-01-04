@@ -55,6 +55,7 @@ BEGIN_MESSAGE_MAP(CdcmtkShowDCMImageView, CView)
     //ON_COMMAND(ID_FILE_OPENDICOM, &CdcmtkShowDCMImageView::OnFileOpendicom)
 //    ON_WM_MOUSEHWHEEL()
     ON_WM_MOUSEWHEEL()
+    ON_WM_RBUTTONDOWN()
 END_MESSAGE_MAP()
 
 // CdcmtkShowDCMImageView construction/destruction
@@ -676,4 +677,20 @@ void CdcmtkShowDCMImageView::drawCube()
         glVertex3f( 1.0f,0.0f,0.0f );
     glEnd();
     glFinish();
+}
+
+
+void CdcmtkShowDCMImageView::OnRButtonDown(UINT nFlags, CPoint point)
+{
+    // TODO: Add your message handler code here and/or call default
+    std::unique_ptr<CMenu> pMenu( new CMenu() );
+    pMenu->LoadMenu( IDR_TRANSVERSE_POPUP );
+
+    CMenu* pSubMenu = pMenu->GetSubMenu( 0 );
+
+    ClientToScreen( &point );
+
+    pSubMenu->TrackPopupMenu( TPM_LEFTALIGN | TPM_RIGHTBUTTON, point.x, point.y, this);
+
+    CView::OnRButtonDown(nFlags, point);
 }
