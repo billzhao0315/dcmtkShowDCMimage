@@ -3,6 +3,9 @@
 #include "glext.h"
 #define R(...) #__VA_ARGS__
 
+/*************************demoCube---begin************************************/
+/*the shader show the demo cube, we use the postion data as the color for that the their data is same form 0.0 to 1.0 */
+
 char* vertextShader = R(
          #version 430 core\n
          layout( location = 0 ) in vec4 vPosition;
@@ -26,8 +29,10 @@ char* fragShader = R(
          }
     );
 
+/*************************demoCube---end************************************/
 
-
+/*************************indexPlane for demoCube---begin************************************/
+    /*the shader show the index plane, and move the position for z by the uniform variant indexPlane*/
     char* vertextIndexPlaneShader = R(
          #version 430 core\n
         layout( location = 0 ) in vec4 vPosition;
@@ -53,3 +58,4 @@ char* fragIndexPlaneShader = R(
              outColor = fragColor;
          }
     );
+/*************************indexPlane for demoCube---end************************************/
