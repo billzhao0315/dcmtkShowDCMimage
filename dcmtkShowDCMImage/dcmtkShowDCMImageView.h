@@ -1,5 +1,5 @@
 
-// dcmtkShowDCMImageView.h : interface of the CdcmtkShowDCMImageView class
+// dcmtkShowDCMImageView.h : interface of the TransverseView class
 //
 
 #pragma once
@@ -10,17 +10,19 @@
 #include "Observer.h"
 #include <map>
 
+#include "USSTBaseView.h"
+
 #include <gl/GL.h>
 #include "glext.h"
 #include "wglext.h"
 class DcmDataset;
 class DICOMImageHelper;
 
-class CdcmtkShowDCMImageView : public CView, public Observer
+class TransverseView : public USSTBaseView, public Observer
 {
 protected: // create from serialization only
-	CdcmtkShowDCMImageView();
-	DECLARE_DYNCREATE(CdcmtkShowDCMImageView)
+	TransverseView();
+	DECLARE_DYNCREATE(TransverseView)
 public:
     static AttributeTag tagMouseWheel;
 // Attributes
@@ -60,12 +62,12 @@ private:
     static std::map<int, std::shared_ptr<ByteBlendLUT> >   m_mapBlend;
     static const int BYTE_RANGE;
 private:
-    std::shared_ptr<ByteBlendLUT> CdcmtkShowDCMImageView::getByteBlendLUT( int nPercentAlpha );
+    std::shared_ptr<ByteBlendLUT> TransverseView::getByteBlendLUT( int nPercentAlpha );
     void drawCube();
 
 // Implementation
 public:
-	virtual ~CdcmtkShowDCMImageView();
+	virtual ~TransverseView();
 #ifdef _DEBUG
 	virtual void AssertValid() const;
 	virtual void Dump(CDumpContext& dc) const;
@@ -89,10 +91,14 @@ public:
     afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
     virtual void OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /*pHint*/);
     afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
+
+public:
+    virtual std::unique_ptr<CMenu> createPopUpMenu();
+
 };
 
 #ifndef _DEBUG  // debug version in dcmtkShowDCMImageView.cpp
-inline CdcmtkShowDCMImageDoc* CdcmtkShowDCMImageView::GetDocument() const
+inline CdcmtkShowDCMImageDoc* TransverseView::GetDocument() const
    { return reinterpret_cast<CdcmtkShowDCMImageDoc*>(m_pDocument); }
 #endif
 

@@ -1,5 +1,5 @@
 ﻿
-// dcmtkShowDCMImageView.cpp : implementation of the CdcmtkShowDCMImageView class
+// dcmtkShowDCMImageView.cpp : implementation of the TransverseView class
 //
 
 #include "stdafx.h"
@@ -30,8 +30,8 @@
 
 #pragma comment( lib, "OpenGL32.lib" )
 #pragma comment( lib, "glu32.lib" )
-std::map<int, std::shared_ptr<CdcmtkShowDCMImageView::ByteBlendLUT> > CdcmtkShowDCMImageView::m_mapBlend;
-const int CdcmtkShowDCMImageView::BYTE_RANGE = 256;
+std::map<int, std::shared_ptr<TransverseView::ByteBlendLUT> > TransverseView::m_mapBlend;
+const int TransverseView::BYTE_RANGE = 256;
 void* pDicomDibits = NULL;
 unsigned char* pRGBDicomDibits;
 LPBITMAPINFOHEADER m_lpBMIH;
@@ -39,38 +39,38 @@ LPBITMAPINFOHEADER m_lpBMIH;
 GLfloat cubeAlpha = 0.5f;
 bool cdcBlendOpenGL = false;
 
-AttributeTag CdcmtkShowDCMImageView::tagMouseWheel;
+AttributeTag TransverseView::tagMouseWheel;
 
-// CdcmtkShowDCMImageView
-IMPLEMENT_DYNCREATE(CdcmtkShowDCMImageView, CView)
+// TransverseView
+IMPLEMENT_DYNCREATE(TransverseView, CView)
 
-BEGIN_MESSAGE_MAP(CdcmtkShowDCMImageView, CView)
+BEGIN_MESSAGE_MAP(TransverseView, CView)
 	// Standard printing commands
 	ON_COMMAND(ID_FILE_PRINT, &CView::OnFilePrint)
 	ON_COMMAND(ID_FILE_PRINT_DIRECT, &CView::OnFilePrint)
-	ON_COMMAND(ID_FILE_PRINT_PREVIEW, &CdcmtkShowDCMImageView::OnFilePrintPreview)
+	ON_COMMAND(ID_FILE_PRINT_PREVIEW, &TransverseView::OnFilePrintPreview)
 	ON_WM_CONTEXTMENU()
 	ON_WM_RBUTTONUP()
     ON_WM_CREATE()
-    //ON_COMMAND(ID_FILE_OPENDICOM, &CdcmtkShowDCMImageView::OnFileOpendicom)
+    //ON_COMMAND(ID_FILE_OPENDICOM, &TransverseView::OnFileOpendicom)
 //    ON_WM_MOUSEHWHEEL()
     ON_WM_MOUSEWHEEL()
     ON_WM_RBUTTONDOWN()
 END_MESSAGE_MAP()
 
-// CdcmtkShowDCMImageView construction/destruction
+// TransverseView construction/destruction
 
-CdcmtkShowDCMImageView::CdcmtkShowDCMImageView()
+TransverseView::TransverseView()
 {
 	// TODO: add construction code here
 }
 
-CdcmtkShowDCMImageView::~CdcmtkShowDCMImageView()
+TransverseView::~TransverseView()
 {
 
 }
 
-BOOL CdcmtkShowDCMImageView::PreCreateWindow(CREATESTRUCT& cs)
+BOOL TransverseView::PreCreateWindow(CREATESTRUCT& cs)
 {
 	// TODO: Modify the Window class or styles here by modifying
 	//  the CREATESTRUCT cs
@@ -78,9 +78,9 @@ BOOL CdcmtkShowDCMImageView::PreCreateWindow(CREATESTRUCT& cs)
 	return CView::PreCreateWindow(cs);
 }
 
-// CdcmtkShowDCMImageView drawing
+// TransverseView drawing
 
-void CdcmtkShowDCMImageView::OnDraw(CDC* pDC)
+void TransverseView::OnDraw(CDC* pDC)
 {
 	CdcmtkShowDCMImageDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
@@ -193,7 +193,7 @@ void CdcmtkShowDCMImageView::OnDraw(CDC* pDC)
 
                 CRect rc;
                 GetClientRect(&rc);
-                int xDst = rc.right/2 - m_lpBMIH->biWidth/2;
+                /*int xDst = static_cast<int>( static_cast< double >(rc.right)/2.0 - static_cast< double >( m_lpBMIH->biWidth )/2.0 );*/
 
                 HBITMAP hBitmap = NULL;
 
@@ -349,39 +349,39 @@ void CdcmtkShowDCMImageView::OnDraw(CDC* pDC)
 }
 
 
-// CdcmtkShowDCMImageView printing
+// TransverseView printing
 
 
-void CdcmtkShowDCMImageView::OnFilePrintPreview()
+void TransverseView::OnFilePrintPreview()
 {
 #ifndef SHARED_HANDLERS
 	AFXPrintPreview(this);
 #endif
 }
 
-BOOL CdcmtkShowDCMImageView::OnPreparePrinting(CPrintInfo* pInfo)
+BOOL TransverseView::OnPreparePrinting(CPrintInfo* pInfo)
 {
 	// default preparation
 	return DoPreparePrinting(pInfo);
 }
 
-void CdcmtkShowDCMImageView::OnBeginPrinting(CDC* /*pDC*/, CPrintInfo* /*pInfo*/)
+void TransverseView::OnBeginPrinting(CDC* /*pDC*/, CPrintInfo* /*pInfo*/)
 {
 	// TODO: add extra initialization before printing
 }
 
-void CdcmtkShowDCMImageView::OnEndPrinting(CDC* /*pDC*/, CPrintInfo* /*pInfo*/)
+void TransverseView::OnEndPrinting(CDC* /*pDC*/, CPrintInfo* /*pInfo*/)
 {
 	// TODO: add cleanup after printing
 }
 
-void CdcmtkShowDCMImageView::OnRButtonUp(UINT /* nFlags */, CPoint point)
+void TransverseView::OnRButtonUp(UINT /* nFlags */, CPoint point)
 {
 	ClientToScreen(&point);
 	OnContextMenu(this, point);
 }
 
-void CdcmtkShowDCMImageView::OnContextMenu(CWnd* /* pWnd */, CPoint point)
+void TransverseView::OnContextMenu(CWnd* /* pWnd */, CPoint point)
 {
 #ifndef SHARED_HANDLERS
 	theApp.GetContextMenuManager()->ShowPopupMenu(IDR_POPUP_EDIT, point.x, point.y, this, TRUE);
@@ -389,20 +389,20 @@ void CdcmtkShowDCMImageView::OnContextMenu(CWnd* /* pWnd */, CPoint point)
 }
 
 
-// CdcmtkShowDCMImageView diagnostics
+// TransverseView diagnostics
 
 #ifdef _DEBUG
-void CdcmtkShowDCMImageView::AssertValid() const
+void TransverseView::AssertValid() const
 {
 	CView::AssertValid();
 }
 
-void CdcmtkShowDCMImageView::Dump(CDumpContext& dc) const
+void TransverseView::Dump(CDumpContext& dc) const
 {
 	CView::Dump(dc);
 }
 
-CdcmtkShowDCMImageDoc* CdcmtkShowDCMImageView::GetDocument() const // non-debug version is inline
+CdcmtkShowDCMImageDoc* TransverseView::GetDocument() const // non-debug version is inline
 {
 	ASSERT(m_pDocument->IsKindOf(RUNTIME_CLASS(CdcmtkShowDCMImageDoc)));
 	return (CdcmtkShowDCMImageDoc*)m_pDocument;
@@ -410,10 +410,10 @@ CdcmtkShowDCMImageDoc* CdcmtkShowDCMImageView::GetDocument() const // non-debug 
 #endif //_DEBUG
 
 
-// CdcmtkShowDCMImageView message handlers
+// TransverseView message handlers
 
 
-int CdcmtkShowDCMImageView::OnCreate(LPCREATESTRUCT lpCreateStruct)
+int TransverseView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
     if (CView::OnCreate(lpCreateStruct) == -1)
         return -1;
@@ -431,7 +431,7 @@ int CdcmtkShowDCMImageView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 }
 
 
-//void CdcmtkShowDCMImageView::OnMouseHWheel(UINT nFlags, short zDelta, CPoint pt)
+//void TransverseView::OnMouseHWheel(UINT nFlags, short zDelta, CPoint pt)
 //{
 //    // This feature requires Windows Vista or greater.
 //    // The symbol _WIN32_WINNT must be >= 0x0600.
@@ -442,7 +442,7 @@ int CdcmtkShowDCMImageView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 //}
 
 
-BOOL CdcmtkShowDCMImageView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
+BOOL TransverseView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 {
     // TODO: Add your message handler code here and/or call default
     CdcmtkShowDCMImageDoc* pDoc = GetDocument();
@@ -463,7 +463,7 @@ BOOL CdcmtkShowDCMImageView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
     return CView::OnMouseWheel(nFlags, zDelta, pt);
 }
 
-void CdcmtkShowDCMImageView::OnUpdate(CView* /*pSender*/, LPARAM lHint, CObject* /*pHint*/)
+void TransverseView::OnUpdate(CView* /*pSender*/, LPARAM lHint, CObject* /*pHint*/)
 {
     // TODO: Add your specialized code here and/or call the base class
     if( lHint == static_cast<LPARAM>(CdcmtkShowDCMImageDoc::tagDICOMImport.getValue()) ||
@@ -474,13 +474,13 @@ void CdcmtkShowDCMImageView::OnUpdate(CView* /*pSender*/, LPARAM lHint, CObject*
 }
 
 
-void CdcmtkShowDCMImageView::onSubjectNotify(Subject* /*pSubject*/, AttributeTag /*tag*/, void* /*pOldValue*/, void* /*pNewValue*/)
+void TransverseView::onSubjectNotify(Subject* /*pSubject*/, AttributeTag /*tag*/, void* /*pOldValue*/, void* /*pNewValue*/)
 {
     
 }
 
 
-bool CdcmtkShowDCMImageView::GLSetting()
+bool TransverseView::GLSetting()
 {
 
     m_pClientDCSPV = new CClientDC(this);
@@ -537,7 +537,7 @@ bool CdcmtkShowDCMImageView::GLSetting()
 
 
 
-std::shared_ptr<CdcmtkShowDCMImageView::ByteBlendLUT> CdcmtkShowDCMImageView::getByteBlendLUT( int nPercentAlpha )
+std::shared_ptr<TransverseView::ByteBlendLUT> TransverseView::getByteBlendLUT( int nPercentAlpha )
 {
     // Clamp the alpha percentage to a valid percentage range.
     nPercentAlpha = std::max<int>( nPercentAlpha, 0 );
@@ -593,7 +593,7 @@ std::shared_ptr<CdcmtkShowDCMImageView::ByteBlendLUT> CdcmtkShowDCMImageView::ge
     return pLUT;
 }
 
-void CdcmtkShowDCMImageView::drawCube()
+void TransverseView::drawCube()
 {
 
 
@@ -680,14 +680,22 @@ void CdcmtkShowDCMImageView::drawCube()
 }
 
 
-void CdcmtkShowDCMImageView::OnRButtonDown(UINT nFlags, CPoint point)
+std::unique_ptr<CMenu> TransverseView::createPopUpMenu()
 {
-    // TODO: Add your message handler code here and/or call default
     std::unique_ptr<CMenu> pMenu( new CMenu() );
     pMenu->LoadMenu( IDR_TRANSVERSE_POPUP );
 
-    CMenu* pSubMenu = pMenu->GetSubMenu( 0 );
+    std::unique_ptr<CMenu> pSubMenu =  std::unique_ptr<CMenu>( pMenu->GetSubMenu( 0 ) );
 
+    return  std::move( pSubMenu );
+}
+
+
+void TransverseView::OnRButtonDown(UINT nFlags, CPoint point)
+{
+    // TODO: Add your message handler code here and/or call default
+    
+    std::unique_ptr<CMenu> pSubMenu = createPopUpMenu();
     ClientToScreen( &point );
 
     pSubMenu->TrackPopupMenu( TPM_LEFTALIGN | TPM_RIGHTBUTTON, point.x, point.y, this);

@@ -161,6 +161,10 @@ bool DICOMImageHelper::DicomParse( std::vector<std::string> pathNames )
                 pDicomSeries->m_pOriginPixelData = new unsigned char[pixelDataLen];
                 memcpy( pDicomSeries->m_pOriginPixelData, pU8Pixel, pixelDataLen );
             }
+            else
+            {
+                assert( false );
+            }
             
             if( pElementValue == NULL )
             {

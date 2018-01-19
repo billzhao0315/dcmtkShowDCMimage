@@ -1,5 +1,5 @@
 ﻿
-// dcmtkShowDCMImageView.cpp : implementation of the CdcmtkShowDCMImageView class
+// dcmtkShowDCMImageView.cpp : implementation of the COpenGLView class
 //
 
 #include "stdafx.h"
@@ -68,7 +68,7 @@ GLfloat newIndex = 0.5f;
 		glTexCoord3f(0.0f, 1.0f, ((float)TexIndex+1.0f)/2.0f);  \
 		glVertex3f(-dOrthoSize,dOrthoSize,TexIndex);
 
-// CdcmtkShowDCMImageView
+// COpenGLView
 IMPLEMENT_DYNCREATE(COpenGLView, CView)
 
 BEGIN_MESSAGE_MAP(COpenGLView, CView)
@@ -153,15 +153,15 @@ public:
         double angleX = (currentPoint.y - startPoint.y);
         double angleY = (currentPoint.x - startPoint.x);
 
-        double rotateAngle = sqrtf( angleX*angleX + angleY*angleY );
+        double rotateAngle = sqrt( angleX*angleX + angleY*angleY );
 
         rotateAngle = abs(rotateAngle) < 1 ? 1 : rotateAngle;
 
         //double mouseDirection[3] = { point.x - m_pStartLocation.x, point.y - m_pStartLocation.y,0 };
 
         std::vector<GLfloat> mouseDirection(3);
-        mouseDirection[0] = currentPoint.x - startPoint.x;
-        mouseDirection[1] = startPoint.y - currentPoint.y;
+        mouseDirection[0] = static_cast< GLfloat >( currentPoint.x - startPoint.x );
+        mouseDirection[1] = static_cast< GLfloat >( startPoint.y - currentPoint.y );
         mouseDirection[2] = 0;
 
         std::vector<GLfloat> viewDirection(3);
@@ -221,7 +221,7 @@ public:
         glm::mat4x4 modelviewMatrix;
 	    modelviewMatrix = glm::lookAt( glm::vec3(0.0,0.0,3.0),glm::vec3(0.0,0.0,0.0),glm::vec3(0.0,1.0,0.0) );
         glm::mat4x4 projectionMatrix;
-        projectionMatrix = glm::perspective(45.0,1.0,1.0,7.0);
+        projectionMatrix = glm::perspective(45.0,1.0,1.0,10.0);
 
         glm::mat4x4 modelMatrix;
 
@@ -262,7 +262,7 @@ private:
     bool   m_bDemoCube;
 };
 
-// CdcmtkShowDCMImageView construction/destruction
+// COpenGLView construction/destruction
 
 COpenGLView::COpenGLView()
 {
@@ -288,9 +288,9 @@ BOOL COpenGLView::PreCreateWindow(CREATESTRUCT& cs)
 	return CView::PreCreateWindow(cs);
 }
 
-// CdcmtkShowDCMImageView drawing
+// COpenGLView drawing
 
-void COpenGLView::OnDraw(CDC* pDC)
+void COpenGLView::OnDraw(CDC* /*pDC*/)
 {
 	CdcmtkShowDCMImageDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
@@ -371,6 +371,9 @@ void COpenGLView::OnDraw(CDC* pDC)
 		{
 			glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 		}
+
+        glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+
 		glDisable( GL_CULL_FACE );
 		//
 		glEnable(GL_TEXTURE_3D);
@@ -460,7 +463,7 @@ void COpenGLView::OnDraw(CDC* pDC)
 }
 
 
-// CdcmtkShowDCMImageView printing
+// COpenGLView printing
 
 
 void COpenGLView::OnFilePrintPreview()
@@ -500,7 +503,7 @@ void COpenGLView::OnContextMenu(CWnd* /* pWnd */, CPoint point)
 }
 
 
-// CdcmtkShowDCMImageView diagnostics
+// COpenGLView diagnostics
 
 #ifdef _DEBUG
 void COpenGLView::AssertValid() const
@@ -521,7 +524,7 @@ CdcmtkShowDCMImageDoc* COpenGLView::GetDocument() const // non-debug version is 
 #endif //_DEBUG
 
 
-// CdcmtkShowDCMImageView message handlers
+// COpenGLView message handlers
 
 
 
@@ -610,7 +613,7 @@ int COpenGLView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 }
 
 
-//void CdcmtkShowDCMImageView::OnMouseHWheel(UINT nFlags, short zDelta, CPoint pt)
+//void COpenGLView::OnMouseHWheel(UINT nFlags, short zDelta, CPoint pt)
 //{
 //    // This feature requires Windows Vista or greater.
 //    // The symbol _WIN32_WINNT must be >= 0x0600.
@@ -894,6 +897,13 @@ void COpenGLView::OnMouseMove(UINT nFlags, CPoint point)
 //
 //	return true;
 //}
+
+std::unique_ptr<CMenu> COpenGLView::createPopUpMenu()
+{
+    return nullptr;
+}
+
+
 
 void COpenGLView::initCubeData()
 {

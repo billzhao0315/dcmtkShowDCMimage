@@ -2,13 +2,15 @@
 #include <afxsplitterwndex.h>
 #include "dcmtkShowDCMImageDoc.h"
 
+#include "USSTBaseView.h"
+
 #include <gl/GL.h>
 #include "glext.h"
 #include "wglext.h"
 
 class GLShaderMgr;
 
-class COpenGLView : public CView
+class COpenGLView : public USSTBaseView
 {
 protected: // create from serialization only
 	COpenGLView();
@@ -80,6 +82,11 @@ public:
     virtual void OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /*pHint*/);
     afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
     afx_msg void OnMouseMove(UINT nFlags, CPoint point);
+
+public:
+
+    virtual std::unique_ptr<CMenu> createPopUpMenu();
+
 };
 
 #ifndef _DEBUG  // debug version in dcmtkShowDCMImageView.cpp

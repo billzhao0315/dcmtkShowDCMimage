@@ -414,7 +414,7 @@ void CMainFrame::OnSettingChange(UINT uFlags, LPCTSTR lpszSection)
 }
 
 
-BOOL CMainFrame::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext)
+BOOL CMainFrame::OnCreateClient(LPCREATESTRUCT /*lpcs*/, CCreateContext* pContext)
 {
     // TODO: Add your specialized code here and/or call the base class
     if (m_splitwnd.CreateStatic( this, 2,2 ) == false)
@@ -426,10 +426,10 @@ BOOL CMainFrame::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext)
     GetClientRect(&rc);
     int nWidth( rc.right );
     int nHeight( rc.bottom );
-    bool bFlag = m_splitwnd.CreateView( 0,0,RUNTIME_CLASS(CdcmtkShowDCMImageView),CSize( nWidth/2, nHeight/2 ), pContext);
+    BOOL bFlag = m_splitwnd.CreateView( 0,0,RUNTIME_CLASS(TransverseView),CSize( nWidth/2, nHeight/2 ), pContext);
     if( !bFlag )
     {
-        MessageBox(_T("fail to create (0,0)sub-window"),_T("CdcmtkShowDCMImageView"),MB_OK|MB_ICONERROR);
+        MessageBox(_T("fail to create (0,0)sub-window"),_T("TransverseView"),MB_OK|MB_ICONERROR);
     }
 
     bFlag =  m_splitwnd.CreateView( 0,1 ,RUNTIME_CLASS(COpenGLView),CSize( nWidth/2, nHeight/2 ), pContext);
@@ -458,11 +458,11 @@ BOOL CMainFrame::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext)
 
 void CMainFrame::onNotifyObservers(
     AttributeTag tag,
-    void* pOldValue,
-    void* pNewValue
+    void* /*pOldValue*/,
+    void* /*pNewValue*/
     )
 {
-    if( tag == CdcmtkShowDCMImageView::tagMouseWheel )
+    if( tag == TransverseView::tagMouseWheel )
     {
         dynamic_cast<CdcmtkShowDCMImageDoc*>(GetActiveDocument())->onNotifyObservers(tagMouseWheel);
     }

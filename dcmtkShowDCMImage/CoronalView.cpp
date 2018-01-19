@@ -11,7 +11,18 @@ CoronalView::~CoronalView(void)
 {
 }
 
-void CoronalView::OnDraw(CDC* pDC)
+void CoronalView::OnDraw(CDC* /*pDC*/)
 {
     
 }
+
+void CoronalView::OnUpdate(CView*, LPARAM, CObject*)
+{
+    
+}
+
+std::unique_ptr<CMenu> CoronalView::createPopUpMenu()
+{
+    return nullptr;
+}
+

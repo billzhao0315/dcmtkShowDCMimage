@@ -11,7 +11,18 @@ SagittalView::~SagittalView(void)
 {
 }
 
-void SagittalView::OnDraw(CDC* pDC)
+void SagittalView::OnDraw(CDC* /*pDC*/)
 {
     
 }
+
+void SagittalView::OnUpdate(CView*, LPARAM, CObject*)
+{
+    
+}
+
+std::unique_ptr<CMenu> SagittalView::createPopUpMenu()
+{
+    return nullptr;
+}
+

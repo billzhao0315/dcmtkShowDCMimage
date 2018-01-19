@@ -78,6 +78,6 @@ private:
 private:
     DICOMHeader m_DiconHeader;
     std::vector<std::shared_ptr<DICOMSerieImage>> m_DicomSerieImage;
-    int* m_ptffFile;
+    unsigned char* m_ptffFile;
     unsigned int m_nDepth;
 };

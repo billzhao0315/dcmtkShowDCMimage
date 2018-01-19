@@ -7,7 +7,7 @@
 //{
 //
 //}
-int* tempTffFile = NULL;
+unsigned char* tempTffFile = NULL;
 
 DICOMSerieImage::~DICOMSerieImage()
 {
@@ -45,8 +45,9 @@ void DICOMSerieImage::mapToWindowLevel()
         }
         else
         {
-            pTmep[i] = ( pTmep[i] - minWindow )*255 / m_nWindow; 
+            pTmep[i] = static_cast< unsigned short >( ( pTmep[i] - minWindow )*255 / m_nWindow ); 
         }
+
         if( tempTffFile != NULL )
         {
             m_pRGBAPixelData[ 4*i ] = tempTffFile[4*pTmep[i]];
@@ -56,15 +57,17 @@ void DICOMSerieImage::mapToWindowLevel()
         }
         else
         {
-            m_pRGBAPixelData[ 4*i ] = pTmep[i];
-            m_pRGBAPixelData[ 4*i +1 ] = pTmep[i];
-            m_pRGBAPixelData[ 4*i +2 ] = pTmep[i];
-            m_pRGBAPixelData[ 4*i +3 ] = pTmep[i];
+            m_pRGBAPixelData[ 4*i ] = static_cast< unsigned char >( pTmep[i] );
+            m_pRGBAPixelData[ 4*i +1 ] = static_cast< unsigned char >( pTmep[i] );
+            m_pRGBAPixelData[ 4*i +2 ] = static_cast< unsigned char >( pTmep[i] );
+            m_pRGBAPixelData[ 4*i +3 ] = static_cast< unsigned char >( pTmep[i] );
         }
         
     }
     m_minValue = 0;
     m_maxValue = 255;
+    //m_nLevel = 127;
+    //m_nWindow = 255;
 }
 
 void DICOMSerieImage::mapToGray()
@@ -74,7 +77,8 @@ void DICOMSerieImage::mapToGray()
     m_pRGBAPixelData = new unsigned char[ imageLen *4 ];
     for( int i = 0; i < imageLen; ++i )
     {
-        int tempGray = ( ((unsigned short*)m_pOriginPixelData)[i] - m_minValue ) * Temp;
+        unsigned char tempGray = static_cast<unsigned char>( ( ((unsigned short*)m_pOriginPixelData)[i] - m_minValue ) * Temp );
+        //unsigned char tempGray = m_pPixelData[ i ];
 
         if( tempTffFile != NULL )
         {
@@ -102,7 +106,7 @@ void DICOMSerieImage::mapToGray()
 void DICOMVolume::setDICOMSeriesImage( std::vector<std::shared_ptr<DICOMSerieImage>> arrDicomSerieImage )
 {
     m_DicomSerieImage = arrDicomSerieImage;
-    m_nDepth = m_DicomSerieImage.size();
+    m_nDepth = static_cast< unsigned int >( m_DicomSerieImage.size() );
     sortDICOMSeriesByIPP();
 }
 
@@ -136,7 +140,7 @@ void DICOMVolume::loadtffFile( std::string tffFileName )
          //*( tffData +count ) = '\0';
          //std::cout<<"count: "<< count<<std::endl;
          file.close();
-         m_ptffFile = new int[count];
+         m_ptffFile = new unsigned char[count];
          //std::ofstream out("exportTff.txt");
          for( int i =0 ;i<256;++i )
          {

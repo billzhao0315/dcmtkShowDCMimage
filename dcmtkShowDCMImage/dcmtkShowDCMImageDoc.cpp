@@ -150,9 +150,9 @@ void CdcmtkShowDCMImageDoc::openDicoms( std::string pDicomFileIndex)
 {
     
     std::string sDicomPath;
-    int iPos = pDicomFileIndex.find_last_of("\\");
+    int iPos = static_cast< int >( pDicomFileIndex.find_last_of("\\") );
     sDicomPath = pDicomFileIndex.substr(0,iPos+1);
-    iPos = pDicomFileIndex.rfind(".dcm");
+    iPos = static_cast< int >( pDicomFileIndex.rfind(".dcm") );
     std::string strDicomIndex = sDicomPath +"*"+ pDicomFileIndex.substr(iPos, pDicomFileIndex.length());
     intptr_t hFile = 0;
     _finddata_t fileinfo;
@@ -206,8 +206,8 @@ unsigned int CdcmtkShowDCMImageDoc::getCurrentImageIndex()const
 
 void CdcmtkShowDCMImageDoc::onNotifyObservers(
                                              AttributeTag tag,
-                                             void* pOldValue,
-                                             void* pNewValue
+                                             void* /*pOldValue*/,
+                                             void* /*pNewValue*/
                                              )
 {
     if (tag == CMainFrame::tagMouseWheel)
@@ -217,9 +217,9 @@ void CdcmtkShowDCMImageDoc::onNotifyObservers(
     
 }
 
-void CdcmtkShowDCMImageDoc::processSpvView(AttributeTag tag,
-                    void* pOldValue,
-                    void* pNewValue)
+void CdcmtkShowDCMImageDoc::processSpvView(AttributeTag /*tag*/,
+                    void* /*pOldValue*/,
+                    void* /*pNewValue*/)
 {
 }
 
@@ -239,7 +239,7 @@ void CdcmtkShowDCMImageDoc::decreaseImageIndex()
     {
         if( m_nSeriesImageIndex == 0 )
         {
-            m_nSeriesImageIndex = m_pDicomImageHelper->getDICOMVolume()->getDICOMSeriesImage().size() - 1;
+            m_nSeriesImageIndex = static_cast<unsigned int>( m_pDicomImageHelper->getDICOMVolume()->getDICOMSeriesImage().size() - 1 );
         }
         else
         {

@@ -99,6 +99,9 @@
     <ClInclude Include="vertexfragmentShader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="USSTBaseView.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dcmtkShowDCMImage.cpp">
@@ -162,6 +165,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GLFunctionParse.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="USSTBaseView.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

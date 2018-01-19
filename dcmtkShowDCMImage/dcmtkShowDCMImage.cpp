@@ -115,7 +115,7 @@ BOOL CdcmtkShowDCMImageApp::InitInstance()
 		IDR_MAINFRAME,
 		RUNTIME_CLASS(CdcmtkShowDCMImageDoc),
 		RUNTIME_CLASS(CMainFrame),       // main SDI frame window
-		RUNTIME_CLASS(CdcmtkShowDCMImageView));
+		RUNTIME_CLASS(USSTBaseView));
 	if (!pDocTemplate)
 		return FALSE;
 	AddDocTemplate(pDocTemplate);
