@@ -152,8 +152,8 @@ void CdcmtkShowDCMImageDoc::openDicoms( std::string pDicomFileIndex)
     std::string sDicomPath;
     int iPos = static_cast< int >( pDicomFileIndex.find_last_of("\\") );
     sDicomPath = pDicomFileIndex.substr(0,iPos+1);
-    iPos = static_cast< int >( pDicomFileIndex.rfind(".dcm") );
-    std::string strDicomIndex = sDicomPath +"*"+ pDicomFileIndex.substr(iPos, pDicomFileIndex.length());
+    //iPos = static_cast< int >( pDicomFileIndex.rfind(".dcm") );
+    std::string strDicomIndex = sDicomPath +"*"/*+ pDicomFileIndex.substr(iPos, pDicomFileIndex.length())*/;
     intptr_t hFile = 0;
     _finddata_t fileinfo;
     hFile = _findfirst(strDicomIndex.c_str(), &fileinfo);
@@ -165,7 +165,15 @@ void CdcmtkShowDCMImageDoc::openDicoms( std::string pDicomFileIndex)
 
     do
     {
-        m_vDicomFileSet.push_back(sDicomPath + std::string(fileinfo.name));
+        if( strcmp( fileinfo.name, "." ) == 0 || strcmp( fileinfo.name, ".." ) == 0 )
+        {
+            continue;
+        }
+        if( m_pDicomImageHelper->isDICOMFile( sDicomPath + std::string(fileinfo.name) ) )
+        {
+            m_vDicomFileSet.push_back(sDicomPath + std::string(fileinfo.name));
+        }
+        
     } while (_findnext(hFile, &fileinfo) == 0);
 
     _findclose(hFile);
@@ -175,17 +183,23 @@ void CdcmtkShowDCMImageDoc::OnFileOpendicom()
 {
     // TODO: Add your command handler code here
     CString m_sFile;
-    CString szFilter = _T("Text Files (*.dcm)|*.dcm||"); //使打开文件对话框仅显示dcm文件
+    //CString szFilter = _T("Text Files (*.dcm)|*.dcm||"); //使打开文件对话框仅显示dcm文件
     CFileDialog  dicomFile(TRUE,
                           (LPCTSTR)".dcm",
                           m_sFile,
-                          OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT,
-                          szFilter);
+                          OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT/*,*/
+                          /*szFilter*/);
     if( dicomFile.DoModal()==TRUE )
     {
         m_sFile = dicomFile.GetPathName();
         openDicoms( m_sFile.GetString() );
         
+        if( m_vDicomFileSet.size() <= 0 )
+        {
+            MessageBoxA(NULL,_T("there is no dicom file to be imported"),_T("error"), MB_OK|MB_ICONERROR);
+            return;
+        }
+
         BeginWaitCursor();
         m_pDicomImageHelper =std::make_shared<DICOMImageHelper>();
         m_pDicomImageHelper->DicomParse(m_vDicomFileSet);

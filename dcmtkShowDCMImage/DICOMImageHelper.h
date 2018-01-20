@@ -13,6 +13,7 @@ public:
     }
     bool DicomParse( std::vector<std::string> pathNames );
     void initMemory();
+    bool isDICOMFile( std::string fileName );
 private:
    std::shared_ptr<DICOMVolume> m_pDICOMVolume;
 };

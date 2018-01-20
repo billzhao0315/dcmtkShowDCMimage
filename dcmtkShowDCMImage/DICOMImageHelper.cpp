@@ -7,7 +7,7 @@
 
 #include "DICOMVolume.h"
 #include <algorithm>
-
+#include <fstream>
 
 DICOMImageHelper::DICOMImageHelper()
 {
@@ -16,8 +16,84 @@ DICOMImageHelper::DICOMImageHelper()
 
 void DICOMImageHelper::initMemory()
 {
-    
+
 }
+
+bool DICOMImageHelper::isDICOMFile(std::string fileName)
+{
+    std::ifstream infile;
+    infile.open( fileName, std::ios::in | std::ios::binary );
+
+    try
+    {
+        infile.seekg( 128 );
+
+        char dcmFlag[4];
+
+        infile.read( dcmFlag, 4 );
+
+        if( dcmFlag[0] == 'D' && dcmFlag[1] == 'I' && dcmFlag[2] == 'C' && dcmFlag[3] == 'M' )
+        {
+            infile.close();
+            return true;
+        }
+        else
+        {
+            //the meta info is missing, assume that the first is group 0008,
+
+            infile.seekg( 0 );
+
+            infile.read( dcmFlag, 2 );
+            dcmFlag[2] = '\0';
+
+            const char firstGroup[3] = { 0x08, 0x00, '\0' };
+
+            if( strcmp( dcmFlag, firstGroup ) == 0 )
+            {
+
+                infile.close();
+                return true;
+
+
+                // the following is kept in order to get the state, implictly, Explictly, in the future
+                /*infile.seekg( 4 );
+
+                infile.read( dcmFlag, 2 );
+
+                dcmFlag[2] = '\0';
+
+                if( strcmp( dcmFlag, "CS" ) == 0 )
+                {
+                    infile.close();
+                    return true;
+                }
+                else
+                {
+                    infile.close();
+                    return true;
+                }*/
+            }
+            else
+            {
+                infile.close();
+                return false;
+            }
+
+            
+        }
+    }
+    catch( ... )
+    {
+        infile.close();
+        MessageBoxA(NULL,_T("unkonw format for file"),_T("error"), MB_OK|MB_ICONERROR);
+        return false;
+    }
+
+
+    
+
+}
+
 
 bool DICOMImageHelper::DicomParse( std::vector<std::string> pathNames )
 {
@@ -28,7 +104,14 @@ bool DICOMImageHelper::DicomParse( std::vector<std::string> pathNames )
        {
            //读DICOM文件
             DcmFileFormat* pDicomFile = new DcmFileFormat();
-            pDicomFile->loadFile( pathNames[i].c_str() );
+            OFCondition status = pDicomFile->loadFile( pathNames[i].c_str() );
+
+            if( !status.good() )
+            {
+                MessageBoxA(NULL, CString( "unable to read file:" ) + CString( pathNames[i].c_str() ),_T("error"), MB_OK|MB_ICONERROR);
+                continue;
+            }
+
             //得到数据集
             DcmDataset* pDataSet = pDicomFile->getDataset();
 
