@@ -321,6 +321,30 @@ BEGIN
     MENUITEM "Win&dows 7",                  ID_VIEW_APPLOOK_WINDOWS_7
 END
 
+IDR_OPENGL_3D MENU
+BEGIN
+    POPUP "3D Popup Menu"
+    BEGIN
+        MENUITEM "3D View",                     ID_Menu
+    END
+END
+
+IDR_SAGITTAL_POPUP MENU
+BEGIN
+    POPUP "SagittalViewPopupMenu"
+    BEGIN
+        MENUITEM "Sagittal View",               ID_SAGITTALVIEWPOPUPMENU_SAGITTALVIEW
+    END
+END
+
+IDR_CORONAL_POPUP MENU
+BEGIN
+    POPUP "CoronalPopupMenu"
+    BEGIN
+        MENUITEM "Coronal View",                ID_CORONALPOPUPMENU_CORONALVIEW
+    END
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //

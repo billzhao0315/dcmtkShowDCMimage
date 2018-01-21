@@ -42,20 +42,20 @@ bool cdcBlendOpenGL = false;
 AttributeTag TransverseView::tagMouseWheel;
 
 // TransverseView
-IMPLEMENT_DYNCREATE(TransverseView, CView)
+IMPLEMENT_DYNCREATE(TransverseView, USSTBaseView)
 
-BEGIN_MESSAGE_MAP(TransverseView, CView)
+BEGIN_MESSAGE_MAP(TransverseView, USSTBaseView)
 	// Standard printing commands
 	ON_COMMAND(ID_FILE_PRINT, &CView::OnFilePrint)
 	ON_COMMAND(ID_FILE_PRINT_DIRECT, &CView::OnFilePrint)
 	ON_COMMAND(ID_FILE_PRINT_PREVIEW, &TransverseView::OnFilePrintPreview)
-	ON_WM_CONTEXTMENU()
-	ON_WM_RBUTTONUP()
+//	ON_WM_CONTEXTMENU()
+//	ON_WM_RBUTTONUP()
     ON_WM_CREATE()
     //ON_COMMAND(ID_FILE_OPENDICOM, &TransverseView::OnFileOpendicom)
 //    ON_WM_MOUSEHWHEEL()
     ON_WM_MOUSEWHEEL()
-    ON_WM_RBUTTONDOWN()
+//    ON_WM_RBUTTONDOWN()
 END_MESSAGE_MAP()
 
 // TransverseView construction/destruction
@@ -375,18 +375,18 @@ void TransverseView::OnEndPrinting(CDC* /*pDC*/, CPrintInfo* /*pInfo*/)
 	// TODO: add cleanup after printing
 }
 
-void TransverseView::OnRButtonUp(UINT /* nFlags */, CPoint point)
-{
-	ClientToScreen(&point);
-	OnContextMenu(this, point);
-}
+//void TransverseView::OnRButtonUp(UINT /* nFlags */, CPoint point)
+//{
+//	ClientToScreen(&point);
+//	OnContextMenu(this, point);
+//}
 
-void TransverseView::OnContextMenu(CWnd* /* pWnd */, CPoint point)
-{
-#ifndef SHARED_HANDLERS
-	theApp.GetContextMenuManager()->ShowPopupMenu(IDR_POPUP_EDIT, point.x, point.y, this, TRUE);
-#endif
-}
+//void TransverseView::OnContextMenu(CWnd* /* pWnd */, CPoint point)
+//{
+//#ifndef SHARED_HANDLERS
+//	theApp.GetContextMenuManager()->ShowPopupMenu(IDR_POPUP_EDIT, point.x, point.y, this, TRUE);
+//#endif
+//}
 
 
 // TransverseView diagnostics
@@ -685,20 +685,13 @@ std::unique_ptr<CMenu> TransverseView::createPopUpMenu()
     std::unique_ptr<CMenu> pMenu( new CMenu() );
     pMenu->LoadMenu( IDR_TRANSVERSE_POPUP );
 
-    std::unique_ptr<CMenu> pSubMenu =  std::unique_ptr<CMenu>( pMenu->GetSubMenu( 0 ) );
-
-    return  std::move( pSubMenu );
+    return  std::move( pMenu );
 }
 
 
-void TransverseView::OnRButtonDown(UINT nFlags, CPoint point)
-{
-    // TODO: Add your message handler code here and/or call default
-    
-    std::unique_ptr<CMenu> pSubMenu = createPopUpMenu();
-    ClientToScreen( &point );
-
-    pSubMenu->TrackPopupMenu( TPM_LEFTALIGN | TPM_RIGHTBUTTON, point.x, point.y, this);
-
-    CView::OnRButtonDown(nFlags, point);
-}
+//void TransverseView::OnRButtonDown(UINT nFlags, CPoint point)
+//{
+//    // TODO: Add your message handler code here and/or call default
+//
+//    USSTBaseView::OnRButtonDown( nFlags, point);
+//}

@@ -1,7 +1,11 @@
 #include "stdafx.h"
 #include "CoronalView.h"
+#include "Resource.h"
 
-IMPLEMENT_DYNCREATE(CoronalView, CView)
+IMPLEMENT_DYNCREATE(CoronalView, USSTBaseView)
+BEGIN_MESSAGE_MAP(CoronalView, USSTBaseView)
+
+END_MESSAGE_MAP()
 CoronalView::CoronalView(void)
 {
 }
@@ -23,6 +27,10 @@ void CoronalView::OnUpdate(CView*, LPARAM, CObject*)
 
 std::unique_ptr<CMenu> CoronalView::createPopUpMenu()
 {
-    return nullptr;
+    std::unique_ptr<CMenu> pMenu( new CMenu() );
+
+    pMenu->LoadMenu( IDR_CORONAL_POPUP );
+
+    return pMenu;
 }
 

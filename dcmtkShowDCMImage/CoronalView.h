@@ -17,5 +17,8 @@ public:
 
 public:
     virtual std::unique_ptr<CMenu> createPopUpMenu();
+
+protected:
+    DECLARE_MESSAGE_MAP()
 };
 

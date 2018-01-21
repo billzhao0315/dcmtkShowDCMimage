@@ -69,15 +69,15 @@ GLfloat newIndex = 0.5f;
 		glVertex3f(-dOrthoSize,dOrthoSize,TexIndex);
 
 // COpenGLView
-IMPLEMENT_DYNCREATE(COpenGLView, CView)
+IMPLEMENT_DYNCREATE(COpenGLView, USSTBaseView)
 
-BEGIN_MESSAGE_MAP(COpenGLView, CView)
+BEGIN_MESSAGE_MAP(COpenGLView, USSTBaseView)
 	// Standard printing commands
 	ON_COMMAND(ID_FILE_PRINT, &CView::OnFilePrint)
 	ON_COMMAND(ID_FILE_PRINT_DIRECT, &CView::OnFilePrint)
-	ON_COMMAND(ID_FILE_PRINT_PREVIEW, &CView::OnFilePrintPreview)
-	ON_WM_CONTEXTMENU()
-	ON_WM_RBUTTONUP()
+	//ON_COMMAND(ID_FILE_PRINT_PREVIEW, &CView::OnFilePrintPreview)
+//	ON_WM_CONTEXTMENU()
+//	ON_WM_RBUTTONUP()
 	ON_WM_CREATE()
 	//ON_COMMAND(ID_FILE_OPENDICOM, &CsplitDCMView::OnFileOpendicom)
 //    ON_WM_MOUSEHWHEEL()
@@ -466,12 +466,12 @@ void COpenGLView::OnDraw(CDC* /*pDC*/)
 // COpenGLView printing
 
 
-void COpenGLView::OnFilePrintPreview()
-{
-#ifndef SHARED_HANDLERS
-	AFXPrintPreview(this);
-#endif
-}
+//void COpenGLView::OnFilePrintPreview()
+//{
+//#ifndef SHARED_HANDLERS
+//	AFXPrintPreview(this);
+//#endif
+//}
 
 BOOL COpenGLView::OnPreparePrinting(CPrintInfo* pInfo)
 {
@@ -489,18 +489,18 @@ void COpenGLView::OnEndPrinting(CDC* /*pDC*/, CPrintInfo* /*pInfo*/)
 	// TODO: add cleanup after printing
 }
 
-void COpenGLView::OnRButtonUp(UINT /* nFlags */, CPoint point)
-{
-	ClientToScreen(&point);
-	OnContextMenu(this, point);
-}
+//void COpenGLView::OnRButtonUp(UINT /* nFlags */, CPoint point)
+//{
+//	ClientToScreen(&point);
+//	OnContextMenu(this, point);
+//}
 
-void COpenGLView::OnContextMenu(CWnd* /* pWnd */, CPoint point)
-{
-#ifndef SHARED_HANDLERS
-	theApp.GetContextMenuManager()->ShowPopupMenu(IDR_POPUP_EDIT, point.x, point.y, this, TRUE);
-#endif
-}
+//void COpenGLView::OnContextMenu(CWnd* /* pWnd */, CPoint point)
+//{
+//#ifndef SHARED_HANDLERS
+//	theApp.GetContextMenuManager()->ShowPopupMenu(IDR_POPUP_EDIT, point.x, point.y, this, TRUE);
+//#endif
+//}
 
 
 // COpenGLView diagnostics
@@ -900,7 +900,11 @@ void COpenGLView::OnMouseMove(UINT nFlags, CPoint point)
 
 std::unique_ptr<CMenu> COpenGLView::createPopUpMenu()
 {
-    return nullptr;
+    std::unique_ptr<CMenu> pMenu( new CMenu() );
+
+    pMenu->LoadMenu( /*IDR_TRANSVERSE_POPUP*/IDR_OPENGL_3D );
+
+    return pMenu;
 }
 
 

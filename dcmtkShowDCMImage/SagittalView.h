@@ -1,7 +1,6 @@
 #pragma once
 #include "afxwin.h"
 #include "dcmtkShowDCMImageDoc.h"
-#include "dcmtkShowDCMImageView.h"
 
 #include "USSTBaseView.h"
 
@@ -17,6 +16,9 @@ public:
     virtual void OnDraw(CDC* pDC);
 
     virtual std::unique_ptr<CMenu> createPopUpMenu();
+
+protected:
+    DECLARE_MESSAGE_MAP()
 
 };
 

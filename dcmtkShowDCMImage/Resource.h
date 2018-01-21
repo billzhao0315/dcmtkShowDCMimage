@@ -88,6 +88,10 @@
 #define IDC_EYE_ROTATE_CURSOR           310
 #define IDR_MENU1                       311
 #define IDR_TRANSVERSE_POPUP            311
+#define IDR_OPENGL_3D                   312
+#define IDR_SAGITTAL_POPUP              313
+#define IDR_CORONAL_VIEW                314
+#define IDR_CORONAL_POPUP               314
 #define ID_FILE_OPENDICOM               32771
 #define ID_TOOLS_ROTATE                 32772
 #define ID_TOOLS_PAN                    32773
@@ -97,13 +101,17 @@
 #define ID_ZOOM_PAN                     32777
 #define ID_ZOOM_WINDOW                  32778
 #define ID_TRANSVERSE_ZOOM              32779
+#define ID_3DVIEW                       32780
+#define ID_Menu                         32781
+#define ID_SAGITTALVIEWPOPUPMENU_SAGITTALVIEW 32782
+#define ID_CORONALPOPUPMENU_CORONALVIEW 32783
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        312
-#define _APS_NEXT_COMMAND_VALUE         32780
+#define _APS_NEXT_RESOURCE_VALUE        315
+#define _APS_NEXT_COMMAND_VALUE         32784
 #define _APS_NEXT_CONTROL_VALUE         1000
 #define _APS_NEXT_SYMED_VALUE           310
 #endif

@@ -1,7 +1,11 @@
 #include "stdafx.h"
 #include "SagittalView.h"
+#include "resource.h"
 
-IMPLEMENT_DYNCREATE(SagittalView, CView)
+IMPLEMENT_DYNCREATE(SagittalView, USSTBaseView)
+BEGIN_MESSAGE_MAP(SagittalView, USSTBaseView)
+
+END_MESSAGE_MAP()
 SagittalView::SagittalView(void)
 {
 }
@@ -23,6 +27,8 @@ void SagittalView::OnUpdate(CView*, LPARAM, CObject*)
 
 std::unique_ptr<CMenu> SagittalView::createPopUpMenu()
 {
-    return nullptr;
+    std::unique_ptr<CMenu> pMenu( new CMenu() );
+    pMenu->LoadMenu( IDR_SAGITTAL_POPUP );
+    return pMenu;
 }
 
