@@ -66,13 +66,13 @@ void CoronalView::OnDraw(CDC* /*pDC*/)
         
         glColor4f( 1.0f,1.0f,1.0f ,1.0f);
         glBegin( GL_QUADS );
-            glTexCoord3f(0.0f, 0.0f, 0.5f); 
+            glTexCoord3f( 0.0f, 0.5f, 0.0f ); 
 		    glVertex3f(-dOrthoSize2,-dOrthoSize2,0.0f);
-		    glTexCoord3f(1.0f, 0.0f, 0.5f);  
+		    glTexCoord3f( 1.0f, 0.5f, 0.0f );  
 		    glVertex3f(dOrthoSize2,-dOrthoSize2,0.0f);
-		    glTexCoord3f(1.0f, 1.0f, 0.5f);  
+		    glTexCoord3f( 1.0f, 0.5f, 1.0f );  
 		    glVertex3f(dOrthoSize2,dOrthoSize2,0.0f);
-		    glTexCoord3f(0.0f, 1.0f, 0.5f);  
+		    glTexCoord3f( 0.0f, 0.5f, 1.0f );  
 		    glVertex3f(-dOrthoSize2,dOrthoSize2,0.0f);
         glEnd();
 		
@@ -119,15 +119,17 @@ void CoronalView::OnDraw(CDC* /*pDC*/)
 
 void CoronalView::OnUpdate(CView* /*pSender*/, LPARAM lHint, CObject* /*pHint*/)
 {
-    if( lHint == static_cast<LPARAM>( CdcmtkShowDCMImageDoc::tagDICOMImport.getValue() ) )
+    if( lHint == static_cast<LPARAM>( CdcmtkShowDCMImageDoc::tagTexture3DChange.getValue() ) )
 	{
-
-        
+        CdcmtkShowDCMImageDoc* pDoc = GetDocument();
+        m_n3DTextureID = pDoc->getTexture3DSPV();
 		Invalidate();
 	}
 
-    CdcmtkShowDCMImageDoc* pDoc = GetDocument();
-    m_n3DTextureID = pDoc->getTexture3DSPV();
+
+
+
+    
 }
 
 std::unique_ptr<CMenu> CoronalView::createPopUpMenu()
@@ -325,6 +327,6 @@ void CoronalView::OnSize(UINT nType, int cx, int cy)
 
     // TODO: Add your message handler code here
 
-    CdcmtkShowDCMImageDoc* pDoc = GetDocument();
-    m_n3DTextureID = pDoc->getTexture3DSPV();
+    /*CdcmtkShowDCMImageDoc* pDoc = GetDocument();
+    m_n3DTextureID = pDoc->getTexture3DSPV();*/
 }

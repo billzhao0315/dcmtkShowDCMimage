@@ -23,6 +23,7 @@ protected: // create from serialization only
 public:
     static const AttributeTag tagDICOMImport;
     static const AttributeTag tagDICOMSliceChange;
+    static const AttributeTag tagTexture3DChange;
 public:
     std::shared_ptr<DICOMImageHelper> getDicomImageHelper()const;
     unsigned int getCurrentImageIndex()const;

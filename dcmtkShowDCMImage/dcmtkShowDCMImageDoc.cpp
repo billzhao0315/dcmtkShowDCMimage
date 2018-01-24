@@ -26,6 +26,7 @@
 
 const AttributeTag CdcmtkShowDCMImageDoc::tagDICOMImport;
 const AttributeTag CdcmtkShowDCMImageDoc::tagDICOMSliceChange;
+const AttributeTag CdcmtkShowDCMImageDoc::tagTexture3DChange;
 
 IMPLEMENT_DYNCREATE(CdcmtkShowDCMImageDoc, CDocument)
 
@@ -47,6 +48,10 @@ CdcmtkShowDCMImageDoc::CdcmtkShowDCMImageDoc()
 
 CdcmtkShowDCMImageDoc::~CdcmtkShowDCMImageDoc()
 {
+    if( m_n3DTextureID > 0 )
+	{
+	    glDeleteTextures( 1, &m_n3DTextureID );
+	}
 }
 
 BOOL CdcmtkShowDCMImageDoc::OnNewDocument()
@@ -226,6 +231,7 @@ bool CdcmtkShowDCMImageDoc::setTexture3DSPV(GLuint n3DTextureID)
     if( n3DTextureID != 0 )
     {
         m_n3DTextureID = n3DTextureID;
+        UpdateAllViews( NULL, static_cast<LPARAM>( tagTexture3DChange.getValue() ) );
         return true;
     }
 
