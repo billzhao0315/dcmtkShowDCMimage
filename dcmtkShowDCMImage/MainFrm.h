@@ -54,6 +54,17 @@ protected:  // control bar embedded members
     CsplitDCMView*    m_dcmSplitDCMView;
     CSplitterWnd    m_splitwnd;
     CSplitterWnd      m_subsplitwnd;
+
+    CClientDC* m_pClientDCCoronal;
+    HGLRC      m_hGLrcCoronal;
+
+    CClientDC* m_pClientDCSagittal;
+    HGLRC      m_hGLrcSagittal;
+
+private:
+    bool setCoronalViewRenderContext();
+    bool setSagittalViewRenderContext();
+
 // Generated message map functions
 protected:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);

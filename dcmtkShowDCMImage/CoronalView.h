@@ -18,14 +18,28 @@ public:
 public:
     virtual std::unique_ptr<CMenu> createPopUpMenu();
 
+    void setGLRenderContext( HGLRC  m_hGLrcCoronal );
+
+    void setClientDC( CClientDC* pClientDCCoronal );
+
+    HGLRC getGLRenderContext();
+
+
     CdcmtkShowDCMImageDoc* GetDocument() const;
     #ifdef _DEBUG
 	virtual void AssertValid() const;
 	virtual void Dump(CDumpContext& dc) const;
     #endif
-
+private:
+    HGLRC      m_hGLrcCoronal;
+    CClientDC* m_pClientDCCoronal;
+    GLuint m_n3DTextureID;
+    void drawCube();
 protected:
     DECLARE_MESSAGE_MAP()
+public:
+    afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+    afx_msg void OnSize(UINT nType, int cx, int cy);
 };
 
 #ifndef _DEBUG  // debug version in dcmtkShowDCMImageView.cpp

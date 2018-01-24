@@ -452,9 +452,146 @@ BOOL CMainFrame::OnCreateClient(LPCREATESTRUCT /*lpcs*/, CCreateContext* pContex
 
     m_splitwnd.SetActivePane( 0,0 );
 
+
+    /*if( setCoronalViewRenderContext() == false )
+    {
+        MessageBox(_T("fail to create coronalview render context"));
+        return false;
+    }
+
+    if( setSagittalViewRenderContext() == false )
+    {
+        MessageBox(_T("fail to create sagittalview render context"));
+        return false;
+    }*/
+
+    m_hGLrcSagittal = (dynamic_cast< SagittalView* >(  m_splitwnd.GetPane( 1,1 ) ))->getGLRenderContext();
+
+    m_hGLrcCoronal = (dynamic_cast< CoronalView* >(  m_splitwnd.GetPane( 1,0 ) ))->getGLRenderContext();
+
+    BOOL bFlag1 = wglShareLists( m_hGLrcCoronal, m_hGLrcSagittal  );
+
+    if( bFlag1 == 0 )
+    {
+        MessageBox(_T("fail to share the texture"),_T(" sagittal and coronal "),MB_OK|MB_ICONERROR);
+    }
+
     return true;
     //return CFrameWndEx::OnCreateClient(lpcs, pContext);
 }
+
+bool CMainFrame::setCoronalViewRenderContext()
+{
+    //set the coronal view render context
+    CoronalView* pCoronalView = dynamic_cast< CoronalView* >(  m_splitwnd.GetPane( 1,0 ) );
+
+    m_pClientDCCoronal = new CClientDC(pCoronalView);
+
+    HGLRC glRc;
+
+    PIXELFORMATDESCRIPTOR pfd = 
+    {
+        sizeof(PIXELFORMATDESCRIPTOR),  // size of this pfd                         //
+        1,                              // version number                           //
+        PFD_DRAW_TO_WINDOW|
+        PFD_SUPPORT_OPENGL|
+        PFD_DOUBLEBUFFER,                         // option flags                             //
+        PFD_TYPE_RGBA,                  // Pixel type (RGBA)                        //
+        24,                             // number of color bits                     //
+        0, 0, 0, 0, 0, 0,               // color field widths and shifts ignored    //
+        8,                              // 8-bit alpha buffer                       //
+        0,                              // shift bit ignored                        //
+        0,                              // no accumulation buffer                   //
+        0, 0, 0, 0,                     // accumulation buffer field widths ignored //
+        32,                             // 32-bit z-buffer                          //
+        8,                              // 8-bit stencil buffer                     //
+        0,                              // no auxiliary buffer                      //
+        PFD_MAIN_PLANE,                 // main layer                               //
+        0,                              // reserved                                 //
+        0, 0, 0                         // layer masks ignored                      //
+    };
+
+    HDC safeHDC = m_pClientDCCoronal->GetSafeHdc();
+
+    int nPixelFormID = ChoosePixelFormat( safeHDC, &pfd );
+
+    if( nPixelFormID == 0 )
+    {
+        MessageBox(_T("fail to choosePixelFormat"));
+        return false;
+    }
+
+    if( SetPixelFormat( m_pClientDCCoronal->GetSafeHdc(), nPixelFormID,&pfd ) == false )
+    {
+        MessageBox(_T("fail to setPixelFormat"));
+        return false;
+    }
+
+    glRc = wglCreateContext( m_pClientDCCoronal->GetSafeHdc() );
+
+    wglMakeCurrent( m_pClientDCCoronal->GetSafeHdc(), glRc );
+
+    m_hGLrcCoronal = wglGetCurrentContext();
+    pCoronalView->setClientDC( m_pClientDCCoronal );
+    pCoronalView->setGLRenderContext( m_hGLrcCoronal );
+    return true;
+}
+
+bool CMainFrame::setSagittalViewRenderContext()
+{
+
+    SagittalView* pSagittalView = dynamic_cast< SagittalView* >(  m_splitwnd.GetPane( 1,0 ) );
+    m_pClientDCSagittal = new CClientDC(pSagittalView);
+
+    HGLRC glRc;
+
+    PIXELFORMATDESCRIPTOR pfd = 
+    {
+        sizeof(PIXELFORMATDESCRIPTOR),  // size of this pfd                         //
+        1,                              // version number                           //
+        PFD_DRAW_TO_WINDOW|
+        PFD_SUPPORT_OPENGL|
+        PFD_DOUBLEBUFFER,                         // option flags                             //
+        PFD_TYPE_RGBA,                  // Pixel type (RGBA)                        //
+        24,                             // number of color bits                     //
+        0, 0, 0, 0, 0, 0,               // color field widths and shifts ignored    //
+        8,                              // 8-bit alpha buffer                       //
+        0,                              // shift bit ignored                        //
+        0,                              // no accumulation buffer                   //
+        0, 0, 0, 0,                     // accumulation buffer field widths ignored //
+        32,                             // 32-bit z-buffer                          //
+        8,                              // 8-bit stencil buffer                     //
+        0,                              // no auxiliary buffer                      //
+        PFD_MAIN_PLANE,                 // main layer                               //
+        0,                              // reserved                                 //
+        0, 0, 0                         // layer masks ignored                      //
+    };
+
+    HDC safeHDC = m_pClientDCSagittal->GetSafeHdc();
+
+    int nPixelFormID = ChoosePixelFormat( safeHDC, &pfd );
+
+    if( nPixelFormID == 0 )
+    {
+        MessageBox(_T("fail to choosePixelFormat"));
+        return false;
+    }
+
+    if( SetPixelFormat( m_pClientDCSagittal->GetSafeHdc(), nPixelFormID,&pfd ) == false )
+    {
+        MessageBox(_T("fail to setPixelFormat"));
+        return false;
+    }
+
+    glRc = wglCreateContext( m_pClientDCSagittal->GetSafeHdc() );
+
+    wglMakeCurrent( m_pClientDCSagittal->GetSafeHdc(), glRc );
+
+    m_hGLrcSagittal = wglGetCurrentContext();
+    //glClearColor( 1.0f,1.0f,1.0f ,1.0f);
+    return true;
+}
+
 
 void CMainFrame::onNotifyObservers(
     AttributeTag tag,

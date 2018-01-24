@@ -41,6 +41,8 @@ CdcmtkShowDCMImageDoc::CdcmtkShowDCMImageDoc()
 	// TODO: add one-time construction code here
     m_nSeriesImageIndex = 0;
     m_pDicomImageHelper = nullptr;
+
+    m_n3DTextureID = 0;
 }
 
 CdcmtkShowDCMImageDoc::~CdcmtkShowDCMImageDoc()
@@ -217,6 +219,26 @@ unsigned int CdcmtkShowDCMImageDoc::getCurrentImageIndex()const
 {
     return m_nSeriesImageIndex;
 }
+
+
+bool CdcmtkShowDCMImageDoc::setTexture3DSPV(GLuint n3DTextureID)
+{
+    if( n3DTextureID != 0 )
+    {
+        m_n3DTextureID = n3DTextureID;
+        return true;
+    }
+
+    return false;
+    
+}
+
+GLuint CdcmtkShowDCMImageDoc::getTexture3DSPV()
+{
+    return m_n3DTextureID;
+}
+
+
 
 void CdcmtkShowDCMImageDoc::onNotifyObservers(
                                              AttributeTag tag,

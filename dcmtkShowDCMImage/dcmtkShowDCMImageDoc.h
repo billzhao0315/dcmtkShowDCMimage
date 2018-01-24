@@ -9,6 +9,7 @@
 #include <string>
 #include "AttributeTag.h"
 #include "Observer.h"
+#include <gl/GL.h>
 class DICOMImageHelper;
 class CdcmtkShowDCMImageDoc : public CDocument,public Observer, public Subject
 {
@@ -32,6 +33,11 @@ public:
         );
     void increaseImageIndex();
     void decreaseImageIndex();
+
+    bool setTexture3DSPV( GLuint n3DTextureID );
+
+    GLuint getTexture3DSPV();
+
 private:
     void openDicoms( std::string pDicomFileIndex );
     void processSpvView(AttributeTag tag,
@@ -41,6 +47,9 @@ private:
     std::vector<std::string> m_vDicomFileSet;
     std::shared_ptr<DICOMImageHelper> m_pDicomImageHelper;
     unsigned int m_nSeriesImageIndex;
+
+    GLuint m_n3DTextureID;
+
     //not system function----end
 
 
