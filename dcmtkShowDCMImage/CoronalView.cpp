@@ -48,7 +48,9 @@ void CoronalView::OnDraw(CDC* /*pDC*/)
         wglMakeCurrent( m_pClientDCCoronal->GetSafeHdc(), m_hGLrcCoronal );
         glClearColor( 0.0f,0.0f,0.0f ,1.0f);
         glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-
+        CRect rc;
+        GetClientRect( &rc );
+        glViewport( rc.left, rc.top, rc.right, rc.bottom );
         glDisable( GL_BLEND );
         glFrontFace( GL_CCW );
         glCullFace( GL_BACK );
@@ -58,11 +60,11 @@ void CoronalView::OnDraw(CDC* /*pDC*/)
 
         glMatrixMode( GL_PROJECTION );
         glLoadIdentity();
-        gluPerspective( 45.0f, 1.0f, 1.0f, 6.0f );
+        gluPerspective( 90.0f, rc.right/rc.bottom, 0.9f, 6.0f );
 
         glMatrixMode( GL_MODELVIEW );
         glLoadIdentity();
-        gluLookAt( 0, 0,4, 0,0,0, 0,1,0 );
+        gluLookAt( 0, 0,1, 0,0,0, 0,1,0 );
         
         glColor4f( 1.0f,1.0f,1.0f ,1.0f);
         glBegin( GL_QUADS );
