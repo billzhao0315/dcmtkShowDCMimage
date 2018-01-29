@@ -974,7 +974,7 @@ void COpenGLView::initCubeData()
     m_pGLShaderMgr->getGLShader()[renderType::demoCube]->end();
 
     m_pGLShaderMgr->insertGLShader( vertextIndexPlaneShader, fragIndexPlaneShader );
-
+    m_pGLShaderMgr->getGLShader()[renderType::IndexPlane]->begin();
     GLfloat indexPlane[8][3] = 
     {
         {  1.0f, 0.0f, 0.0f },
@@ -997,6 +997,7 @@ void COpenGLView::initCubeData()
     GLFunctionParse::glEnableVertexAttribArrayARB(0);
     GLFunctionParse::glBindVertexArray(0);
     GLFunctionParse::glBindBuffer( GL_ARRAY_BUFFER, 0 );
+    m_pGLShaderMgr->getGLShader()[renderType::IndexPlane]->end();
 
 }
 

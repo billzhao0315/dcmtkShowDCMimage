@@ -4,9 +4,22 @@
 
 #include "gl/GLU.h"
 
+#include "GLShaderMgr.h"
+#include "GLFunctionParse.h"
+#include "coronalViewShader.h"
+#include "GLShader.h"
+
+#include "..//dependence//glm//glm.hpp"
+#include "..//dependence//glm//vec3.hpp"
+#include "..//dependence//glm//vec4.hpp"
+#include "..//dependence//glm//mat4x4.hpp"
+#include "..//dependence//glm//gtc//matrix_transform.hpp"
+
 GLfloat cubeAlpha1 = 0.0f;
 
 GLfloat dOrthoSize2 = 1.0f;
+
+#define BUFFER_OFFSET(offset) ((void*)(offset))
 
 IMPLEMENT_DYNCREATE(CoronalView, USSTBaseView)
 BEGIN_MESSAGE_MAP(CoronalView, USSTBaseView)
@@ -14,9 +27,38 @@ BEGIN_MESSAGE_MAP(CoronalView, USSTBaseView)
     ON_WM_CREATE()
     ON_WM_SIZE()
 END_MESSAGE_MAP()
+
+void toglmMatrix( GLfloat* glfloatMatrix, glm::mat4x4& glmMatrix )
+    {
+        for( int i = 0; i<4; ++i )
+        {
+            for( int j = 0; j<4; ++j )
+            {
+                glmMatrix[i][j] = glfloatMatrix[ i*4+j ];
+            }
+        }
+    }
+
+void toGLfloatMatrix( GLfloat* glfoatMatrix, glm::mat4x4 glmMatrix )
+    {
+        for( int i = 0; i<4; ++i )
+        {
+            for( int j = 0; j<4; ++j )
+            {
+                glfoatMatrix[ i*4+j ] = glmMatrix[i][j];
+            }
+        }
+    }
+
 CoronalView::CoronalView(void)
 {
     m_n3DTextureID = 0;
+
+    m_modelMatrix[0]=m_modelMatrix[5]=m_modelMatrix[10]=m_modelMatrix[15] = 1.0f;
+    m_modelMatrix[1]=m_modelMatrix[2]=m_modelMatrix[3]=m_modelMatrix[4] = 0.0f;
+	m_modelMatrix[6]=m_modelMatrix[7]=m_modelMatrix[8]=m_modelMatrix[9] = 0.0f;
+	m_modelMatrix[11]=m_modelMatrix[12]=m_modelMatrix[13]=m_modelMatrix[14] = 0.0f;
+
 }
 
 
@@ -51,23 +93,57 @@ void CoronalView::OnDraw(CDC* /*pDC*/)
         CRect rc;
         GetClientRect( &rc );
         glViewport( rc.left, rc.top, rc.right, rc.bottom );
-        glDisable( GL_BLEND );
+        //glDisable( GL_BLEND );
         glFrontFace( GL_CCW );
         glCullFace( GL_BACK );
         glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
         glEnable(GL_TEXTURE_3D);
-		glBindTexture( GL_TEXTURE_3D,  m_n3DTextureID );
+		//glBindTexture( GL_TEXTURE_3D,  m_n3DTextureID );
 
-        glMatrixMode( GL_PROJECTION );
+        /*glMatrixMode( GL_PROJECTION );
         glLoadIdentity();
         gluPerspective( 90.0f, rc.right/rc.bottom, 0.9f, 6.0f );
 
         glMatrixMode( GL_MODELVIEW );
         glLoadIdentity();
-        gluLookAt( 0, 0,1, 0,0,0, 0,1,0 );
+        gluLookAt( 0, 0,3, 0,0,0, 0,1,0 );*/
         
         glColor4f( 1.0f,1.0f,1.0f ,1.0f);
-        glBegin( GL_QUADS );
+
+
+        glm::mat4x4 modelviewMatrix;
+	    modelviewMatrix = glm::lookAt( glm::vec3(0.0,0.0,1.5),glm::vec3(0.0,0.0,0.0),glm::vec3(0.0,1.0,0.0) );
+        glm::mat4x4 projectionMatrix;
+        projectionMatrix = glm::perspective(90.0, (double)rc.right/rc.bottom, 0.9, 6.0);
+
+        glm::mat4x4 modelMatrix;
+
+        modelMatrix = projectionMatrix*modelviewMatrix;
+
+        toGLfloatMatrix( &m_modelMatrix[0], modelMatrix );
+
+        
+
+        m_pGLShaderMgr->getGLShader()[1]->begin();
+        GLFunctionParse::glBindBuffer( GL_ARRAY_BUFFER, m_nFrameDataVBO );
+        GLFunctionParse::glBindVertexArray( m_nCoronalViewVAO );
+        GLuint tex = GLFunctionParse::glGetUniformLocation( m_pGLShaderMgr->getGLShader()[1]->getprogramID(), "baseTexture" );
+
+        GLFunctionParse::glUniform1i( tex, m_n3DTextureID );
+
+        GLuint color = GLFunctionParse::glGetUniformLocation( m_pGLShaderMgr->getGLShader()[1]->getprogramID(), "vColor" );
+        GLFunctionParse::glUniform3f( color, 1.0f,0.0f,0.0f );
+
+        GLuint mModelViewProjectionMatrixIndexPlane = GLFunctionParse::glGetUniformLocation( m_pGLShaderMgr->getGLShader()[1]->getprogramID(), "mModelViewProjectionMatrix" );
+
+        GLFunctionParse::glUniformMatrix4fv( mModelViewProjectionMatrixIndexPlane,1, GL_FALSE, m_modelMatrix );
+
+        glDrawArrays( GL_QUADS, 0, 4 );
+        GLFunctionParse::glBindBuffer( GL_ARRAY_BUFFER, 0 );
+        GLFunctionParse::glBindVertexArray( 0 );
+        m_pGLShaderMgr->getGLShader()[1]->end();
+
+        /*glBegin( GL_QUADS );
             glTexCoord3f( 0.0f, 0.5f, 0.0f ); 
 		    glVertex3f(-dOrthoSize2,-dOrthoSize2,0.0f);
 		    glTexCoord3f( 1.0f, 0.5f, 0.0f );  
@@ -76,9 +152,36 @@ void CoronalView::OnDraw(CDC* /*pDC*/)
 		    glVertex3f(dOrthoSize2,dOrthoSize2,0.0f);
 		    glTexCoord3f( 0.0f, 0.5f, 1.0f );  
 		    glVertex3f(-dOrthoSize2,dOrthoSize2,0.0f);
-        glEnd();
+        glEnd();*/
 		
-		glBindTexture( GL_TEXTURE_3D, 0 );
+		//glBindTexture( GL_TEXTURE_3D, 0 );
+
+        glLineWidth( 2.0f );
+        /*glBegin( GL_LINES );
+            glColor4f( 0.0f,1.0f,0.0f, 1.0f );
+            glVertex3f( -2.0f, 0.0f, -0.5f );
+            glVertex3f( 2.0f, 0.0f, -0.5f );
+            glVertex3f( 0.0f,-2.0f, -0.5f );
+            glVertex3f( 0.0f,2.0f,-0.5f );
+        glEnd();*/
+
+        m_pGLShaderMgr->getGLShader()[0]->begin();
+        GLFunctionParse::glBindBuffer( GL_ARRAY_BUFFER, m_nBufferVBO );
+        GLFunctionParse::glBindVertexArray( m_nLineIndexVAO );
+        GLuint nLineIndex = GLFunctionParse::glGetUniformLocation( m_pGLShaderMgr->getGLShader()[0]->getprogramID(), "vLineColor" );
+
+        GLuint mModelViewProjectionMatrixIndexPlane1 = GLFunctionParse::glGetUniformLocation( m_pGLShaderMgr->getGLShader()[0]->getprogramID(), "mModelViewProjectionMatrix" );
+
+        GLFunctionParse::glUniformMatrix4fv( mModelViewProjectionMatrixIndexPlane1,1, GL_FALSE, m_modelMatrix );
+
+        GLFunctionParse::glUniform4f( nLineIndex, 0.0f,1.0f,0.0f, 1.0f );
+
+        glDrawArrays( GL_LINES, 0,4 );
+        GLFunctionParse::glBindBuffer( GL_ARRAY_BUFFER, 0 );
+        GLFunctionParse::glBindVertexArray( 0 );
+        m_pGLShaderMgr->getGLShader()[0]->end();
+
+        
 
         glFinish();
         /*GLenum err = glGetError(  );
@@ -125,6 +228,7 @@ void CoronalView::OnUpdate(CView* /*pSender*/, LPARAM lHint, CObject* /*pHint*/)
 	{
         CdcmtkShowDCMImageDoc* pDoc = GetDocument();
         m_n3DTextureID = pDoc->getTexture3DSPV();
+        initializeData();
 		Invalidate();
 	}
 
@@ -174,6 +278,88 @@ void CoronalView::setClientDC(CClientDC* pClientDCCoronal)
 HGLRC CoronalView::getGLRenderContext()
 {
     return m_hGLrcCoronal;
+}
+
+bool CoronalView::initializeData()
+{
+    wglMakeCurrent( m_pClientDCCoronal->GetSafeHdc(), m_hGLrcCoronal );
+
+    GLfloat lineIndexData[][4] = 
+    {
+        { -1.0f, 0.0f, -0.5f, 1.0f },// line index data --- begin
+        { 1.0f, 0.0f, -0.5f, 1.0f },
+        { 0.0f, -1.0f, -0.5f, 1.0f },
+        { 0.0f, 1.0f, -0.5f, 1.0f }// line index data ---end
+        
+    };
+
+    GLfloat frameData[][4] = 
+    {
+        { -1.0f, -1.0f, 0.0f, 1.0f },// coronal view data ---begin
+        { 1.0f, -1.0f, 0.0f, 1.0f },
+        { 1.0f, 1.0f, 0.0f, 1.0f },
+        { -1.0f, 1.0f, 0.0f, 1.0f }//coronal view data --- end
+    };
+
+    GLfloat frameTextureData[][3] = 
+    {
+        { 0.0f, 0.5f, 0.0f },// texture coord
+        { 1.0f, 0.5f, 0.0f },
+        { 1.0f, 0.5f, 1.0f },
+        { 0.0f, 0.5f, 1.0f }
+    };
+
+    //GLfloat frameColorData[][4] = 
+    //{
+    //    { 0.0f, 0.5f, 0.0f ,1.0f},// texture coord
+    //    { 1.0f, 0.5f, 0.0f ,1.0f},
+    //    { 1.0f, 0.5f, 1.0f ,1.0f},
+    //    { 0.0f, 0.5f, 1.0f ,1.0f}
+    //};
+
+    GLFunctionParse::glGenVertexArrays( 1, &m_nLineIndexVAO );
+    GLFunctionParse::glBindVertexArray( m_nLineIndexVAO );
+    GLFunctionParse::glGenBuffers( 1, &m_nBufferVBO );
+    GLFunctionParse::glBindBuffer( GL_ARRAY_BUFFER, m_nBufferVBO );
+    GLFunctionParse::glBufferData( GL_ARRAY_BUFFER, sizeof( lineIndexData ) , NULL, GL_STATIC_DRAW );
+    
+    GLFunctionParse::glBufferSubData( GL_ARRAY_BUFFER, 0, sizeof( lineIndexData ), lineIndexData );
+    
+
+    // line index
+    m_pGLShaderMgr = std::make_shared< GLShaderMgr >( vertexLineIndexForMPR, fragLineIndexForMPR );
+    m_pGLShaderMgr->getGLShader()[0]->begin();
+    GLFunctionParse::glVertexAttribPointer( 0, 4, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0) );
+    GLFunctionParse::glEnableVertexAttribArrayARB( 0 );
+    m_pGLShaderMgr->getGLShader()[0]->end();
+    GLFunctionParse::glBindVertexArray( 0);
+    GLFunctionParse::glBindBuffer( GL_ARRAY_BUFFER, 0 );
+
+
+
+    // frame data
+    GLFunctionParse::glGenVertexArrays( 1, &m_nCoronalViewVAO );
+    GLFunctionParse::glBindVertexArray( m_nCoronalViewVAO );
+    GLFunctionParse::glGenBuffers( 1, &m_nFrameDataVBO );
+    GLFunctionParse::glBindBuffer( GL_ARRAY_BUFFER, m_nFrameDataVBO );
+    GLFunctionParse::glBufferData( GL_ARRAY_BUFFER, sizeof( frameData ) + sizeof( frameTextureData ) , NULL, GL_STATIC_DRAW );
+    GLFunctionParse::glBufferSubData( GL_ARRAY_BUFFER, 0, sizeof( frameData ), frameData );
+    GLFunctionParse::glBufferSubData( GL_ARRAY_BUFFER, sizeof( frameData ), sizeof( frameTextureData ), frameTextureData );
+
+    m_pGLShaderMgr->insertGLShader( vertexFrameDataForMPR, frahFrameDataForMPR );
+    m_pGLShaderMgr->getGLShader()[1]->begin();
+    GLFunctionParse::glVertexAttribPointer( 0, 4, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET( 0 ) );
+    GLFunctionParse::glEnableVertexAttribArrayARB( 0 );
+    GLFunctionParse::glVertexAttribPointer( 1,3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET( sizeof( frameData ) ) );
+    GLFunctionParse::glEnableVertexAttribArrayARB( 1 );
+    m_pGLShaderMgr->getGLShader()[1]->end();
+
+    GLFunctionParse::glBindVertexArray( 0);
+    GLFunctionParse::glBindBuffer( GL_ARRAY_BUFFER, 0 );
+
+
+    wglMakeCurrent( NULL, NULL );
+    return true;
 }
 
 
@@ -318,6 +504,8 @@ int CoronalView::OnCreate(LPCREATESTRUCT lpCreateStruct)
     wglMakeCurrent( m_pClientDCCoronal->GetSafeHdc(), glRc );
     glClearColor( 0.0f,0.0f,0.0f,1.0f );
     m_hGLrcCoronal = wglGetCurrentContext();
+
+    //initializeData();
 
     return 0;
 }

@@ -5,6 +5,8 @@
 
 #include "USSTBaseView.h"
 
+class GLShaderMgr;
+
 class CoronalView : public USSTBaseView
 {
 public:
@@ -34,7 +36,14 @@ private:
     HGLRC      m_hGLrcCoronal;
     CClientDC* m_pClientDCCoronal;
     GLuint m_n3DTextureID;
+    GLuint m_nBufferVBO;
+    GLuint m_nLineIndexVAO;
+    GLuint m_nFrameDataVBO;
+    GLuint m_nCoronalViewVAO;
+    std::shared_ptr<GLShaderMgr> m_pGLShaderMgr;
+    float  m_modelMatrix[16];
     void drawCube();
+    bool initializeData();
 protected:
     DECLARE_MESSAGE_MAP()
 public:

@@ -194,6 +194,7 @@
     <ClInclude Include="ClassView.h" />
     <ClInclude Include="CoronalView.h" />
     <ClInclude Include="COpenGLView.h" />
+    <ClInclude Include="coronalViewShader.h" />
     <ClInclude Include="dcmtkShowDCMImage.h" />
     <ClInclude Include="dcmtkShowDCMImageDoc.h" />
     <ClInclude Include="dcmtkShowDCMImageView.h" />
