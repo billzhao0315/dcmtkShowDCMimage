@@ -28,37 +28,9 @@ BEGIN_MESSAGE_MAP(CoronalView, USSTBaseView)
     ON_WM_SIZE()
 END_MESSAGE_MAP()
 
-void toglmMatrix( GLfloat* glfloatMatrix, glm::mat4x4& glmMatrix )
-    {
-        for( int i = 0; i<4; ++i )
-        {
-            for( int j = 0; j<4; ++j )
-            {
-                glmMatrix[i][j] = glfloatMatrix[ i*4+j ];
-            }
-        }
-    }
-
-void toGLfloatMatrix( GLfloat* glfoatMatrix, glm::mat4x4 glmMatrix )
-    {
-        for( int i = 0; i<4; ++i )
-        {
-            for( int j = 0; j<4; ++j )
-            {
-                glfoatMatrix[ i*4+j ] = glmMatrix[i][j];
-            }
-        }
-    }
-
 CoronalView::CoronalView(void)
 {
     m_n3DTextureID = 0;
-
-    m_modelMatrix[0]=m_modelMatrix[5]=m_modelMatrix[10]=m_modelMatrix[15] = 1.0f;
-    m_modelMatrix[1]=m_modelMatrix[2]=m_modelMatrix[3]=m_modelMatrix[4] = 0.0f;
-	m_modelMatrix[6]=m_modelMatrix[7]=m_modelMatrix[8]=m_modelMatrix[9] = 0.0f;
-	m_modelMatrix[11]=m_modelMatrix[12]=m_modelMatrix[13]=m_modelMatrix[14] = 0.0f;
-
 }
 
 
@@ -120,10 +92,6 @@ void CoronalView::OnDraw(CDC* /*pDC*/)
 
         modelMatrix = projectionMatrix*modelviewMatrix;
 
-        toGLfloatMatrix( &m_modelMatrix[0], modelMatrix );
-
-        
-
         m_pGLShaderMgr->getGLShader()[1]->begin();
         GLFunctionParse::glBindBuffer( GL_ARRAY_BUFFER, m_nFrameDataVBO );
         GLFunctionParse::glBindVertexArray( m_nCoronalViewVAO );
@@ -133,7 +101,7 @@ void CoronalView::OnDraw(CDC* /*pDC*/)
 
         GLuint mModelViewProjectionMatrixIndexPlane = GLFunctionParse::glGetUniformLocation( m_pGLShaderMgr->getGLShader()[1]->getprogramID(), "mModelViewProjectionMatrix" );
 
-        GLFunctionParse::glUniformMatrix4fv( mModelViewProjectionMatrixIndexPlane,1, GL_FALSE, m_modelMatrix );
+        GLFunctionParse::glUniformMatrix4fv( mModelViewProjectionMatrixIndexPlane,1, GL_FALSE, &modelMatrix[0][0] );
 
         glDrawArrays( GL_QUADS, 0, 4 );
         GLFunctionParse::glBindBuffer( GL_ARRAY_BUFFER, 0 );
@@ -169,7 +137,7 @@ void CoronalView::OnDraw(CDC* /*pDC*/)
 
         GLuint mModelViewProjectionMatrixIndexPlane1 = GLFunctionParse::glGetUniformLocation( m_pGLShaderMgr->getGLShader()[0]->getprogramID(), "mModelViewProjectionMatrix" );
 
-        GLFunctionParse::glUniformMatrix4fv( mModelViewProjectionMatrixIndexPlane1,1, GL_FALSE, m_modelMatrix );
+        GLFunctionParse::glUniformMatrix4fv( mModelViewProjectionMatrixIndexPlane1,1, GL_FALSE, &modelMatrix[0][0] );
 
         GLFunctionParse::glUniform4f( nLineIndex, 0.0f,1.0f,0.0f, 1.0f );
 
