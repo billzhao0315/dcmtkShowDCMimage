@@ -281,7 +281,7 @@ bool CoronalView::initializeData()
 {
     wglMakeCurrent( m_pClientDCCoronal->GetSafeHdc(), m_hGLrcCoronal );
 
-    GLfloat lineIndexData[][4] = 
+    GLfloat coronalCrossCursor[][4] = 
     {
         { -1.0f, 0.0f, -0.5f, 1.0f },// line index data --- begin
         { 1.0f, 0.0f, -0.5f, 1.0f },
@@ -318,9 +318,9 @@ bool CoronalView::initializeData()
     GLFunctionParse::glBindVertexArray( m_nLineIndexVAO );
     GLFunctionParse::glGenBuffers( 1, &m_nBufferVBO );
     GLFunctionParse::glBindBuffer( GL_ARRAY_BUFFER, m_nBufferVBO );
-    GLFunctionParse::glBufferData( GL_ARRAY_BUFFER, sizeof( lineIndexData ) , NULL, GL_STATIC_DRAW );
+    GLFunctionParse::glBufferData( GL_ARRAY_BUFFER, sizeof( coronalCrossCursor ) , NULL, GL_STATIC_DRAW );
     
-    GLFunctionParse::glBufferSubData( GL_ARRAY_BUFFER, 0, sizeof( lineIndexData ), lineIndexData );
+    GLFunctionParse::glBufferSubData( GL_ARRAY_BUFFER, 0, sizeof( coronalCrossCursor ), coronalCrossCursor );
     
 
     // line index
