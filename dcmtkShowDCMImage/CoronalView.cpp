@@ -98,7 +98,7 @@ void CoronalView::OnDraw(CDC* /*pDC*/)
         glCullFace( GL_BACK );
         glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
         glEnable(GL_TEXTURE_3D);
-		//glBindTexture( GL_TEXTURE_3D,  m_n3DTextureID );
+		glBindTexture( GL_TEXTURE_3D,  m_n3DTextureID );
 
         /*glMatrixMode( GL_PROJECTION );
         glLoadIdentity();
@@ -112,7 +112,7 @@ void CoronalView::OnDraw(CDC* /*pDC*/)
 
 
         glm::mat4x4 modelviewMatrix;
-	    modelviewMatrix = glm::lookAt( glm::vec3(0.0,0.0,1.5),glm::vec3(0.0,0.0,0.0),glm::vec3(0.0,1.0,0.0) );
+	    modelviewMatrix = glm::lookAt( glm::vec3(0.0,0.0,1.0),glm::vec3(0.0,0.0,0.0),glm::vec3(0.0,1.0,0.0) );
         glm::mat4x4 projectionMatrix;
         projectionMatrix = glm::perspective(90.0, (double)rc.right/rc.bottom, 0.9, 6.0);
 
@@ -129,10 +129,7 @@ void CoronalView::OnDraw(CDC* /*pDC*/)
         GLFunctionParse::glBindVertexArray( m_nCoronalViewVAO );
         GLuint tex = GLFunctionParse::glGetUniformLocation( m_pGLShaderMgr->getGLShader()[1]->getprogramID(), "baseTexture" );
 
-        GLFunctionParse::glUniform1i( tex, m_n3DTextureID );
-
-        GLuint color = GLFunctionParse::glGetUniformLocation( m_pGLShaderMgr->getGLShader()[1]->getprogramID(), "vColor" );
-        GLFunctionParse::glUniform3f( color, 1.0f,0.0f,0.0f );
+        GLFunctionParse::glUniform1i( tex, 0 ); // default, the active texture uint is zero, so this value should be set to zero.
 
         GLuint mModelViewProjectionMatrixIndexPlane = GLFunctionParse::glGetUniformLocation( m_pGLShaderMgr->getGLShader()[1]->getprogramID(), "mModelViewProjectionMatrix" );
 
@@ -154,7 +151,7 @@ void CoronalView::OnDraw(CDC* /*pDC*/)
 		    glVertex3f(-dOrthoSize2,dOrthoSize2,0.0f);
         glEnd();*/
 		
-		//glBindTexture( GL_TEXTURE_3D, 0 );
+		glBindTexture( GL_TEXTURE_3D, 0 );
 
         glLineWidth( 2.0f );
         /*glBegin( GL_LINES );

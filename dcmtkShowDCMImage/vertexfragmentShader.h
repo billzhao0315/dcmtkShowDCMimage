@@ -7,7 +7,7 @@
 /*the shader show the demo cube, we use the postion data as the color for that the their data is same form 0.0 to 1.0 */
 
 char* vertextShader = R(
-         #version 430 core\n
+         #version 430 compatibility\n
          layout( location = 0 ) in vec4 vPosition;
          layout( location = 1 ) in vec4 vColor;
          uniform mat4 mModelViewProjectionMatrix;
@@ -20,7 +20,7 @@ char* vertextShader = R(
     );
 
 char* fragShader = R(
-         #version 430 core\n
+         #version 430 compatibility\n
          in vec4 fragColor;
          out vec4 outColor;
          void main()
@@ -34,7 +34,7 @@ char* fragShader = R(
 /*************************indexPlane for demoCube---begin************************************/
     /*the shader show the index plane, and move the position for z by the uniform variant indexPlane*/
     char* vertextIndexPlaneShader = R(
-         #version 430 core\n
+         #version 430 compatibility\n
         layout( location = 0 ) in vec4 vPosition;
         layout( location = 1 ) in vec4 vColor;
          uniform mat4 mModelViewProjectionMatrix;
@@ -50,7 +50,7 @@ char* fragShader = R(
     );
 
 char* fragIndexPlaneShader = R(
-         #version 430 core\n
+         #version 430 compatibility\n
          in vec4 fragColor;
          out vec4 outColor;
          void main()
