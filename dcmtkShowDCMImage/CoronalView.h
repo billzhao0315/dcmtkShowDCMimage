@@ -41,7 +41,7 @@ private:
     GLuint m_nFrameDataVBO;
     GLuint m_nCoronalViewVAO;
     std::shared_ptr<GLShaderMgr> m_pGLShaderMgr;
-    float  m_modelMatrix[16];
+    //float  m_modelMatrix[16];
     void drawCube();
     bool initializeData();
 protected:
@@ -49,6 +49,8 @@ protected:
 public:
     afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
     afx_msg void OnSize(UINT nType, int cx, int cy);
+    afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+    afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 };
 
 #ifndef _DEBUG  // debug version in dcmtkShowDCMImageView.cpp

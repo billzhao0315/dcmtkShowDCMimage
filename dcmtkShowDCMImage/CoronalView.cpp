@@ -26,6 +26,8 @@ BEGIN_MESSAGE_MAP(CoronalView, USSTBaseView)
 
     ON_WM_CREATE()
     ON_WM_SIZE()
+    ON_WM_LBUTTONDOWN()
+    ON_WM_MOUSEMOVE()
 END_MESSAGE_MAP()
 
 CoronalView::CoronalView(void)
@@ -59,6 +61,15 @@ void CoronalView::OnDraw(CDC* /*pDC*/)
     {
         
         //glDrawBuffer( GL_FRONT );
+        static bool bBusy = false;
+
+        if( bBusy )
+        {
+            return;
+        }
+
+        bBusy = true;
+
         wglMakeCurrent( m_pClientDCCoronal->GetSafeHdc(), m_hGLrcCoronal );
         glClearColor( 0.0f,0.0f,0.0f ,1.0f);
         glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
@@ -83,14 +94,14 @@ void CoronalView::OnDraw(CDC* /*pDC*/)
         glColor4f( 1.0f,1.0f,1.0f ,1.0f);
 
 
-        glm::mat4x4 modelviewMatrix;
-	    modelviewMatrix = glm::lookAt( glm::vec3(0.0,0.0,1.0),glm::vec3(0.0,0.0,0.0),glm::vec3(0.0,1.0,0.0) );
+        glm::mat4x4 viewMatrix;
+	    viewMatrix = glm::lookAt( glm::vec3(0.0,0.0,1.0),glm::vec3(0.0,0.0,0.0),glm::vec3(0.0,1.0,0.0) );
         glm::mat4x4 projectionMatrix;
         projectionMatrix = glm::perspective(90.0, (double)rc.right/rc.bottom, 0.9, 6.0);
 
-        glm::mat4x4 modelMatrix;
+        glm::mat4x4 projectionViewMatrix;
 
-        modelMatrix = projectionMatrix*modelviewMatrix;
+        projectionViewMatrix = projectionMatrix*viewMatrix;
 
         m_pGLShaderMgr->getGLShader()[1]->begin();
         GLFunctionParse::glBindBuffer( GL_ARRAY_BUFFER, m_nFrameDataVBO );
@@ -101,7 +112,7 @@ void CoronalView::OnDraw(CDC* /*pDC*/)
 
         GLuint mModelViewProjectionMatrixIndexPlane = GLFunctionParse::glGetUniformLocation( m_pGLShaderMgr->getGLShader()[1]->getprogramID(), "mModelViewProjectionMatrix" );
 
-        GLFunctionParse::glUniformMatrix4fv( mModelViewProjectionMatrixIndexPlane,1, GL_FALSE, &modelMatrix[0][0] );
+        GLFunctionParse::glUniformMatrix4fv( mModelViewProjectionMatrixIndexPlane,1, GL_FALSE, &projectionViewMatrix[0][0] );
 
         glDrawArrays( GL_QUADS, 0, 4 );
         GLFunctionParse::glBindBuffer( GL_ARRAY_BUFFER, 0 );
@@ -137,7 +148,8 @@ void CoronalView::OnDraw(CDC* /*pDC*/)
 
         GLuint mModelViewProjectionMatrixIndexPlane1 = GLFunctionParse::glGetUniformLocation( m_pGLShaderMgr->getGLShader()[0]->getprogramID(), "mModelViewProjectionMatrix" );
 
-        GLFunctionParse::glUniformMatrix4fv( mModelViewProjectionMatrixIndexPlane1,1, GL_FALSE, &modelMatrix[0][0] );
+        glm::mat4x4 MVP = projectionViewMatrix * m_mModelMatrix;
+        GLFunctionParse::glUniformMatrix4fv( mModelViewProjectionMatrixIndexPlane1,1, GL_FALSE, &MVP[0][0] );
 
         GLFunctionParse::glUniform4f( nLineIndex, 0.0f,1.0f,0.0f, 1.0f );
 
@@ -180,6 +192,8 @@ void CoronalView::OnDraw(CDC* /*pDC*/)
         SwapBuffers( m_pClientDCCoronal->GetSafeHdc() );
 
         wglMakeCurrent( NULL, NULL );
+
+        bBusy = false;
     }
     
         
@@ -484,4 +498,20 @@ void CoronalView::OnSize(UINT nType, int cx, int cy)
 
     /*CdcmtkShowDCMImageDoc* pDoc = GetDocument();
     m_n3DTextureID = pDoc->getTexture3DSPV();*/
+}
+
+
+void CoronalView::OnLButtonDown(UINT nFlags, CPoint point)
+{
+    // TODO: Add your message handler code here and/or call default
+
+    USSTBaseView::OnLButtonDown(nFlags, point);
+}
+
+
+void CoronalView::OnMouseMove(UINT nFlags, CPoint point)
+{
+    // TODO: Add your message handler code here and/or call default
+
+    USSTBaseView::OnMouseMove(nFlags, point);
 }
