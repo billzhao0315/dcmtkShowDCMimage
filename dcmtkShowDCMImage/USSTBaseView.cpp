@@ -82,11 +82,28 @@ void USSTBaseView::OnMouseMove(UINT nFlags, CPoint point)
     // TODO: Add your message handler code here and/or call default
     if( nFlags && MK_LBUTTON )
     {
-        if( point != m_nLBdownPointForModelMatrix )
+
+        CRect rc;
+        GetClientRect( &rc );
+
+        glm::vec2 newStartPoint( m_nLBdownPointForModelMatrix.x - rc.Width()/2 , m_nLBdownPointForModelMatrix.y - rc.Height()/2);
+        glm::vec2 newEndPoint( point.x - rc.Width()/2, point.y - rc.Height()/2 );
+
+        int crossValue = static_cast<int>( newStartPoint.x * newEndPoint.y - newStartPoint.y * newEndPoint.x );
+
+        if( crossValue != 0 )
         {
             //glm::vec3 vAxisForRotation = glm::cross( glm::vec3( 0,0,1 ), glm::vec3( point.x - m_nLBdownPointForModelMatrix.x, point.y - m_nLBdownPointForModelMatrix.y, 0 ) );
 
-            float angleForRotation = ::sqrtf( static_cast< float >( point.x - m_nLBdownPointForModelMatrix.x )*( point.x - m_nLBdownPointForModelMatrix.x ) + static_cast< float >( point.y - m_nLBdownPointForModelMatrix.y )*( point.y - m_nLBdownPointForModelMatrix.y ) );
+            //float angleForRotation = ::sqrtf( static_cast< float >( point.x - m_nLBdownPointForModelMatrix.x )*( point.x - m_nLBdownPointForModelMatrix.x ) + static_cast< float >( point.y - m_nLBdownPointForModelMatrix.y )*( point.y - m_nLBdownPointForModelMatrix.y ) );
+            
+            auto de = glm::acos( glm::dot( glm::normalize( newStartPoint ), glm::normalize( newEndPoint ) ) );
+            float angleForRotation = glm::degrees( de );
+
+            if( crossValue > 0 )
+            {
+                angleForRotation = -1 * angleForRotation;
+            }
 
             glm::mat4x4 previousModelMatrix = m_mModelMatrix;
             glm::mat4x4 mIdentityMatrix;
