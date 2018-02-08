@@ -35,22 +35,23 @@
             layout( location = 0 ) in vec4 vPosition;
             layout( location = 1 ) in vec3 vTextureCoord;
             uniform mat4 mModelViewProjectionMatrix;
-            out vec3 texCoord;
+            uniform mat4 mTransformMatrixTextureCoord;
+            out vec4 texCoord;
             void main()
             {
                 gl_Position = mModelViewProjectionMatrix*vPosition;
-                texCoord = vTextureCoord;
+                texCoord = mTransformMatrixTextureCoord*vec4(vTextureCoord,1.0);
             }
             );
 
         char* frahFrameDataForMPR = R(
             #version 430 compatibility\n
             uniform sampler3D baseTexture;
-            in vec3 texCoord;
+            in vec4 texCoord;
             out vec4 outColor;
             void main()
             {
-                outColor = texture( baseTexture, texCoord );
+                outColor = texture( baseTexture, vec3(texCoord) );
             }
             ); 
 

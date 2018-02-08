@@ -103,6 +103,8 @@ void CoronalView::OnDraw(CDC* /*pDC*/)
 
         projectionViewMatrix = projectionMatrix*viewMatrix;
 
+        glm::mat4x4 MVP = projectionViewMatrix * m_mModelMatrix;
+
         m_pGLShaderMgr->getGLShader()[1]->begin();
         GLFunctionParse::glBindBuffer( GL_ARRAY_BUFFER, m_nFrameDataVBO );
         GLFunctionParse::glBindVertexArray( m_nCoronalViewVAO );
@@ -113,6 +115,14 @@ void CoronalView::OnDraw(CDC* /*pDC*/)
         GLuint mModelViewProjectionMatrixIndexPlane = GLFunctionParse::glGetUniformLocation( m_pGLShaderMgr->getGLShader()[1]->getprogramID(), "mModelViewProjectionMatrix" );
 
         GLFunctionParse::glUniformMatrix4fv( mModelViewProjectionMatrixIndexPlane,1, GL_FALSE, &projectionViewMatrix[0][0] );
+
+        glm::mat4x4 mIdentityMatrix;
+        glm::mat4x4 mTextureCoordMatrixT =  glm::translate( mIdentityMatrix, glm::vec3( -0.5f, -0.5f, -0.5f ) );
+        //glm::mat4x4 mTextureCoordMatrixR =  glm::rotate( mIdentityMatrix, static_cast<float>(90.0), glm::vec3( 0,0,1 ) );
+        glm::mat4x4 mTextureCoordMatrixTinv =  glm::translate( mIdentityMatrix, glm::vec3( 0.5f,0.5f,0.5f ) );
+        glm::mat4x4 mTextureCoordMatrix = mTextureCoordMatrixTinv * m_mModelMatrix * mTextureCoordMatrixT;
+        GLuint mTransformMatrixTextureCoord = GLFunctionParse::glGetUniformLocation( m_pGLShaderMgr->getGLShader()[1]->getprogramID(), "mTransformMatrixTextureCoord" );
+        GLFunctionParse::glUniformMatrix4fv( mTransformMatrixTextureCoord, 1, GL_FALSE, &mTextureCoordMatrix[0][0] );
 
         glDrawArrays( GL_QUADS, 0, 4 );
         GLFunctionParse::glBindBuffer( GL_ARRAY_BUFFER, 0 );
@@ -148,7 +158,7 @@ void CoronalView::OnDraw(CDC* /*pDC*/)
 
         GLuint mModelViewProjectionMatrixIndexPlane1 = GLFunctionParse::glGetUniformLocation( m_pGLShaderMgr->getGLShader()[0]->getprogramID(), "mModelViewProjectionMatrix" );
 
-        glm::mat4x4 MVP = projectionViewMatrix * m_mModelMatrix;
+        
         GLFunctionParse::glUniformMatrix4fv( mModelViewProjectionMatrixIndexPlane1,1, GL_FALSE, &MVP[0][0] );
 
         GLFunctionParse::glUniform4f( nLineIndex, 0.0f,1.0f,0.0f, 1.0f );
@@ -287,6 +297,16 @@ bool CoronalView::initializeData()
         { 1.0f, 0.5f, 1.0f },
         { 0.0f, 0.5f, 1.0f }
     };
+
+    ////
+    //GLfloat frameTextureData[][3] = 
+    //{
+    //    {  0.5f,0.0f, 0.0f },// texture coord
+    //    {  0.5f,1.0f, 0.0f },
+    //    {  0.5f,1.0f, 1.0f },
+    //    {  0.5f,0.0f, 1.0f }
+    //};
+
 
     //GLfloat frameColorData[][4] = 
     //{

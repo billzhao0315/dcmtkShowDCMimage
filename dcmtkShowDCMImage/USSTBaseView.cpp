@@ -7,6 +7,7 @@ IMPLEMENT_DYNAMIC( USSTBaseView, CView )
 
 USSTBaseView::USSTBaseView(void)
 {
+    m_mModelMatrix = glm::mat4x4( 1.0 );
 }
 
 
@@ -87,7 +88,10 @@ void USSTBaseView::OnMouseMove(UINT nFlags, CPoint point)
 
             float angleForRotation = ::sqrtf( static_cast< float >( point.x - m_nLBdownPointForModelMatrix.x )*( point.x - m_nLBdownPointForModelMatrix.x ) + static_cast< float >( point.y - m_nLBdownPointForModelMatrix.y )*( point.y - m_nLBdownPointForModelMatrix.y ) );
 
-            m_mModelMatrix = glm::rotate( m_mModelMatrix, angleForRotation, glm::vec3( 0,0,1 ) );
+            glm::mat4x4 previousModelMatrix = m_mModelMatrix;
+            glm::mat4x4 mIdentityMatrix;
+            m_mModelMatrix = glm::rotate( mIdentityMatrix, angleForRotation, glm::vec3( 0,0,1 ) );
+            m_mModelMatrix = m_mModelMatrix * previousModelMatrix;
 
             m_nLBdownPointForModelMatrix = point;
 
