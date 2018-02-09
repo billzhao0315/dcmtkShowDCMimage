@@ -11,6 +11,7 @@
 #include "Observer.h"
 #include <gl/GL.h>
 class DICOMImageHelper;
+class TaskMaster;
 class CdcmtkShowDCMImageDoc : public CDocument,public Observer, public Subject
 {
 protected: // create from serialization only
@@ -50,6 +51,8 @@ private:
     unsigned int m_nSeriesImageIndex;
 
     GLuint m_n3DTextureID;
+    std::shared_ptr<TaskMaster> m_pTaskMaster;
+
 
     //not system function----end
 
